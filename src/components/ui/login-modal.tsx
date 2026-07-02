@@ -11,9 +11,10 @@ import { checkReferral, claimReferralReward } from "@/lib/api";
 
 interface LoginModalProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function LoginModal({ onClose }: LoginModalProps) {
+export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const { user, login, register } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [mobile, setMobile] = useState("");
@@ -64,6 +65,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
           } catch {}
         }
       }
+      onSuccess?.();
       onClose();
     } catch (err: any) {
       setError(err.message || "操作失败，请重试");
@@ -87,12 +89,12 @@ export default function LoginModal({ onClose }: LoginModalProps) {
             🐙
           </div>
           <h2 className="text-lg font-bold">{mode === "login" ? "欢迎回来" : "注册账号"}</h2>
-          <p className="text-xs text-text-tertiary mt-1">
-            {mode === "login" ? "登录后同步资产和订单" : "注册即送 150,000 游戏豆 🎉"}
+          <p className={`text-xs mt-1 ${mode === "register" ? "text-red-500 font-medium" : "text-text-tertiary"}`}>
+            {mode === "login" ? "登录后同步资产和订单 · 邀请奖励 1,000 游戏豆" : "注册即送 150,000 游戏豆 🎉"}
           </p>
           {referrer && mode === "register" && (
             <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[20px]">
-              <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你
+              <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你 · 你们各得 1,000 游戏豆
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import { getStoreProducts, getSwapProducts } from "@/lib/api";
 import type { StoreProduct as ApiProduct, SwapProduct } from "@/lib/api";
+import { ImageOff } from "lucide-react";
 import ShareButton from "@/components/ui/share-button";
 import SharePanel from "@/components/ui/share-panel";
 import SwapPurchaseModal from "@/components/ui/swap-purchase-modal";
@@ -101,6 +102,87 @@ const productBg = [
   "linear-gradient(135deg,#dbeafe,#93c5fd)",
 ];
 
+/** 获取商品图片（兼容字符串/数组/无图） */
+function getProductImage(images: string[] | string | undefined): string | null {
+  if (!images) return null;
+  if (Array.isArray(images) && images.length > 0) {
+    const url = images[0];
+    if (!url || url === "null" || url === "undefined") return null;
+    return url.startsWith("http") ? url : `https://surplus.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
+  }
+  if (typeof images === "string" && images) {
+    if (images === "null" || images === "undefined" || images === "[]") return null;
+    // 可能是 JSON 字符串
+    try {
+      const parsed = JSON.parse(images);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const url = parsed[0];
+        return url.startsWith("http") ? url : `https://surplus.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
+      }
+    } catch {}
+    // 直接当 URL
+    return images.startsWith("http") ? images : `https://surplus.hi.cn/${images.replace(/^\/+/, "")}`;
+  }
+  return null;
+}
+
+/** 商品卡片组件 */
+function ProductCard({ p, i, onBuy, onShare }: {
+  p: ApiProduct; i: number;
+  onBuy: (p: ApiProduct) => void;
+  onShare: (p: ApiProduct) => void;
+}) {
+  const [imgErr, setImgErr] = useState(false);
+  const imgUrl = getProductImage(p.images);
+
+  return (
+    <div onClick={() => onBuy(p)}
+      className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-96 transition-transform cursor-pointer relative">
+      <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); onShare(p); }}>
+        <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `https://h5.surplus.hi.cn/store` }} />
+      </div>
+      {/* 商品图片 */}
+      <div className="w-full aspect-square bg-gray-100 flex items-center justify-center overflow-hidden mb-2">
+        {imgUrl && !imgErr ? (
+          <img
+            src={imgUrl}
+            alt={p.name}
+            className="w-full h-full object-cover"
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1"
+            style={{ background: productBg[i % productBg.length] }}>
+            <span className="text-4xl">{productEmoji(p.name)}</span>
+            <span className="text-[9px] text-text-tertiary/60">暂无图片</span>
+          </div>
+        )}
+      </div>
+      <div className="px-3">
+        <div className="text-xs font-semibold mb-0.5 line-clamp-2 min-h-[2em]">{p.name}</div>
+        {p.description && (
+          <div className="text-[9px] text-text-tertiary mb-1 line-clamp-1">{p.description}</div>
+        )}
+        <div className="flex items-baseline gap-1">
+          <span className="text-base font-bold text-brand-coral">¥{p.selling_price}</span>
+          {p.sales_count > 0 && (
+            <span className="text-[9px] text-text-tertiary">已售{p.sales_count}</span>
+          )}
+        </div>
+        <div className="text-[10px] text-brand-gold-dark mt-1 bg-[rgba(242,182,49,0.1)] px-2 py-0.5 rounded-[4px] inline-block">
+          赠游戏豆
+        </div>
+        {p.local_stock > 0 && p.local_stock <= 10 && (
+          <div className="text-[9px] text-brand-coral mt-1">仅剩 {p.local_stock} 件</div>
+        )}
+        {p.brand && (
+          <div className="text-[8px] text-text-tertiary mt-1 truncate">{p.brand}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function StoreTemplate({ config: userConfig, storeId = 10001 }: StoreTemplateProps) {
   const cfg = { ...defaultConfig, ...userConfig };
   const [activeTab, setActiveTab] = useState(0);
@@ -120,6 +202,20 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
       .then(setProducts)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+  }, [storeId]);
+
+  // 处理 BFCache 后退时样式不一致
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // 重新加载数据确保样式最新
+        getStoreProducts(storeId)
+          .then(setProducts)
+          .catch((e) => setError(e.message));
+      }
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
   }, [storeId]);
 
   useEffect(() => {
@@ -164,7 +260,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
       </div>
 
       {/* Tab Switch */}
-      <div className="flex mx-4 mt-3 bg-bg rounded-[20px] p-[3px]">
+      <div className="flex mx-4 mt-3 bg-bg rounded-sm p-[3px]">
         {["商品", "消费", "闲豆"].map((tab, i) => (
           <button key={i} onClick={() => setActiveTab(i)}
             className={`flex-1 py-2 text-center rounded-[12px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>
@@ -181,7 +277,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             /* Loading skeleton */
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {[1,2,3,4].map((i) => (
-                <div key={i} className="bg-surface rounded-[20px] py-3.5 px-3 text-center shadow-sm animate-pulse">
+                <div key={i} className="bg-surface rounded-sm py-3.5 px-3 text-center shadow-sm animate-pulse">
                   <div className="w-14 h-14 rounded-xl bg-gray-200 mx-auto mb-2" />
                   <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-1" />
                   <div className="h-5 bg-gray-200 rounded w-1/2 mx-auto mb-1" />
@@ -195,7 +291,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
               <span className="text-4xl">😵</span>
               <p className="text-sm text-text-tertiary mt-2">加载失败，请稍后重试</p>
               <button onClick={() => { setLoading(true); setError(""); getStoreProducts(storeId).then(setProducts).catch(e => setError(e.message)).finally(() => setLoading(false)); }}
-                className="mt-3 text-xs bg-brand-teal text-white px-4 py-2 rounded-[20px]">
+                className="mt-3 text-xs bg-brand-teal text-white px-4 py-2 rounded-sm">
                 重新加载
               </button>
             </div>
@@ -208,24 +304,13 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
           ) : (
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {products.map((p, i) => (
-                <div key={p.id} onClick={() => handleBuy(p)}
-                  className="bg-surface rounded-[20px] py-3.5 px-3 text-center shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-96 transition-transform cursor-pointer relative">
-                  <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.name, subtitle: `¥${p.selling_price}`, brand: p.brand || "小章鱼", url: "https://h5.surplus.hi.cn/store" }); }}>
-                    <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `https://h5.surplus.hi.cn/store` }} />
-                  </div>
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-2"
-                    style={{ background: productBg[i % productBg.length] }}>
-                    {productEmoji(p.name)}
-                  </div>
-                  <div className="text-xs font-semibold mb-1 line-clamp-2">{p.name}</div>
-                  <div className="text-base font-bold text-brand-coral">¥{p.selling_price}</div>
-                  <div className="text-[10px] text-brand-gold-dark mt-1 bg-[rgba(242,182,49,0.1)] px-2 py-0.5 rounded-[4px] inline-block">
-                    赠游戏豆
-                  </div>
-                  {p.local_stock > 0 && p.local_stock <= 10 && (
-                    <div className="text-[9px] text-brand-coral mt-1">仅剩 {p.local_stock} 件</div>
-                  )}
-                </div>
+                <ProductCard
+                  key={p.id}
+                  p={p}
+                  i={i}
+                  onBuy={handleBuy}
+                  onShare={(product) => setShareData({ title: product.name, subtitle: `¥${product.selling_price}`, brand: product.brand || "小章鱼", url: "https://h5.surplus.hi.cn/store" })}
+                />
               ))}
             </div>
           )}
@@ -239,7 +324,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
           {swapLoading ? (
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {[1,2,3,4].map((i) => (
-                <div key={i} className="bg-surface rounded-[20px] py-3.5 px-3 text-center shadow-sm animate-pulse">
+                <div key={i} className="bg-surface rounded-sm py-3.5 px-3 text-center shadow-sm animate-pulse">
                   <div className="w-14 h-14 rounded-xl bg-gray-200 mx-auto mb-2" />
                   <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-1" />
                   <div className="h-5 bg-gray-200 rounded w-1/2 mx-auto mb-1" />
@@ -256,7 +341,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {swapProducts.map((p) => (
                 <div key={p.id} onClick={() => setSwapBuyProduct(p)}
-                  className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[20px] py-3.5 px-3 text-center shadow-sm border border-amber-200/50 active:scale-96 transition-transform cursor-pointer relative">
+                  className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-sm py-3.5 px-3 text-center shadow-sm border border-amber-200/50 active:scale-96 transition-transform cursor-pointer relative">
                   <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: "https://h5.surplus.hi.cn/store" }); }}>
                     <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.surplus.hi.cn/store` }} className="bg-amber-100 text-amber-600 hover:bg-amber-500 hover:text-white" />
                   </div>

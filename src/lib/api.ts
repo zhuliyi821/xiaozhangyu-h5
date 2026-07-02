@@ -1,5 +1,14 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
 
+/** 规范化图片 URL：过滤 "null"/"undefined"/空值，补全域名 */
+export function normalizeImageUrl(url: string | null | undefined): string | null {
+  if (!url || url === "null" || url === "undefined" || url === "[]" || url === "") return null;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === "null" || trimmed === "undefined") return null;
+  if (trimmed.startsWith("http")) return trimmed;
+  return `https://surplus.hi.cn${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+}
+
 // ────── Auth API ──────
 
 export interface LoginResult {
@@ -23,7 +32,7 @@ export async function login(mobile: string, password: string): Promise<LoginResu
     body: JSON.stringify({ mobile, password }),
   });
   const json = await res.json();
-  if (json.code !== 0) throw new Error(json.message || "登录失败");
+  if (json.code !== 0 && json.code !== 200) throw new Error(json.message || "登录失败");
   return json.data;
 }
 
@@ -34,7 +43,9 @@ export async function register(mobile: string, password: string): Promise<{ uid:
     body: JSON.stringify({ mobile, password }),
   });
   const json = await res.json();
-  if (json.code !== 0) throw new Error(json.message || json.code === 409 ? "手机号已注册" : "注册失败");
+  if (json.code !== 0 && json.code !== 200) {
+    throw new Error(json.message || (json.code === 409 ? "手机号已注册" : "注册失败"));
+  }
   return json.data;
 }
 

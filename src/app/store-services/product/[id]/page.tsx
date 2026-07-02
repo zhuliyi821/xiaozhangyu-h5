@@ -3,26 +3,47 @@
 import { useState, useEffect, use } from "react";
 import { getProductDetail, ProductDetail } from "@/lib/api";
 import { ArrowLeft, ShoppingCart, Share2, AlertTriangle, Loader2 } from "lucide-react";
+import { normalizeImageUrl } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import LoginModal from "@/components/ui/login-modal";
+
+/** 解码 HTML 实体编码（如 &lt; → <） */
+function decodeHtmlEntities(str: string): string {
+  if (typeof document === "undefined") return str;
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuth();
   const [data, setData] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [qty, setQty] = useState(1);
   const [imgError, setImgError] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"buy" | "cart" | null>(null);
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
 
-  const buyNow = async () => {
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    if (pendingAction === "buy") {
+      setPendingAction(null);
+      doBuy();
+    } else if (pendingAction === "cart") {
+      setPendingAction(null);
+      doAddToCart();
+    }
+  };
+
+  const doBuy = async () => {
+    if (!user?.uid) { setPendingAction("buy"); setShowLogin(true); return; }
     setBuying(true);
     try {
-      // Get member_id from localStorage or URL
-      const stored = localStorage.getItem("user");
-      const user = stored ? JSON.parse(stored) : null;
-      const memberId = user?.uid || 0;
-
-      const r = await fetch(`${API_BASE}/api/store-services?action=create_order&goods_id=${id}&member_id=${memberId}&quantity=${qty}`);
+      const r = await fetch(`${API_BASE}/api/store-services?action=create_order&goods_id=${id}&member_id=${user.uid}&quantity=${qty}`);
       const j = await r.json();
       if (j.code !== 0) throw new Error(j.msg);
       window.location.href = "/orders";
@@ -30,6 +51,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       alert("下单失败: " + e.message);
     }
     setBuying(false);
+  };
+
+  const doAddToCart = () => {
+    if (!user?.uid) { setPendingAction("cart"); setShowLogin(true); return; }
+    alert("已加入购物车（功能开发中）");
   };
 
   const load = async () => {
@@ -44,6 +70,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   useEffect(() => { load(); }, [id]);
+
+  // 处理 BFCache 后退问题
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) load();
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, [id]);
 
   if (loading) return (
     <main className="min-h-screen bg-white">
@@ -67,11 +102,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   );
 
   const { goods } = data;
-  const thumbUrl = goods.thumb ? (goods.thumb.startsWith("http") ? goods.thumb : `https://surplus.hi.cn${goods.thumb}`) : "";
+  const thumbUrl = normalizeImageUrl(goods.thumb);
   const originalPrice = (Number(goods.price) * 1.3).toFixed(2);
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-24">
+    <main className="min-h-screen bg-gray-50 pb-32">
       {/* 顶部导航 */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-gray-100">
         <button onClick={() => window.history.back()} className="p-1 -ml-1">
@@ -127,25 +162,36 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       {goods.content && (
         <div className="bg-white px-4 py-4 mt-[1px]">
           <div className="text-xs font-medium text-gray-500 mb-2">商品描述</div>
-          <div className="text-xs text-gray-700 leading-relaxed">{goods.content}</div>
+          <div
+            className="prose prose-xs max-w-none text-xs text-gray-700 leading-relaxed [&_img]:max-w-full [&_img]:rounded-lg [&_p]:mb-2"
+            dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(goods.content) }}
+          />
         </div>
       )}
 
-      {/* 底部操作栏 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3">
+      {/* 底部操作栏 - 上移 64px 避开 TabBar */}
+      <div className="fixed bottom-[64px] left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3 z-40">
         <a href="/orders" className="flex flex-col items-center gap-0.5 px-2">
           <ShoppingCart className="w-5 h-5 text-gray-400" />
           <span className="text-[10px] text-gray-400">我的订单</span>
         </a>
         <div className="flex-1 flex gap-2">
-          <button className="flex-1 py-2.5 text-xs font-medium rounded-full border border-brand-teal text-brand-teal" onClick={() => alert("已加入购物车")}>加入购物车</button>
-          <button onClick={buyNow} disabled={buying}
+          <button className="flex-1 py-2.5 text-xs font-medium rounded-full border border-brand-teal text-brand-teal" onClick={doAddToCart}>加入购物车</button>
+          <button onClick={doBuy} disabled={buying}
             className="flex-1 py-2.5 text-xs font-medium rounded-full bg-gradient-to-r from-brand-coral to-red-500 text-white shadow-sm flex items-center justify-center gap-1">
             {buying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
             {buying ? "下单中..." : "立即购买"}
           </button>
         </div>
       </div>
+
+      {/* 登录弹窗 */}
+      {showLogin && (
+        <LoginModal
+          onClose={() => { setShowLogin(false); setPendingAction(null); }}
+          onSuccess={handleLoginSuccess}
+        />
+      )}
     </main>
   );
 }

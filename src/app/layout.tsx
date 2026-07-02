@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { TabBar } from "@/components/ui/tab-bar";
 import ClientLayout from "@/components/client-layout";
-import ChatFloating from "@/components/chat-floating";
 
 export const metadata: Metadata = {
   title: "小章鱼 · AI趣预测",
@@ -25,7 +24,6 @@ export default function RootLayout({
         <ClientLayout>
           {children}
           <TabBar />
-          <ChatFloating />
         </ClientLayout>
       </body>
     </html>

@@ -6,6 +6,20 @@ import {
   DecorateComponent, StoreCategory, StoreInfo, StoreProduct
 } from "@/lib/api";
 import { MapPin, ChevronRight, Store } from "lucide-react";
+import { normalizeImageUrl } from "@/lib/api";
+
+/** 带 fallback 的商品图片 */
+function ProductImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [err, setErr] = useState(false);
+  if (err || !src) {
+    return (
+      <div className={`${className} bg-gray-100 flex items-center justify-center`}>
+        <span className="text-3xl opacity-40">📦</span>
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setErr(true)} />;
+}
 
 export default function StoreServicesPage() {
   const [loading, setLoading] = useState(true);
@@ -55,6 +69,17 @@ export default function StoreServicesPage() {
 
   useEffect(() => { load(); }, []);
 
+  // 处理 BFCache 后退时样式不一致的问题
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        load();
+      }
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#F5F5F5] pb-24">
       {/* 顶部定位栏 */}
@@ -70,7 +95,7 @@ export default function StoreServicesPage() {
       </div>
 
       {error && (
-        <div className="mx-4 mt-4 p-3 bg-red-50 rounded-xl text-xs text-red-500 text-center">
+        <div className="mx-4 mt-4 p-3 bg-red-50 rounded-sm text-xs text-red-500 text-center">
           {error}
           <button onClick={load} className="ml-2 underline">重试</button>
         </div>
@@ -88,22 +113,23 @@ export default function StoreServicesPage() {
               <span className="text-[10px] text-brand-teal-dark">更多 →</span>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
-              {products.slice(0, 6).map((p) => (
-                <a key={p.id} href={`/store-services/product/${p.id}`} className="bg-white rounded-xl overflow-hidden shadow-sm active:scale-[0.97] transition-transform block">
-                  <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center text-3xl">
-                    {p.thumb ? (
-                      <img src={p.thumb.startsWith("http") ? p.thumb : `https://surplus.hi.cn${p.thumb}`} alt={p.title} className="w-full h-full object-cover" />
-                    ) : "📦"}
-                  </div>
-                  <div className="p-2.5">
-                    <div className="text-[12px] font-medium truncate">{p.title}</div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-sm font-bold text-brand-coral">¥{p.price}</span>
-                      <button className="text-[10px] bg-brand-coral text-white px-2.5 py-1 rounded-full">立即购买</button>
+              {products.slice(0, 6).map((p) => {
+                const thumbUrl = normalizeImageUrl(p.thumb);
+                return (
+                  <a key={p.id} href={`/store-services/product/${p.id}`} className="bg-white rounded-sm overflow-hidden shadow-sm active:scale-[0.97] transition-transform block">
+                    <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center overflow-hidden">
+                      <ProductImage src={thumbUrl || ""} alt={p.title} className="w-full h-full object-cover" />
                     </div>
-                  </div>
-                </a>
-              ))}
+                    <div className="p-2.5">
+                      <div className="text-[12px] font-medium truncate">{p.title}</div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-sm font-bold text-brand-coral">¥{p.price}</span>
+                        <button className="text-[10px] bg-brand-coral text-white px-2.5 py-1 rounded-full">立即购买</button>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
             </div>
           </section>
 
@@ -117,26 +143,27 @@ export default function StoreServicesPage() {
               <span className="text-[10px] text-brand-teal-dark">更多 →</span>
             </div>
             <div className="space-y-2.5">
-              {products.slice(6, 16).map((p) => (
-                <a key={p.id} href={`/store-services/product/${p.id}`} className="bg-white rounded-xl p-3 flex gap-3 shadow-sm active:scale-[0.98] transition-transform block">
-                  <div className="w-20 h-20 rounded-lg bg-gray-100 shrink-0 flex items-center justify-center text-2xl overflow-hidden">
-                    {p.thumb ? (
-                      <img src={p.thumb.startsWith("http") ? p.thumb : `https://surplus.hi.cn${p.thumb}`} alt={p.title} className="w-full h-full object-cover" />
-                    ) : "📦"}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium truncate">{p.title}</div>
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="text-xs text-brand-coral font-bold">¥{p.price}</span>
-                      <span className="text-[10px] text-text-tertiary line-through">¥{String(Number(p.price) * 1.2).slice(0, 5)}</span>
+              {products.slice(6, 16).map((p) => {
+                const thumbUrl = normalizeImageUrl(p.thumb);
+                return (
+                  <a key={p.id} href={`/store-services/product/${p.id}`} className="bg-white rounded-sm p-3 flex gap-3 shadow-sm active:scale-[0.98] transition-transform block">
+                    <div className="w-20 h-20 rounded-lg bg-gray-100 shrink-0 flex items-center justify-center overflow-hidden">
+                      <ProductImage src={thumbUrl || ""} alt={p.title} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] bg-red-50 text-brand-coral px-2 py-0.5 rounded">店内优惠</span>
-                      <button className="text-[10px] bg-brand-teal text-white px-2.5 py-1 rounded-full">立即购买</button>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-medium truncate">{p.title}</div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className="text-xs text-brand-coral font-bold">¥{p.price}</span>
+                        <span className="text-[10px] text-text-tertiary line-through">¥{String(Number(p.price) * 1.2).slice(0, 5)}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-[10px] bg-red-50 text-brand-coral px-2 py-0.5 rounded">店内优惠</span>
+                        <button className="text-[10px] bg-brand-teal text-white px-2.5 py-1 rounded-full">立即购买</button>
+                      </div>
                     </div>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           </section>
 
@@ -179,8 +206,8 @@ export default function StoreServicesPage() {
                 </div>
               )}
               {stores.map((s) => (
-                <div key={s.id} className="bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform cursor-pointer">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-lg shrink-0">
+                <div key={s.id} className="bg-white rounded-sm p-3 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform cursor-pointer">
+                  <div className="w-12 h-12 rounded-sm bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-lg shrink-0">
                     🏪
                   </div>
                   <div className="flex-1 min-w-0">
