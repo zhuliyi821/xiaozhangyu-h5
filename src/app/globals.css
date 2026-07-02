@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-brand-gold: #F2B631;
+  --color-brand-gold-light: #FCE7A8;
+  --color-brand-gold-dark: #D99A0F;
+  --color-brand-teal: #45CCD5;
+  --color-brand-teal-light: #A0EDF2;
+  --color-brand-teal-dark: #2BAAAF;
+  --color-brand-coral: #F27152;
+  --color-brand-coral-light: #FABAA8;
+  --color-brand-coral-dark: #D45435;
+
+  /* Neutral */
+  --color-bg: #F0F6F7;
+  --color-surface: #FFFFFF;
+  --color-text: #1C1C1E;
+  --color-text-secondary: #636366;
+  --color-text-tertiary: #8E8E93;
+
+  /* Ball Colors */
+  --color-ball-front: #F27152;
+  --color-ball-back: #45CCD5;
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+
+  /* Shadows */
+  --shadow-soft: 0 8px 32px rgba(69,204,213,0.12), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-soft-lg: 0 12px 48px rgba(69,204,213,0.18), 0 4px 16px rgba(0,0,0,0.06);
+
+  /* Font */
+  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+}
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+}
