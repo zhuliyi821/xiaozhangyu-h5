@@ -33,7 +33,7 @@ export function HeroSection() {
 
       {showShare && (
         <SharePanel
-          data={{ title: "小章鱼 · AI趣预测", desc: "AI驱动 · 全民预测 · 有奖PK", brand: "小章鱼", url: "https://h5.surplus.hi.cn" }}
+          data={{ title: "小章鱼 · AI趣预测", desc: "AI驱动 · 全民预测 · 有奖PK", brand: "小章鱼", url: "https://h5.ws.hi.cn" }}
           onClose={() => setShowShare(false)}
         />
       )}

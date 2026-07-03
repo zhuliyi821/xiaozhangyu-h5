@@ -30,56 +30,23 @@ export default function ProfileTemplate() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
 
-  const credits = user?.balance ?? { credit1: 0, credit2: 0, credit3: 0, credit4: 0, sim_coin: 0 };
-  const [frozenBeans, setFrozenBeans] = useState(0);
-  const [activating, setActivating] = useState(false);
-  const [activateMsg, setActivateMsg] = useState("");
+  const credits = user?.balance ?? { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0, credit6: 0, granted_game_coins: 0 };
   const [couponCount, setCouponCount] = useState(0);
 
-  // 查冻结豆 + 卡券数
+  // 查卡券数
   useEffect(() => {
     if (!user) return;
-    fetch(`https://surplus.hi.cn/addons/guess/api.php?route=guess.assets.balance&uid=${user.uid}`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.code === 0 && d.data) {
-          setFrozenBeans(d.data.frozen_credit3 || 0);
-        }
-      })
-      .catch(() => {});
     getCoupons(user.uid).then(r => setCouponCount(r.available)).catch(() => {});
   }, [user]);
 
-  async function handleActivate() {
-    if (!user || frozenBeans <= 0) return;
-    setActivating(true);
-    setActivateMsg("");
-    try {
-      // 简单激活：每次激活全部冻结豆的10%（最小单位）
-      const amount = Math.max(100, Math.floor(frozenBeans * 0.1));
-      const res = await fetch("https://surplus.hi.cn/api/member/activate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: user.uid, amount, token: user.token }),
-      });
-      const d = await res.json();
-      if (d.code === 0) {
-        setActivateMsg(`✅ 激活 ${amount} 冻豆成功`);
-        setFrozenBeans(prev => Math.max(0, prev - amount));
-      } else {
-        setActivateMsg(d.msg || "激活失败");
-      }
-    } catch {
-      setActivateMsg("网络错误");
-    } finally {
-      setActivating(false);
-      setTimeout(() => setActivateMsg(""), 3000);
-    }
+  function handleActivate() {
+    if (!user) { setShowLogin(true); return; }
+    window.location.href = "/assets";
   }
 
   function handleInvite() {
     if (!user) { setShowLogin(true); return; }
-    const inviteUrl = `https://h5.surplus.hi.cn?ref=${user.uid}`;
+    const inviteUrl = `https://h5.ws.hi.cn?ref=${user.uid}`;
     const shareText = `🎮 小章鱼 · AI趣预测\n邀请你一起玩！注册即送 150,000 游戏豆 🎉\n${inviteUrl}`;
 
     if (navigator.share) {
@@ -138,11 +105,11 @@ export default function ProfileTemplate() {
 
         {/* Assets - click to view all */}
         <div className="grid grid-cols-5 gap-1.5 cursor-pointer" onClick={() => window.location.href = "/assets"}>
-          <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="积分" />
-          <AssetTile icon="🫘" value={String(Math.floor(credits.sim_coin))} label="游戏豆" />
+          <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="游戏豆" />
+          <AssetTile icon="✨" value={String(Math.floor(credits.credit5))} label="豆豆" />
           <AssetTile icon="🔮" value={String(Math.floor(credits.credit3))} label="水晶球" />
-          <AssetTile icon="¥" value={credits.credit2.toFixed(2)} label="余额" />
-          <AssetTile icon="🫘" value={String(Math.floor(credits.credit4))} label="闲豆" />
+          <AssetTile icon="¥" value={credits.credit4.toFixed(2)} label="余额" />
+          <AssetTile icon="🏪" value={String(Math.floor(credits.credit2))} label="闲豆" />
         </div>
         {user && (
           <div className="mt-2 flex justify-end">
@@ -150,23 +117,19 @@ export default function ProfileTemplate() {
           </div>
         )}
         {/* Frozen Beans */}
-        {user && frozenBeans > 0 && (
+        {user && credits.credit6 > 0 && (
           <div className="mt-2 flex items-center justify-between bg-white/10 rounded-[12px] px-3 py-2">
             <div className="flex items-center gap-2">
               <span className="text-[11px] opacity-80">🧊 冻结豆</span>
-              <span className="text-sm font-bold">{frozenBeans}</span>
+              <span className="text-sm font-bold">{Math.floor(credits.credit6)}</span>
             </div>
             <button
-              onClick={handleActivate}
-              disabled={activating}
-              className="text-[10px] bg-white/20 px-3 py-1 rounded-[20px] active:scale-95 transition-transform disabled:opacity-50"
+              onClick={() => alert("激活功能开发中，请前往资产页操作")}
+              className="text-[10px] bg-white/20 px-3 py-1 rounded-[20px] active:scale-95 transition-transform"
             >
-              {activating ? "激活中..." : "激活"}
+              激活
             </button>
           </div>
-        )}
-        {activateMsg && (
-          <div className="mt-1 text-[10px] text-center opacity-90">{activateMsg}</div>
         )}
       </div>
 

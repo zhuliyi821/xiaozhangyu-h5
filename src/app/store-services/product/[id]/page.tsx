@@ -6,6 +6,7 @@ import { ArrowLeft, ShoppingCart, Share2, AlertTriangle, Loader2 } from "lucide-
 import { normalizeImageUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { API_BASE } from "@/config/api";
 
 /** 解码 HTML 实体编码（如 &lt; → <） */
 function decodeHtmlEntities(str: string): string {
@@ -26,7 +27,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [buying, setBuying] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pendingAction, setPendingAction] = useState<"buy" | "cart" | null>(null);
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
 
   const handleLoginSuccess = () => {
     setShowLogin(false);

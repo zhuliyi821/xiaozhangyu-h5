@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Sparkles, Info, ArrowLeft, RotateCcw, Share2, ChevronRight, Clock, User, Hash } from "lucide-react";
-import Link from "next/link";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { Sparkles, Info, ArrowLeft, RotateCcw, Share2, Clock, User, Hash } from "lucide-react";
+import { API_BASE } from '@/config/api';
+import LoginModal from "@/components/ui/login-modal";
 
 interface FortuneResult {
   bazi: { pillars: string[]; year: any; month: any; day: any; hour: any };
@@ -30,6 +29,7 @@ export default function FortunePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
 
   const [form, setForm] = useState({
     birth_year: 1990,
@@ -149,7 +149,7 @@ export default function FortunePage() {
           )}
           {!user && (
             <div className="p-4 rounded-[20px] bg-white shadow-sm border border-brand-teal/10 text-xs text-center text-text-tertiary">
-              请先 <Link href="/login" className="text-brand-teal-dark font-medium">登录</Link> 后使用运势分析
+              请先 <button onClick={() => setShowLogin(true)} className="text-brand-teal-dark font-medium">登录</button> 后使用运势分析
             </div>
           )}
           <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] space-y-4">
@@ -378,6 +378,7 @@ export default function FortunePage() {
           </div>
         </div>
       )}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={() => setShowLogin(false)} />}
     </main>
   );
 }

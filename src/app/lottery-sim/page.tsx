@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, RefreshCw, AlertTriangle, Dices, Sparkles, Trophy, DollarSign, History, ChevronDown, Bot } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { API_BASE } from '@/config/api';
+import { useAuth } from "@/lib/auth-context";
+import LoginModal from "@/components/ui/login-modal";
 
 interface LotteryConfig {
   name: string; code: string; front_name: string; front_range: number; front_pick: number;
@@ -44,10 +46,11 @@ function LotterySimContent() {
   const searchParams = useSearchParams();
   const initType = searchParams.get("type") || "ssq";
   const predParam = searchParams.get("pred") || "";
+  const { user, loading: authLoading } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
   const [lotteryCode, setLotteryCode] = useState(initType);
   const [config, setConfig] = useState<LotteryConfig | null>(null);
-  const [memberId, setMemberId] = useState("guest_" + Math.random().toString(36).slice(2, 8));
-  const [balance, setBalance] = useState(10000);
+  const [balance, setBalance] = useState(0);
   const [selectedFront, setSelectedFront] = useState<number[]>([]);
   const [selectedBack, setSelectedBack] = useState<number[]>([]);
   const [tickets, setTickets] = useState<Array<{ front: number[]; back: number[] }>>([]);
@@ -73,7 +76,7 @@ function LotterySimContent() {
 
   // Load config and auto-fill AI prediction
   useEffect(() => {
-    fetch(API + "/api/lotto/config?code=" + lotteryCode)
+    fetch(API_BASE + "/api/lotto/config?code=" + lotteryCode)
       .then(r => r.json())
       .then(j => { 
         if (j.code === 0) {
@@ -94,13 +97,18 @@ function LotterySimContent() {
     setShowDraw(false);
   }, [lotteryCode]);
 
-  // Load balance
+  // Load real balance from wallet
   useEffect(() => {
-    fetch(API + "/api/lotto/balance?member_id=" + memberId)
+    if (!user) { setBalance(0); return; }
+    fetch(API_BASE + "/api/lotto-bet-sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid: user.uid, action: "balance" }),
+    })
       .then(r => r.json())
-      .then(j => { if (j.code === 0) setBalance(j.data.balance); })
+      .then(j => { if (j.code === 0) setBalance(Math.floor(j.data.game_coins)); })
       .catch(() => {});
-  }, [memberId]);
+  }, [user]);
 
   const toggleNumber = (num: number, isFront: boolean) => {
     const setter = isFront ? setSelectedFront : setSelectedBack;
@@ -133,7 +141,7 @@ function LotterySimContent() {
   };
 
   const quickPick = () => {
-    fetch(API + "/api/lotto/quick-pick?code=" + lotteryCode)
+    fetch(API_BASE + "/api/lotto/quick-pick?code=" + lotteryCode)
       .then(r => r.json())
       .then(j => {
         if (j.code === 0) {
@@ -148,6 +156,7 @@ function LotterySimContent() {
   };
 
   const placeBet = async () => {
+    if (!user) { setShowLogin(true); return; }
     if (tickets.length === 0 && (selectedFront.length > 0 || (config?.back_pick === 0 && selectedFront.length === 0))) {
       // Auto-add current selection
       if (config && config.back_pick > 0 && selectedFront.length === config.front_pick && selectedBack.length === config.back_pick) {
@@ -176,38 +185,52 @@ function LotterySimContent() {
     setShowDraw(false);
     
     try {
-      const res = await fetch(API + "/api/lotto/bet", {
+      // 1) 扣游戏豆
+      const deductRes = await fetch(API_BASE + "/api/lotto-bet-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ member_id: memberId, lottery: lotteryCode, tickets: betTickets, multiple: betMultiple }),
+        body: JSON.stringify({ uid: user.uid, action: "bet", amount: totalCost, lottery: lotteryCode }),
+      });
+      const deductJson = await deductRes.json();
+      if (deductJson.code !== 0) throw new Error(deductJson.msg || "投注失败");
+      
+      // 2) Python开奖模拟
+      const res = await fetch(API_BASE + "/api/lotto/bet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: String(user.uid), lottery: lotteryCode, tickets: betTickets, multiple: betMultiple }),
       });
       const json = await res.json();
       if (json.code !== 0) throw new Error(json.msg);
+      
+      // 3) 结算: 赢则加豆豆
+      const totalWin = json.data?.total_win || 0;
+      const winAmount = totalWin > totalCost ? totalWin - totalCost : 0;
+      if (totalWin > 0) {
+        await fetch(API_BASE + "/api/lotto-bet-sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: user.uid, action: "settle",
+            return_amount: totalWin >= totalCost ? totalCost : totalWin,
+            win_amount: winAmount,
+            lottery: lotteryCode,
+          }),
+        });
+      }
+      
       setResult(json.data);
-      setBalance(json.data.balance_after);
+      setBalance(prev => prev - totalCost + totalWin);
       setHistory(prev => [json.data, ...prev].slice(0, 50));
       setTickets([]);
       setSelectedFront([]);
       setSelectedBack([]);
-      // Show draw animation after a moment
       setTimeout(() => setShowDraw(true), 300);
     } catch (e: any) {
       setError(e.message);
     } finally {
       setBetting(false);
     }
-  };
-
-  const resetBalance = async () => {
-    try {
-      const res = await fetch(API + "/api/lotto/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ member_id: memberId }),
-      });
-      const json = await res.json();
-      if (json.code === 0) setBalance(10000);
-    } catch {}
   };
 
   const totalCost = tickets.length * (config?.price || 2) * betMultiple;
@@ -224,13 +247,13 @@ function LotterySimContent() {
               <ArrowLeft className="w-4 h-4 text-white" />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-white">彩票试玩</h1>
-              <p className="text-[11px] text-white/80">模拟真实投注 · 游戏豆</p>
+              <h1 className="text-lg font-bold text-white">彩票投注</h1>
+              <p className="text-[11px] text-white/80">用游戏豆投注 · 赢豆豆</p>
             </div>
           </div>
           <div className="text-right text-white">
-            <div className="text-[10px] opacity-75">余额</div>
-            <div className="text-base font-bold">{balance.toLocaleString()} 🪙</div>
+                    <div className="text-[10px] opacity-75">{user ? "🎮游戏豆" : "未登录"}</div>
+            <div className="text-base font-bold">{user ? balance.toLocaleString() : "—"} 🎮</div>
           </div>
         </div>
       </div>
@@ -330,7 +353,7 @@ function LotterySimContent() {
                   <Dices className="w-3.5 h-3.5" /> 机选
                 </button>
                 <button onClick={addTicket} className="flex-1 py-2 rounded-[12px] bg-brand-teal/10 text-brand-teal-dark text-xs font-medium border border-brand-teal/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
-                  + 添加选号 ({(config?.price || 2) * betMultiple}🪙)
+                  + 添加选号 ({(config?.price || 2) * betMultiple}🎮)
                 </button>
               </div>
             </div>
@@ -350,7 +373,7 @@ function LotterySimContent() {
                 ))}
                 <div className="flex items-center justify-between mt-3">
                   <div className="text-xs text-text-tertiary">共 {tickets.length} 注</div>
-                  <div className="text-sm font-bold">{totalCost} 🪙</div>
+                  <div className="text-sm font-bold">{totalCost} 🎮</div>
                 </div>
               </div>
             )}
@@ -381,13 +404,14 @@ function LotterySimContent() {
               className={`w-full py-3 mb-3 rounded-[16px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
                 canBet ? "bg-gradient-to-r from-orange-500 to-red-500 shadow-sm" : "bg-gray-200 text-gray-400"
               }`}>
-              {betting ? "开奖中..." : `投注 ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🪙`}
+              {betting ? "开奖中..." : !user ? "请先登录" : `投注 ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
             </button>
 
-            {/* Reset */}
-            <div className="text-center mb-3">
-              <button onClick={resetBalance} className="text-[10px] text-text-tertiary underline">重置余额 (10000🪙)</button>
-            </div>
+            {!user && (
+              <div className="mb-3 p-3 rounded-xl bg-amber-50 text-amber-700 text-xs text-center">
+                请先 <button onClick={() => setShowLogin(true)} className="font-bold underline">登录</button> 后使用游戏豆投注
+              </div>
+            )}
 
             {/* Draw Result */}
             {result && showDraw && (
@@ -422,7 +446,7 @@ function LotterySimContent() {
                     <div className="flex items-center justify-center gap-1 text-xs mb-1">
                       {t.prize.won ? <Sparkles className="w-4 h-4 text-brand-gold" /> : <span className="text-text-tertiary">😅</span>}
                       <span className={t.prize.won ? "text-brand-gold-dark font-bold" : "text-text-tertiary"}>
-                        {t.prize.won ? `🎉 ${t.prize.name} — 奖金 ${t.prize.amount}🪙` : "未中奖"}
+                        {t.prize.won ? `🎉 ${t.prize.name} — 奖金 ${t.prize.amount}✨` : "未中奖"}
                       </span>
                     </div>
                     {t.prize.won && <div className="text-[10px] text-text-tertiary">匹配 {t.prize.matched_front}前+{t.prize.matched_back}后</div>}
@@ -431,11 +455,11 @@ function LotterySimContent() {
                 
                 <div className="mt-3 text-sm">
                   {result.net_result > 0 ? (
-                    <span className="text-red-500 font-bold">+{result.net_result}🪙 🎉</span>
+                    <span className="text-red-500 font-bold">+{result.net_result}✨ 🎉</span>
                   ) : result.net_result === 0 ? (
                     <span className="text-text-tertiary">收支平衡</span>
                   ) : (
-                    <span className="text-text-tertiary">{result.net_result}🪙</span>
+                    <span className="text-text-tertiary">{result.net_result}🎮</span>
                   )}
                 </div>
               </div>
@@ -471,6 +495,7 @@ function LotterySimContent() {
           </>
         )}
       </div>
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </main>
   );
 }

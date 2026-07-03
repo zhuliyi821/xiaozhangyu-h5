@@ -2,6 +2,8 @@
 
 import { useState, useEffect, use } from "react";
 import { MapPin, ShoppingCart, Phone, ChevronRight, Star, Clock } from "lucide-react";
+import { API_BASE } from "@/config/api";
+import { apiFetch } from "@/config/api";
 
 /** 门店配置 */
 interface StoreConfig {
@@ -40,7 +42,6 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   const [store, setStore] = useState<StoreConfig>(defaultStore(storeId));
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
 
   useEffect(() => {
     async function loadStore() {

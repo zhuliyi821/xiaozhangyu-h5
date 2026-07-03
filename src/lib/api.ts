@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
 /** 规范化图片 URL：过滤 "null"/"undefined"/空值，补全域名 */
 export function normalizeImageUrl(url: string | null | undefined): string | null {
@@ -6,7 +6,7 @@ export function normalizeImageUrl(url: string | null | undefined): string | null
   const trimmed = url.trim();
   if (!trimmed || trimmed === "null" || trimmed === "undefined") return null;
   if (trimmed.startsWith("http")) return trimmed;
-  return `https://surplus.hi.cn${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+  return `https://ws.hi.cn${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
 }
 
 // ────── Auth API ──────
@@ -17,11 +17,13 @@ export interface LoginResult {
   avatar: string;
   token: string;
   balance: {
-    credit1: number;
-    credit2: number;
-    credit3: number;
-    credit4: number;
-    sim_coin: number;
+    credit1: number;  // 🎮 游戏豆
+    credit2: number;  // 🏪 闲豆
+    credit3: number;  // 🔮 水晶球
+    credit4: number;  // 💰 余额
+    credit5: number;  // ✨ 豆豆
+    credit6: number;  // ❄️ 冻结豆
+    granted_game_coins: number;
   };
 }
 

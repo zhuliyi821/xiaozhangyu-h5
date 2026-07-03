@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, TrendingUp, AlertTriangle } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { API_BASE } from '@/config/api';
 
 interface Quote { symbol: string; price: number; open: number; high: number; low: number; pre_close: number; change_pct: number; volume: number; is_mock?: boolean; }
 interface Kline { t: number; o: number; c: number; h: number; l: number; v: number; }
@@ -11,7 +11,7 @@ interface Position { id: number; order_sn: string; direction_label: string; leve
 interface Trade { id: number; order_sn: string; direction_label: string; leverage: number; open_price: number; close_price: number; points: number; profit_loss_points: number; win: boolean; }
 
 const api = (path: string, opts?: RequestInit) =>
-  fetch(API + "/api/backend/" + path, { ...opts, headers: { "Content-Type": "application/json", ...opts?.headers } }).then(r => r.json());
+  fetch(API_BASE + "/api/backend/" + path, { ...opts, headers: { "Content-Type": "application/json", ...opts?.headers } }).then(r => r.json());
 
 function Sparkline({ klines }: { klines: Kline[] }) {
   if (!klines?.length) return <div className="h-28 w-full rounded-xl bg-bg animate-pulse" />;
@@ -57,19 +57,19 @@ export default function SimPage() {
 
   const openPosition = async () => {
     const pts = parseInt(points);
-    if (pts < 10) { setMessage("❌ 最少10积分"); return; }
+    if (pts < 10) { setMessage("❌ 最少10🎮"); return; }
     setLoading(true); setMessage("");
     const res = await api("sim/open", { method: "POST", body: JSON.stringify({ direction, leverage, points: pts }) });
     setLoading(false);
     if (res?.result === 1) { setMessage("✅ 开仓成功"); loadData(); }
-    else { setMessage("❌ " + (res?.msg || "开仓失败")); }
+    else { setMessage("❌ " + (res?.msg || "游戏豆不足")); }
   };
 
   const closePosition = async (tradeId: number) => {
     setLoading(true);
     const res = await api("sim/close", { method: "POST", body: JSON.stringify({ trade_id: tradeId }) });
     setLoading(false);
-    if (res?.result === 1) { setMessage(res.data.win ? "✅ 盈利 +" + res.data.points_returned : "❌ 亏损"); loadData(); }
+    if (res?.result === 1) { setMessage(res.data.win ? "✅ 盈利 +" + res.data.points_returned + "🎮 +" + Math.floor(res.data.pl_points_int * 0.8) + "✨" : "❌ 亏损"); loadData(); }
     else { setMessage("❌ " + (res?.msg || "平仓失败")); }
   };
 
@@ -85,7 +85,7 @@ export default function SimPage() {
           <button onClick={() => window.history.back()} className="text-text-tertiary active:scale-90">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <span className="text-sm font-semibold">沪深模拟</span>
+          <span className="text-sm font-semibold">沪深期货</span>
           {quote && (
             <div className="ml-auto flex items-baseline gap-2">
               <span className={`text-lg font-bold ${isUp ? "text-red-500" : "text-green-500"}`}>{cp.toFixed(1)}</span>
@@ -210,7 +210,7 @@ export default function SimPage() {
 
               {/* Points */}
               <div className="mb-4">
-                <label className="text-[10px] text-text-tertiary">积分 (最少10)</label>
+                <label className="text-[10px] text-text-tertiary">游戏豆 🎮 (最少10)</label>
                 <div className="mt-1.5 flex gap-2 mb-2">
                   {[100, 500, 1000, 5000].map(v => (
                     <button key={v} onClick={() => setPoints(String(v))}
@@ -260,7 +260,7 @@ export default function SimPage() {
                   </div>
                   <div className="mt-2 flex items-center justify-between text-[10px] text-text-tertiary">
                     <span>开: {p.open_price.toFixed(1)} / 现: {p.current_price.toFixed(1)}</span>
-                    <span className="rounded-full bg-bg px-2 py-0.5">{p.points}积分</span>
+                    <span className="rounded-full bg-bg px-2 py-0.5">{p.points}🎮</span>
                   </div>
                   <button onClick={() => closePosition(p.id)} disabled={loading}
                     className="mt-2 w-full rounded-[12px] border border-border-tertiary py-1.5 text-[10px] text-text-secondary transition hover:bg-bg active:scale-[0.98]">
@@ -298,7 +298,7 @@ export default function SimPage() {
                     </span>
                   </div>
                   <div className="mt-1 text-[10px] text-text-tertiary">
-                    {t.open_price.toFixed(1)} → {t.close_price.toFixed(1)} · {t.points}积分
+                    {t.open_price.toFixed(1)} → {t.close_price.toFixed(1)} · {t.points}🎮
                   </div>
                 </div>
               ))

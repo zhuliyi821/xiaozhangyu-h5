@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { TrendingUp, Search, RefreshCw, AlertTriangle, ChevronDown, BarChart3, Activity, Target, Shield } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { API_BASE } from '@/config/api';
 
 interface PredictionResult {
   code: string;

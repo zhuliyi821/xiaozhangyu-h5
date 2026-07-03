@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, TrendingUp, AlertTriangle, ChevronDown, BarChart3, Activity, Shield, Zap, DollarSign, RefreshCw } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { API_BASE } from "@/config/api";
 
 interface PredictionData {
   current_price: number; signal: string; score: number; confidence: number;

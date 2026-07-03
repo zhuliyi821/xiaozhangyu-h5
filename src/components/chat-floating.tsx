@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { API_BASE } from '@/config/api';
 
 interface ChatMsg {
   role: "user" | "assistant";

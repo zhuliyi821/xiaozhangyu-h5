@@ -37,7 +37,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
         amount: String(price),
         idle_bean: String(idleUsed),
       });
-      const res = await fetch("https://surplus.hi.cn/addons/addon_xiaozhangyu_swap/api.php?action=purchase", {
+      const res = await fetch("https://ws.hi.cn/addons/addon_xiaozhangyu_swap/api.php?action=purchase", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params.toString(),

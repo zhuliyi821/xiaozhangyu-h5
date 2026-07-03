@@ -7,6 +7,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { login as apiLogin, register as apiRegister, type LoginResult } from "@/lib/api";
+import { apiFetch, API_BASE } from "@/config/api";
+import { ApiError } from "@/config/api";
 
 interface UserInfo {
   uid: number;
@@ -14,11 +16,13 @@ interface UserInfo {
   avatar: string;
   token: string;
   balance: {
-    credit1: number;
-    credit2: number;
-    credit3: number;
-    credit4: number;
-    sim_coin: number;
+    credit1: number;  // 🎮 游戏豆
+    credit2: number;  // 🏪 闲豆
+    credit3: number;  // 🔮 水晶球
+    credit4: number;  // 💰 余额
+    credit5: number;  // ✨ 豆豆
+    credit6: number;  // ❄️ 冻结豆
+    granted_game_coins: number;
   };
 }
 
@@ -49,7 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(parsed);
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to restore auth state:", e);
+    }
     setLoading(false);
   }, []);
 
@@ -71,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (mobile: string, password: string) => {
     await apiRegister(mobile, password);
-    // 注册成功后自动登录
     await login(mobile, password);
   }, [login]);
 
@@ -83,16 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshBalance = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await fetch(`https://surplus.hi.cn/api/member/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile: user.nickname, token: user.token }),
+      // 使用钱包余额接口替代登录接口
+      const json = await apiFetch<any>(`/wallet_api.php`, {
+        params: { action: "balance", uid: String(user.uid) },
       });
-      const json = await res.json();
-      if (json.code === 0 && json.data?.balance) {
-        saveUser({ ...user, balance: json.data.balance });
+      if (json?.data) {
+        saveUser({ ...user, balance: json.data });
       }
-    } catch {}
+    } catch (err) {
+      // 余额刷新失败不阻断用户体验，仅输出警告
+      console.warn("Balance refresh failed:", err instanceof ApiError ? err.message : err);
+    }
   }, [user, saveUser]);
 
   return (

@@ -108,7 +108,7 @@ function getProductImage(images: string[] | string | undefined): string | null {
   if (Array.isArray(images) && images.length > 0) {
     const url = images[0];
     if (!url || url === "null" || url === "undefined") return null;
-    return url.startsWith("http") ? url : `https://surplus.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
+    return url.startsWith("http") ? url : `https://ws.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
   }
   if (typeof images === "string" && images) {
     if (images === "null" || images === "undefined" || images === "[]") return null;
@@ -117,11 +117,11 @@ function getProductImage(images: string[] | string | undefined): string | null {
       const parsed = JSON.parse(images);
       if (Array.isArray(parsed) && parsed.length > 0) {
         const url = parsed[0];
-        return url.startsWith("http") ? url : `https://surplus.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
+        return url.startsWith("http") ? url : `https://ws.hi.cn${url.startsWith("/") ? "" : "/"}${url}`;
       }
     } catch {}
     // 直接当 URL
-    return images.startsWith("http") ? images : `https://surplus.hi.cn/${images.replace(/^\/+/, "")}`;
+    return images.startsWith("http") ? images : `https://ws.hi.cn/${images.replace(/^\/+/, "")}`;
   }
   return null;
 }
@@ -139,7 +139,7 @@ function ProductCard({ p, i, onBuy, onShare }: {
     <div onClick={() => onBuy(p)}
       className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-96 transition-transform cursor-pointer relative">
       <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); onShare(p); }}>
-        <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `https://h5.surplus.hi.cn/store` }} />
+        <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `https://h5.ws.hi.cn/store` }} />
       </div>
       {/* 商品图片 */}
       <div className="w-full aspect-square bg-gray-100 flex items-center justify-center overflow-hidden mb-2">
@@ -235,7 +235,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
   /** 点击购买 → 跳转芸众收银台 */
   function handleBuy(product: ApiProduct) {
     const goodsId = product.yz_goods_id || product.product_id;
-    const buyUrl = `https://surplus.hi.cn/app/index.php?i=7&c=entry&m=yun_shop&do=mobile&r=store.cashier.goods.buy&goods_id=${goodsId}&store_id=${storeId}`;
+    const buyUrl = `https://ws.hi.cn/app/index.php?i=7&c=entry&m=yun_shop&do=mobile&r=store.cashier.goods.buy&goods_id=${goodsId}&store_id=${storeId}`;
     window.location.href = buyUrl;
   }
 
@@ -309,7 +309,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
                   p={p}
                   i={i}
                   onBuy={handleBuy}
-                  onShare={(product) => setShareData({ title: product.name, subtitle: `¥${product.selling_price}`, brand: product.brand || "小章鱼", url: "https://h5.surplus.hi.cn/store" })}
+                  onShare={(product) => setShareData({ title: product.name, subtitle: `¥${product.selling_price}`, brand: product.brand || "小章鱼", url: "https://h5.ws.hi.cn/store" })}
                 />
               ))}
             </div>
@@ -342,8 +342,8 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
               {swapProducts.map((p) => (
                 <div key={p.id} onClick={() => setSwapBuyProduct(p)}
                   className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-sm py-3.5 px-3 text-center shadow-sm border border-amber-200/50 active:scale-96 transition-transform cursor-pointer relative">
-                  <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: "https://h5.surplus.hi.cn/store" }); }}>
-                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.surplus.hi.cn/store` }} className="bg-amber-100 text-amber-600 hover:bg-amber-500 hover:text-white" />
+                  <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: "https://h5.ws.hi.cn/store" }); }}>
+                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.ws.hi.cn/store` }} className="bg-amber-100 text-amber-600 hover:bg-amber-500 hover:text-white" />
                   </div>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-2"
                     style={{ background: "linear-gradient(135deg,#fef3c7,#fde68a)" }}>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, AlertTriangle, ChevronDown,History, BookOpen, Star, Shield, Check, X } from "lucide-react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://surplus.hi.cn";
+import { Send, Bot, AlertTriangle, ChevronDown, Shield } from "lucide-react";
+import { API_BASE } from "@/config/api";
+import { useAuth } from "@/lib/auth-context";
+import LoginModal from "@/components/ui/login-modal";
 
 interface Message { role: "user" | "assistant"; content: string; }
 
@@ -68,11 +69,13 @@ function getGreeting(): string {
 }
 
 export default function AIChatPage() {
+  const { user } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
   const [tab, setTab] = useState(TAB_CONFIG[0].id);
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", content: getGreeting() }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [balance, setBalance] = useState(100);
+  const [balance, setBalance] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingMsg, setPendingMsg] = useState("");
   const [deductCost, setDeductCost] = useState(0);
@@ -88,6 +91,16 @@ export default function AIChatPage() {
   const isFinancial = tab === "stock" || tab === "crypto";
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // 读取真实余额
+  useEffect(() => {
+    if (!user) { setBalance(0); return; }
+    fetch(API_BASE + "/api/ai-deduct", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid: user.uid, action: "balance" }),
+    }).then(r => r.json()).then(j => { if (j.code === 0) setBalance(j.data.balance); }).catch(() => {});
+  }, [user]);
 
   // Check disclaimer when switching to financial tabs
   useEffect(() => {
@@ -113,7 +126,15 @@ export default function AIChatPage() {
 
   const confirmSend = async () => {
     setShowConfirm(false);
+    if (!user) { setShowLogin(true); return; }
     if (balance < deductCost) { setMessages(prev => [...prev, { role: "assistant", content: "😅 游戏豆不足，去做任务或签到领取更多豆子吧！" }]); return; }
+    // 扣真实游戏豆
+    try {
+      await fetch(API_BASE + "/api/ai-deduct", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid, action: "deduct", cost: deductCost, category: cfg.label }),
+      });
+    } catch {}
     setBalance(b => b - deductCost);
     const msg = pendingMsg;
     setMessages(prev => [...prev, { role: "user", content: msg }]);
@@ -162,9 +183,9 @@ export default function AIChatPage() {
             <span className="text-lg">🤖</span>
             <span className="text-sm font-bold text-text-primary">AI趣预测</span>
           </div>
-          <button className="flex items-center gap-1.5 bg-bg rounded-full px-3 py-1.5 border border-border-tertiary active:scale-95 transition-transform">
+          <button onClick={() => { if (!user) setShowLogin(true); }} className="flex items-center gap-1.5 bg-bg rounded-full px-3 py-1.5 border border-border-tertiary active:scale-95 transition-transform">
             <span className="w-2 h-2 rounded-full bg-brand-gold" />
-            <span className="text-xs font-semibold">{balance}</span>
+            <span className="text-xs font-semibold">{user ? balance.toLocaleString() : "未登录"} 🎮</span>
           </button>
         </div>
       </div>
@@ -320,7 +341,7 @@ export default function AIChatPage() {
               <h3 className="text-sm font-bold">确认咨询</h3>
             </div>
             <p className="text-xs text-text-secondary text-center mb-4">
-              本次测算将扣除 <span className="font-bold text-brand-teal-dark">{deductCost}</span> 游戏豆，确认发起咨询？
+              本次测算将扣除 <span className="font-bold text-brand-teal-dark">{deductCost}</span> 🎮，确认发起咨询？
             </p>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)}
@@ -342,6 +363,7 @@ export default function AIChatPage() {
           本平台AI推演仅传统易学文化娱乐内容，不构成彩票、股票、虚拟货币、婚恋、医疗、法律任何决策依据；网络售彩违法，虚拟货币交易不受法律保护，各类资金操作请理性谨慎。
         </p>
       </div>
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </main>
   );
 }
