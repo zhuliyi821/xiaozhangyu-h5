@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { ChevronLeft, Sparkles, Flame, TrendingUp, MapPin, Clock, Bot } from "lucide-react";
 import { API_BASE } from "@/config/api";
+import FortuneShare from "@/components/fortune/fortune-share";
 
 // ── Types ──
 interface FortuneToday {
@@ -83,19 +84,23 @@ export default function DailyFortunePage() {
     async function load() {
       try {
         const uid = (user as any)?.uid || 0;
+        const token = (user as any)?.token || "";
+        const authHeaders: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) authHeaders["Authorization"] = `Bearer ${token}`;
+
         // Register birth if needed (use defaults for demo)
         await fetch(`${API_BASE}/api/v1/fortune/birth`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST", headers: authHeaders,
           body: JSON.stringify({ user_id: uid || 1, birth_date: "1990-06-15", birth_hour: 12, gender: 1 }),
         }).catch(() => {});
 
         const [todayRes, detailRes] = await Promise.all([
           fetch(`${API_BASE}/api/v1/fortune/today`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+            method: "POST", headers: authHeaders,
             body: JSON.stringify({ user_id: uid || 1 }),
           }).then(r => r.json()),
           fetch(`${API_BASE}/api/v1/fortune/detail`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+            method: "POST", headers: authHeaders,
             body: JSON.stringify({ user_id: uid || 1 }),
           }).then(r => r.json()),
         ]);
@@ -158,6 +163,14 @@ export default function DailyFortunePage() {
             <ChevronLeft className="w-4 h-4 text-purple-600" />
           </Link>
           <div className="flex-1 text-center text-sm font-bold text-purple-800 -ml-8">小章鱼今日运势</div>
+          <FortuneShare
+            score={td.score}
+            tag={td.tag}
+            dimensions={dims}
+            advice={td.advice}
+            lucky={td.lucky}
+            bestHour={{ name: td.best_hour.name, score: td.best_hour.score }}
+          />
         </div>
       </div>
 
