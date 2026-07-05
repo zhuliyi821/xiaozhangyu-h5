@@ -86,17 +86,18 @@ export default function ProChartPage() {
     return () => clearInterval(interval);
   }, [loadData, type]);
 
-  // Run AI prediction when data or tab changes
+  // Run AI prediction using real history data
   useEffect(() => {
-    if (!trend || trend.data.length === 0) return;
-    const frontData = trend.data.map(d => d.front || []);
-    const backData = cfg.back > 0 ? trend.data.map(d => d.back || []) : undefined;
+    if (history.length === 0) return;
+    // Convert history (string[]) to trend format (number[][])
+    const frontData = history.slice(0, periods).map(h => h.front.map(n => parseInt(n)).filter(n => !isNaN(n)));
+    const backData = cfg.back > 0 ? history.slice(0, periods).map(h => h.back?.map(n => parseInt(n)).filter(n => !isNaN(n)) ?? []) : undefined;
     const result = predict(
       { front: frontData, back: backData },
       { frontMax: cfg.front, backMax: cfg.back, totalPeriods: periods }
     );
     setPrediction(result);
-  }, [trend, periods, cfg.front, cfg.back]);
+  }, [history, periods, cfg.front, cfg.back]);
 
   // Render chart when data or tab changes (uses layoutEffect for immediate render)
   useLayoutEffect(() => {
@@ -130,15 +131,47 @@ export default function ProChartPage() {
     };
   }, [trend, activeTab, periods]);
 
-  const frontNums = trend?.hot_front?.slice(0, 5) || [];
-  const backNums = trend?.hot_back?.slice(0, 3) || [];
+  // ── 从真实历史数据计算热号 ──
+  const realHotFront = useMemo(() => {
+    if (history.length === 0) return [];
+    const freq: number[] = new Array(cfg.front).fill(0);
+    history.slice(0, 50).forEach(h => {
+      h.front.forEach(n => { const v = parseInt(n); if (v >= 1 && v <= cfg.front) freq[v - 1]++; });
+    });
+    return freq.map((v, i) => ({ num: i + 1, freq: v }))
+      .sort((a, b) => b.freq - a.freq)
+      .slice(0, 5)
+      .map(x => x.num);
+  }, [history, cfg.front]);
+
+  const realHotBack = useMemo(() => {
+    if (history.length === 0 || cfg.back === 0) return [];
+    const freq: number[] = new Array(cfg.back).fill(0);
+    history.slice(0, 50).forEach(h => {
+      if (h.back) h.back.forEach(n => { const v = parseInt(n); if (v >= 1 && v <= cfg.back) freq[v - 1]++; });
+    });
+    return freq.map((v, i) => ({ num: i + 1, freq: v }))
+      .sort((a, b) => b.freq - a.freq)
+      .slice(0, 3)
+      .map(x => x.num);
+  }, [history, cfg.back]);
+
+  // ── AI 模型推荐的 Top 热号 ──
+  const aiHotFront = useMemo(() => {
+    if (!prediction) return [];
+    return prediction.front.slice(0, 5).map(r => r.number);
+  }, [prediction]);
+
+  const aiHotBack = useMemo(() => {
+    if (!prediction || cfg.back === 0) return [];
+    return prediction.back.slice(0, 3).map(r => r.number);
+  }, [prediction, cfg.back]);
 
   const { lastPeriod, lastDrawDate } = useMemo(() => {
-    const lastItem = trend?.data?.[trend.data.length - 1];
-    const period = lastItem?.period;
-    const date = history.find(h => h.period === period)?.date || lastItem?.date;
-    return { lastPeriod: period, lastDrawDate: date };
-  }, [trend, history]);
+    // 从 history 取最新一期（history[0] 是最新的）
+    const latest = history[0];
+    return { lastPeriod: latest?.period, lastDrawDate: latest?.date };
+  }, [history]);
 
   return (
     <main className="pb-24 min-h-screen bg-bg">
@@ -174,37 +207,71 @@ export default function ProChartPage() {
             loading={loading}
           />
 
-          {/* 热冷号卡片 */}
+          {/* 热冷号卡片：实际数据 vs AI 模型 */}
           <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-semibold">🔥 热号推荐（近{trend?.periods || periods}期）</span>
+              <span className="text-xs font-semibold">📊 数据对比</span>
               <span className="text-[10px] text-text-tertiary">
                 {lastUpdated ? `更新于 ${lastUpdated.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : cfg.name}
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="text-[10px] text-text-tertiary mb-1.5">前区热号</div>
-                <div className="flex gap-1.5">
-                  {frontNums.map(n => (
-                    <span key={n} className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                      {String(n).padStart(2, "0")}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              {cfg.back > 0 && (
-                <div>
-                  <div className="text-[10px] text-text-tertiary mb-1.5">后区热号</div>
+            {/* 实际数据热号 */}
+            <div className="mb-3 pb-3 border-b border-[rgba(69,204,213,0.08)]">
+              <div className="text-[10px] font-semibold text-brand-teal-dark mb-2">📈 实际热号（近50期开奖数据）</div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-[9px] text-text-tertiary mb-1">前区</div>
                   <div className="flex gap-1.5">
-                    {backNums.map(n => (
-                      <span key={n} className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-gold to-brand-gold-dark text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                    {realHotFront.map(n => (
+                      <span key={n} className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
                         {String(n).padStart(2, "0")}
                       </span>
                     ))}
+                    {realHotFront.length === 0 && <span className="text-[10px] text-text-tertiary">加载中...</span>}
                   </div>
                 </div>
-              )}
+                {cfg.back > 0 && (
+                  <div>
+                    <div className="text-[9px] text-text-tertiary mb-1">后区</div>
+                    <div className="flex gap-1.5">
+                      {realHotBack.map(n => (
+                        <span key={n} className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                          {String(n).padStart(2, "0")}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* AI 模型热号 */}
+            <div>
+              <div className="text-[10px] font-semibold text-purple-600 mb-2">🤖 AI 模型推荐</div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-[9px] text-text-tertiary mb-1">前区</div>
+                  <div className="flex gap-1.5">
+                    {aiHotFront.map(n => (
+                      <span key={n} className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                        {String(n).padStart(2, "0")}
+                      </span>
+                    ))}
+                    {aiHotFront.length === 0 && <span className="text-[10px] text-text-tertiary">加载中...</span>}
+                  </div>
+                </div>
+                {cfg.back > 0 && (
+                  <div>
+                    <div className="text-[9px] text-text-tertiary mb-1">后区</div>
+                    <div className="flex gap-1.5">
+                      {aiHotBack.map(n => (
+                        <span key={n} className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                          {String(n).padStart(2, "0")}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

@@ -20,7 +20,7 @@ export default function PKRoomPage() {
   const cfg = catConfig[category] || catConfig.general;
   const { user } = useAuth();
   const uid = user?.uid || 0;
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
   const [topic, setTopic] = useState<any>(null);
   const [loading, setLoading] = useState(true);

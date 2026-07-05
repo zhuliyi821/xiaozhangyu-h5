@@ -45,7 +45,7 @@ export default function FeedPage() {
   const [comments, setComments] = useState<Record<number, CommentItem[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [commentLoading, setCommentLoading] = useState<Set<number>>(new Set());
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
   const loadFeeds = useCallback(() => {
     setLoading(true);

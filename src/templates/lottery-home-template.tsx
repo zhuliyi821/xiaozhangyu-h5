@@ -8,7 +8,6 @@
  */
 import { HeroSection } from "@/components/home/hero-section";
 import { NewsGrid } from "@/components/home/news-grid";
-import { DrawCard } from "@/components/home/draw-card";
 import { LotteryScroll } from "@/components/home/lottery-scroll";
 
 export interface LotteryHomeProps {
@@ -34,7 +33,6 @@ export default function LotteryHomeTemplate({
     <main className="pb-20">
       <HeroSection />
       <NewsGrid />
-      <DrawCard />
       <LotteryScroll />
     </main>
   );

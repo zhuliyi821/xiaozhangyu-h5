@@ -214,7 +214,7 @@ function UserLevelBadge({ uid }: { uid: number }) {
   } | null>(null);
 
   useEffect(() => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
     fetch(`${API_BASE}/api/user/level?uid=${uid}`)
       .then(r => r.json())
       .then(j => { if (j.code === 0) setLevel(j.data); })

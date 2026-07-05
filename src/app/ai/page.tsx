@@ -8,6 +8,16 @@ import LoginModal from "@/components/ui/login-modal";
 
 interface Message { role: "user" | "assistant"; content: string; }
 
+// ── 运势工具快捷入口 ──
+const FORTUNE_TOOLS = [
+  { icon: "💰", label: "财运", tab: "lottery", question: "近期偏财气场如何" },
+  { icon: "❤️", label: "感情", tab: "zodiac", question: "情感婚姻运势如何" },
+  { icon: "💼", label: "事业", tab: "zodiac", question: "职场事业发展运势如何" },
+  { icon: "🔮", label: "抽签", tab: "zodiac", question: "帮我起一卦随心快速起卦" },
+  { icon: "🎯", label: "预测", tab: "lottery", question: "近期有什么好机遇" },
+  { icon: "📤", label: "分享", tab: "", question: "" },
+];
+
 const TAB_CONFIG = [
   {
     id: "lottery", label: "彩运趣味推演", cost: 5, icon: "🎱",
@@ -71,7 +81,18 @@ function getGreeting(): string {
 export default function AIChatPage() {
   const { user } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  const [tab, setTab] = useState(TAB_CONFIG[0].id);
+  // 会话ID：每次进入页面生成一次，后续对话复用
+  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 10));
+  // 从 URL 参数读取默认 tab：/ai?tab=lottery
+  const getInitialTab = () => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      const t = p.get("tab");
+      if (t && TAB_CONFIG.find(c => c.id === t)) return t;
+    }
+    return TAB_CONFIG[0].id;
+  };
+  const [tab, setTab] = useState(getInitialTab);
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", content: getGreeting() }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -124,6 +145,25 @@ export default function AIChatPage() {
     setShowDisclaimer(false);
   };
 
+  // 用户反馈（准/不准）
+  const [feedbackMsg, setFeedbackMsg] = useState("");
+  const handleFeedback = async (msgIndex: number, feedback: number) => {
+    try {
+      await fetch(`${API_BASE}/api/v1/fortune/feedback`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user?.uid || 0,
+          feedback_type: "chat",
+          feedback_date: new Date().toISOString().split("T")[0],
+          dimension: tab,
+          feedback: feedback,
+        }),
+      });
+      setFeedbackMsg(feedback === 1 ? "👍 感谢反馈" : "👎 已记录");
+      setTimeout(() => setFeedbackMsg(""), 2000);
+    } catch {}
+  };
+
   const confirmSend = async () => {
     setShowConfirm(false);
     if (!user) { setShowLogin(true); return; }
@@ -144,6 +184,9 @@ export default function AIChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          user_id: user?.uid || 0,
+          session_id: sessionId,
+          tab: tab,
           messages: [
             { role: "system", content: `你是AI趣预测平台的周易推演助手。回答要求：1.积极正向 2.若推演气场偏弱则追加安抚文案 3.末尾随机附一句励志短句 4.控制在200字内 5.不使用"大凶、必亏、无解"等词汇，用"气场阻滞、存在阻碍、调整方式即可迎来转机"替代。当前用户咨询分类:${cfg.label}。回复风格：传统文化+正向引导` },
             ...messages.filter(m => m.role === "user").slice(-8).map(m => ({ role: "user", content: m.content })),
@@ -190,8 +233,34 @@ export default function AIChatPage() {
         </div>
       </div>
 
-      {/* ── 4 Category Tabs ── */}
+      {/* ── 运势工具快捷入口 ── */}
       <div className="sticky top-[52px] z-20 bg-white border-b border-border-tertiary overflow-x-auto scrollbar-none">
+        <div className="flex gap-1.5 px-3 py-2.5">
+          {FORTUNE_TOOLS.map((tool, i) => (
+            <button key={i} onClick={() => {
+              if (tool.tab) {
+                setTab(tool.tab);
+                setMessages([{ role: "assistant", content: getGreeting() }]);
+                setSubCategory("");
+                if (tool.question) {
+                  handleQuickQuestion(tool.question, TAB_CONFIG.find(t => t.id === tool.tab)?.cost || 5);
+                }
+              } else if (tool.label === "分享") {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                  alert("链接已复制，分享给朋友一起来测运势吧！");
+                }).catch(() => {});
+              }
+            }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-gradient-to-r from-purple-50 to-purple-100/60 border border-purple-200/60 active:scale-95 transition-transform shadow-sm">
+              <span className="text-sm">{tool.icon}</span>
+              <span className="text-purple-700">{tool.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 4 Category Tabs ── */}
+      <div className="sticky top-[104px] z-20 bg-white border-b border-border-tertiary overflow-x-auto scrollbar-none">
         <div className="flex gap-0.5 px-2">
           {TAB_CONFIG.map(t => (
             <button key={t.id} onClick={() => { setTab(t.id); setMessages([{ role: "assistant", content: getGreeting() }]); setSubCategory(""); }}
@@ -271,12 +340,23 @@ export default function AIChatPage() {
                 <Bot className="w-3.5 h-3.5 text-white" />
               </div>
             )}
-            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
-              msg.role === "user"
-                ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-br-md"
-                : "bg-surface border border-border-tertiary shadow-sm rounded-bl-md"
-            }`}>
-              {msg.content}
+            <div>
+              <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
+                msg.role === "user"
+                  ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-br-md"
+                  : "bg-surface border border-border-tertiary shadow-sm rounded-bl-md"
+              }`}>
+                {msg.content}
+              </div>
+              {/* 反馈按钮：只显示在assistant消息 */}
+              {msg.role === "assistant" && msg.content !== getGreeting() && i > 0 && (
+                <div className="flex gap-2 mt-1 ml-1">
+                  <button onClick={() => handleFeedback(i, 1)}
+                    className="text-[9px] text-text-tertiary hover:text-green-500 transition-colors">👍 准</button>
+                  <button onClick={() => handleFeedback(i, 0)}
+                    className="text-[9px] text-text-tertiary hover:text-red-400 transition-colors">👎 不准</button>
+                </div>
+              )}
             </div>
           </div>
         ))}

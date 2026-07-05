@@ -16,7 +16,7 @@ const categoryIcons: Record<string, string> = { sports: "⚽", social: "🌐", e
 export default function PKHallPage() {
   const router = useRouter();
   const [pkTopics, setPkTopics] = useState<any[]>([]);
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
   useEffect(() => {
     fetch(`${API_BASE}/api/pk?action=list`)

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sparkles, Store, User, Plus, Bot } from "lucide-react";
+import { Home, Sparkles, User, Plus, Bot } from "lucide-react";
 
 /** AI 文字图标 — 当 Bot 图标不够明显时作为 fallback */
 function AIBadge({ className }: { className?: string }) {
@@ -12,9 +12,9 @@ function AIBadge({ className }: { className?: string }) {
 }
 
 const tabs: { href: string; label: string; icon: any; badge?: boolean }[] = [
-  { href: "/", label: "门店", icon: Store },
+  { href: "/", label: "首页", icon: Home },
   { href: "/jiadouzhan", label: "加豆站", icon: Plus, badge: true },
-  { href: "/predict", label: "预测大厅", icon: Sparkles },
+  { href: "/predict", label: "PK大厅", icon: Sparkles },
   { href: "/ai", label: "小章鱼", icon: Bot },
   { href: "/profile", label: "我的", icon: User },
 ] as const;

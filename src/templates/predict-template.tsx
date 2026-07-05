@@ -94,7 +94,7 @@ export default function PredictTemplate({ config: userConfig, lotteryPrediction 
 
   // 从API加载真实排行榜
   useEffect(() => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
     fetch(`${API_BASE}/api/leaderboard?limit=10`)
       .then(r => r.json())
       .then(j => { if (j.code === 0 && j.data?.length > 0) setLiveLB(j.data); })
@@ -114,7 +114,7 @@ export default function PredictTemplate({ config: userConfig, lotteryPrediction 
   const [filterCategory, setFilterCategory] = useState("");
   const [voteMsg, setVoteMsg] = useState("");
   const [showLogin, setShowLogin] = useState(false);
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
   // ── 投注确认弹窗状态 ──
   const [confirmVote, setConfirmVote] = useState<{

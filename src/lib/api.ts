@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
 /** 规范化图片 URL：过滤 "null"/"undefined"/空值，补全域名 */
 export function normalizeImageUrl(url: string | null | undefined): string | null {

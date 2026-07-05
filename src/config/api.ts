@@ -5,7 +5,7 @@
  * 禁止在各页面文件中重复定义 API_BASE。
  */
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
 export const API_CONFIG = {
   baseUrl: API_BASE,
