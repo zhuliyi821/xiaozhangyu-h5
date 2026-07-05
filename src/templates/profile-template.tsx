@@ -17,6 +17,7 @@ export interface ProfileMenuItem {
 
 const menuItems: ProfileMenuItem[] = [
   { icon: "💰", label: "我的资产" },
+  { icon: "💬", label: "社区动态" },
   { icon: "📋", label: "我的订单" },
   { icon: "🎟️", label: "卡券包" },
   { icon: "❤️", label: "我的收藏" },
@@ -90,6 +91,7 @@ export default function ProfileTemplate() {
                 <div className="text-xs opacity-80">
                   {user ? `UID: ${user.uid}` : "登录同步账户资产"}
                 </div>
+                {user && <UserLevelBadge uid={user.uid} />}
               </>
             )}
           </div>
@@ -106,7 +108,7 @@ export default function ProfileTemplate() {
         {/* Assets - click to view all */}
         <div className="grid grid-cols-5 gap-1.5 cursor-pointer" onClick={() => window.location.href = "/assets"}>
           <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="游戏豆" />
-          <AssetTile icon="✨" value={String(Math.floor(credits.credit5))} label="豆豆" />
+          <AssetTile icon="⛏️" value={String(Math.floor(credits.credit5))} label="水晶石" />
           <AssetTile icon="🔮" value={String(Math.floor(credits.credit3))} label="水晶球" />
           <AssetTile icon="¥" value={credits.credit4.toFixed(2)} label="余额" />
           <AssetTile icon="🏪" value={String(Math.floor(credits.credit2))} label="闲豆" />
@@ -156,12 +158,12 @@ export default function ProfileTemplate() {
       <div className="mt-4 px-4 space-y-2">
         {menuItems.map((m, i) => (
           <div key={i} onClick={() => {
-            if (m.label === "我的资产") { window.location.href = "/assets"; return; }
-            if (m.label === "我的订单") { window.location.href = "/orders"; return; }
-            if (m.label === "卡券包") { window.location.href = "/coupons"; return; }
-            if (m.label === "我的收藏") { window.location.href = "/favorites"; return; }
-            if (m.label === "设置") { window.location.href = "/settings"; return; }
-            alert(`${m.label} 页面开发中`);
+            const routes: Record<string, string> = {
+              "我的资产": "/assets", "社区动态": "/feed", "我的订单": "/orders",
+              "卡券包": "/coupons", "我的收藏": "/favorites", "购彩记录": "/orders",
+              "设置": "/settings",
+            };
+            window.location.href = routes[m.label] || "/";
           }}
             className="flex items-center gap-3 bg-surface rounded-[20px] py-3.5 px-4 shadow-sm border border-[rgba(69,204,213,0.06)] active:scale-[0.98] transition-transform cursor-pointer">
             <div className="w-9 h-9 rounded-[10px] bg-bg flex items-center justify-center text-lg">{m.icon}</div>
@@ -201,6 +203,36 @@ function AssetTile({ icon, value, label }: { icon: string; value: string; label:
       <div className="text-xs mb-0.5">{icon}</div>
       <div className="text-[13px] font-bold leading-tight">{value}</div>
       <div className="text-[9px] opacity-80 mt-0.5 leading-tight">{label}</div>
+    </div>
+  );
+}
+
+/** 🏆 用户等级徽章 */
+function UserLevelBadge({ uid }: { uid: number }) {
+  const [level, setLevel] = useState<{
+    rank: string; progress: number; xp: number; stats: Record<string, number>;
+  } | null>(null);
+
+  useEffect(() => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+    fetch(`${API_BASE}/api/user/level?uid=${uid}`)
+      .then(r => r.json())
+      .then(j => { if (j.code === 0) setLevel(j.data); })
+      .catch(() => {});
+  }, [uid]);
+
+  if (!level) return <div className="h-4 w-20 bg-white/10 rounded animate-pulse mt-1" />;
+
+  return (
+    <div className="flex items-center gap-1.5 mt-1">
+      <span className="text-[10px] bg-white/20 rounded-[6px] px-1.5 py-0.5 font-medium">
+        {level.rank}
+      </span>
+      <div className="flex-1 h-1.5 bg-white/15 rounded-full overflow-hidden max-w-[80px]">
+        <div className="h-full bg-gradient-to-r from-brand-gold to-amber-300 rounded-full transition-all duration-500"
+          style={{ width: `${Math.min(level.progress, 100)}%` }} />
+      </div>
+      <span className="text-[9px] opacity-70">{level.xp}EXP</span>
     </div>
   );
 }

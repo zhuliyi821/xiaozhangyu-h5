@@ -129,7 +129,7 @@ export default function BTCGamePage() {
         if (res?.result === 1) {
           const isWin = res.data?.is_win;
           const points = res.data?.profit || 0;
-          setMessage(isWin ? `✅ 赢了! +${points} ✨` : `❌ 输了 -${betPoints} 🎮`);
+          setMessage(isWin ? `✅ 赢了! +${points} ⛏️` : `❌ 输了 -${betPoints} 🎮`);
           setActiveBetId(null);
           loadFastBets();
         } else {
@@ -161,7 +161,7 @@ export default function BTCGamePage() {
     const res = await api("btc-game/close", { method: "POST", body: JSON.stringify({ trade_id: tradeId }) });
     setLoading(false);
     if (res?.result === 1) {
-      setMessage(`✅ 已平仓! 盈亏: ${res.data?.pl_points >= 0 ? "+" : ""}${res.data?.pl_points ?? 0} (🎮本金+✨盈利)`);
+      setMessage(`✅ 已平仓! 盈亏: ${res.data?.pl_points >= 0 ? "+" : ""}${res.data?.pl_points ?? 0} (🎮本金+⛏️盈利)`);
       loadPositions();
     } else {
       setMessage("❌ " + (res?.msg || "平仓失败"));
@@ -566,7 +566,7 @@ export default function BTCGamePage() {
                   {betType === "tail"
                     ? (parseInt(betPoints) * 8.5).toLocaleString()
                     : (parseInt(betPoints) * 1.8).toLocaleString()
-                  } ✨
+                  } ⛏️
                 </span>
               </span>
             </div>

@@ -35,7 +35,7 @@ export default function ChatFloating() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/ai/`, {
+      const res = await fetch(`${API_BASE}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

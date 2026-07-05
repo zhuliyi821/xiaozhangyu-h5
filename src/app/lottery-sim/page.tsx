@@ -203,7 +203,7 @@ function LotterySimContent() {
       const json = await res.json();
       if (json.code !== 0) throw new Error(json.msg);
       
-      // 3) 结算: 赢则加豆豆
+      // 3) 结算: 赢则加水晶石
       const totalWin = json.data?.total_win || 0;
       const winAmount = totalWin > totalCost ? totalWin - totalCost : 0;
       if (totalWin > 0) {
@@ -248,7 +248,7 @@ function LotterySimContent() {
             </button>
             <div>
               <h1 className="text-lg font-bold text-white">彩票投注</h1>
-              <p className="text-[11px] text-white/80">用游戏豆投注 · 赢豆豆</p>
+              <p className="text-[11px] text-white/80">用游戏豆投注 · 赢水晶石</p>
             </div>
           </div>
           <div className="text-right text-white">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Download } from "lucide-react";
 import { getTrend, getHistory, TrendData } from "@/lib/api";
@@ -51,12 +51,23 @@ export default function PredictionReportPage() {
   const detailRef = useRef<HTMLDivElement>(null);
   const detailInst = useRef<echarts.ECharts | null>(null);
 
-  useEffect(() => {
-    setLoading(true);
-    getTrend(type)
-      .then(d => { setTrend(d); })
-      .finally(() => setLoading(false));
+  const refresh = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const d = await getTrend(type);
+      setTrend(d);
+    } catch (e) {
+      console.error("预测报告数据刷新失败", e);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
   }, [type]);
+
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(() => refresh(false), 60000);
+    return () => clearInterval(interval);
+  }, [refresh]);
 
   // Run prediction
   useEffect(() => {

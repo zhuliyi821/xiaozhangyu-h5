@@ -140,7 +140,7 @@ export default function AIChatPage() {
     setMessages(prev => [...prev, { role: "user", content: msg }]);
     setLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/api/ai/`, {
+      const r = await fetch(`${API_BASE}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -175,7 +175,7 @@ export default function AIChatPage() {
   };
 
   return (
-    <main className="min-h-screen bg-bg flex flex-col">
+    <main className="min-h-screen bg-bg flex flex-col pb-[calc(env(safe-area-inset-bottom,0px)+64px)]">
       {/* ── Top Bar: Logo + Balance ── */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-border-tertiary">
         <div className="flex items-center justify-between px-4 py-2.5">
@@ -299,7 +299,8 @@ export default function AIChatPage() {
       </div>
 
       {/* ── Input ── */}
-      <div className="sticky bottom-0 bg-white border-t border-border-tertiary px-4 py-3">
+      <div className="sticky bottom-[64px] bg-white border-t border-border-tertiary px-4 py-3"
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))' }}>
         <div className="flex items-center gap-2 bg-bg rounded-[16px] border border-border-tertiary px-3 py-2">
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && sendMessage()}

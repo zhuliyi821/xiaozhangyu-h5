@@ -15,7 +15,7 @@ interface WalletData {
 
 const assetList = [
   { key: "credit1", icon: "🎮", color: "from-indigo-400 to-purple-500" },
-  { key: "credit5", icon: "✨", color: "from-ocean-400 to-cyan-500" },
+  { key: "credit5", icon: "⛏️", color: "from-amber-400 to-orange-500" },
   { key: "credit6", icon: "❄️", color: "from-cyan-400 to-blue-500", sub: "冻结豆" },
   { key: "credit3", icon: "🔮", color: "from-violet-400 to-pink-500" },
   { key: "credit4", icon: "💰", color: "from-green-400 to-emerald-500" },
@@ -115,7 +115,7 @@ export default function AssetsPage() {
             🎮 {Math.floor(w.credit1).toLocaleString()} 游戏豆
           </div>
           <div className="text-[11px] opacity-70 mt-1">
-            豆豆 {Math.floor(w.credit5).toLocaleString()} · 水晶球 {Math.floor(w.credit3)} · 余额 ¥{w.credit4.toFixed(2)}
+            水晶石 {Math.floor(w.credit5).toLocaleString()} · 水晶球 {Math.floor(w.credit3)} · 余额 ¥{w.credit4.toFixed(2)}
           </div>
         </div>
       )}

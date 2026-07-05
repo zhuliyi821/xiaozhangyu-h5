@@ -5,7 +5,7 @@
  */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PredictTemplate } from "@/templates";
 import { getTrend } from "@/lib/api";
 import { predict } from "@/lib/ai-models";
@@ -13,7 +13,7 @@ import { predict } from "@/lib/ai-models";
 export default function PredictPage() {
   const [lotteryPred, setLotteryPred] = useState<{ top5: number[]; top3Back?: number[]; score: number } | null>(null);
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     getTrend("dlt").then(trend => {
       if (!trend || trend.data.length === 0) return;
       const frontData = trend.data.map(d => d.front || []);
@@ -29,6 +29,12 @@ export default function PredictPage() {
       });
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    refresh();
+    const interval = setInterval(refresh, 60000); // 每分钟刷新 AI 彩票预测
+    return () => clearInterval(interval);
+  }, [refresh]);
 
   return <PredictTemplate lotteryPrediction={lotteryPred} />;
 }

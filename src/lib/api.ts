@@ -21,7 +21,7 @@ export interface LoginResult {
     credit2: number;  // 🏪 闲豆
     credit3: number;  // 🔮 水晶球
     credit4: number;  // 💰 余额
-    credit5: number;  // ✨ 豆豆
+    credit5: number;  // ⛏️ 水晶石
     credit6: number;  // ❄️ 冻结豆
     granted_game_coins: number;
   };
@@ -100,7 +100,7 @@ export interface HistoryItem {
 export interface TrendData {
   periods: number;
   type: string;
-  data: { period: number; front: number[]; back: number[] }[];
+  data: { period: number; date?: string; front: number[]; back: number[] }[];
   hot_front: number[];
   hot_back: number[];
 }
@@ -123,8 +123,12 @@ export interface VerifyResult {
 }
 
 async function fetchApi<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}/api/lottery-data/${path}`, {
-    next: { revalidate: 10 },
+  // 加时间戳 bust cache，确保彩票数据实时（浏览器/CDN 不缓存）
+  const sep = path.includes("?") ? "&" : "?";
+  const url = `${API_BASE}/api/lottery-data/${path}${sep}_t=${Date.now()}`;
+  const res = await fetch(url, {
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();

@@ -45,7 +45,7 @@ const defaultConfig: SimulateConfig = {
   title: "模拟中心",
   assets: [
     { icon: "🎮", label: "游戏豆", value: "2,680", color: "text-brand-gold-dark" },
-    { icon: "🫘", label: "豆豆", value: "1,200", color: "text-brand-teal-dark" },
+    { icon: "⛏️", label: "水晶石", value: "1,200", color: "text-amber-600" },
     { icon: "🔮", label: "水晶球", value: "5", color: "text-purple-600" },
   ],
   games: [

@@ -69,7 +69,7 @@ export default function SimPage() {
     setLoading(true);
     const res = await api("sim/close", { method: "POST", body: JSON.stringify({ trade_id: tradeId }) });
     setLoading(false);
-    if (res?.result === 1) { setMessage(res.data.win ? "✅ 盈利 +" + res.data.points_returned + "🎮 +" + Math.floor(res.data.pl_points_int * 0.8) + "✨" : "❌ 亏损"); loadData(); }
+    if (res?.result === 1) { setMessage(res.data.win ? "✅ 盈利 +" + res.data.points_returned + "🎮 +" + Math.floor(res.data.pl_points_int * 0.8) + "⛏️" : "❌ 亏损"); loadData(); }
     else { setMessage("❌ " + (res?.msg || "平仓失败")); }
   };
 

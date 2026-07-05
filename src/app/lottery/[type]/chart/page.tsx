@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getTrend, getHistory, TrendData, HistoryItem } from "@/lib/api";
 import { predict, PredictionResult } from "@/lib/ai-models";
 import DrawFreshnessBar from "@/components/ui/draw-freshness-bar";
+import { DRAW_SCHEDULES } from "@/lib/draw-schedule";
 import * as echarts from "echarts/core";
 import { BarChart, LineChart, ScatterChart, HeatmapChart, GraphChart } from "echarts/charts";
 import {
@@ -41,17 +41,50 @@ export default function ProChartPage() {
   const [periods, setPeriods] = useState(5);
   const [activeTab, setActiveTab] = useState<"trend" | "freq" | "miss" | "predict">("trend");
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInst = useRef<echarts.ECharts | null>(null);
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      getTrend(type).then(setTrend),
-      getHistory(type, 1, 100).then(r => setHistory(r.list || [])),
-    ]).finally(() => setLoading(false));
+  const loadData = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const [trendData, historyData] = await Promise.all([
+        getTrend(type),
+        getHistory(type, 1, 100),
+      ]);
+      setTrend(trendData);
+      setHistory(historyData.list || []);
+      setLastUpdated(new Date());
+    } catch (e) {
+      console.error("彩票数据加载失败", e);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
   }, [type]);
+
+  // 首次加载 + 彩种切换
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // 定时轮询：每 60 秒静默刷新一次；开奖日开奖后 5 分钟内每 10 秒刷新
+  useEffect(() => {
+    let intervalMs = 60000;
+    const now = new Date();
+    const schedule = DRAW_SCHEDULES[type];
+    if (schedule) {
+      const [drawHour, drawMin] = schedule.drawTime.split(":").map(Number);
+      const curMin = now.getHours() * 60 + now.getMinutes();
+      const drawMin_ = drawHour * 60 + drawMin;
+      const isDrawDay = schedule.drawDays.includes(now.getDay());
+      if (isDrawDay && curMin >= drawMin_ && curMin <= drawMin_ + 5) {
+        intervalMs = 10000;
+      }
+    }
+    const interval = setInterval(() => loadData(false), intervalMs);
+    return () => clearInterval(interval);
+  }, [loadData, type]);
 
   // Run AI prediction when data or tab changes
   useEffect(() => {
@@ -100,6 +133,13 @@ export default function ProChartPage() {
   const frontNums = trend?.hot_front?.slice(0, 5) || [];
   const backNums = trend?.hot_back?.slice(0, 3) || [];
 
+  const { lastPeriod, lastDrawDate } = useMemo(() => {
+    const lastItem = trend?.data?.[trend.data.length - 1];
+    const period = lastItem?.period;
+    const date = history.find(h => h.period === period)?.date || lastItem?.date;
+    return { lastPeriod: period, lastDrawDate: date };
+  }, [trend, history]);
+
   return (
     <main className="pb-24 min-h-screen bg-bg">
       {/* Header */}
@@ -128,9 +168,9 @@ export default function ProChartPage() {
           {/* 数据新鲜度 */}
           <DrawFreshnessBar
             type={type}
-            lastPeriod={trend?.data?.[trend.data.length - 1]?.period}
-            lastDrawDate={trend?.data?.[trend.data.length - 1]?.period ? "2026-07-01" : undefined}
-            onRefresh={() => { setLoading(true); getTrend(type).then(setTrend).finally(() => setLoading(false)); }}
+            lastPeriod={lastPeriod}
+            lastDrawDate={lastDrawDate}
+            onRefresh={() => loadData(true)}
             loading={loading}
           />
 
@@ -138,7 +178,9 @@ export default function ProChartPage() {
           <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-semibold">🔥 热号推荐（近{trend?.periods || periods}期）</span>
-              <span className="text-[10px] text-text-tertiary">{cfg.name}</span>
+              <span className="text-[10px] text-text-tertiary">
+                {lastUpdated ? `更新于 ${lastUpdated.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : cfg.name}
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex-1">
