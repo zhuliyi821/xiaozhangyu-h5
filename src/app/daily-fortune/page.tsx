@@ -1,68 +1,156 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { Sparkles, ChevronLeft, Flame } from "lucide-react";
+import { ChevronLeft, Sparkles, Flame, TrendingUp, MapPin, Clock, Bot } from "lucide-react";
+import { API_BASE } from "@/config/api";
 
-// ── 运势数据 ──
-const SCORE_TAGS = [
-  { min: 85, label: "大吉", emoji: "🌟", text: "text-green-600", stars: 5 },
-  { min: 70, label: "吉", emoji: "✨", text: "text-brand-teal-dark", stars: 4 },
-  { min: 55, label: "中平", emoji: "🌊", text: "text-amber-600", stars: 3 },
-  { min: 0,  label: "小凶", emoji: "🌧", text: "text-red-500", stars: 2 },
-];
+// ── Types ──
+interface FortuneToday {
+  score: number; tag: string; trend: string;
+  advice: { do: string[]; dont: string[] };
+  best_hour: { name: string; range: string; score: number; bonus: number };
+  lucky: { color: string; color_hex: string; numbers: number[]; direction: string };
+  body_use: string; body_use_label: string;
+}
 
-const DO_TODOS = ["下注","约会","吃火锅","投资","面试","出行","签约","表白","健身","学习","社交","购物"];
-const DONT_TODOS = ["冲动消费","熬夜","吵架","借贷","冒险","裸辞","暴饮暴食"];
-const LUCKY_COLORS = ["琥珀金","青瓷绿","珊瑚红","水晶紫","珍珠白","曜石黑","玫瑰金","天空蓝"];
-const LUCKY_COLORS_HEX = ["#F5A623","#45CCD5","#F27152","#7C3AED","#FFFFFF","#333333","#E8A0BF","#87CEEB"];
-const LUCKY_NUMBERS = [[3,7,9],[1,6,8],[2,5,9],[4,7,8],[6,8,2],[1,3,5],[7,9,4],[2,6,3]];
-const LUCKY_DIRECTIONS = ["东南","正南","正西","正北","东北","西南","西北","东方"];
+interface Hexagram { name: string; gua_ci: string; body_trigram: string; use_trigram: string; body_use: string; }
+interface DimItem { score: number; level: string; advice: string; }
+interface HourlyItem { hour: string; time_range: string; zhi_shi_door: string; score: number; label: string; bonus: number; advice: string; }
+
+interface FortuneDetail {
+  total_score: number;
+  hexagram: Hexagram;
+  dimensions: Record<string, DimItem>;
+  hourly: HourlyItem[];
+  recommendation: { prediction_bonus: number; rooms: {name:string;type:string}[]; stores: {name:string;direction:string;distance:string}[] };
+}
 
 const FORTUNE_TOOLS = [
-  { icon: "💰", label: "财运", href: "/ai?tab=lottery", color: "from-amber-400 to-amber-500", desc: "偏财气场推演" },
-  { icon: "❤️", label: "感情", href: "/ai?tab=zodiac", color: "from-pink-400 to-pink-500", desc: "情感运势分析" },
-  { icon: "💼", label: "事业", href: "/ai?tab=zodiac", color: "from-blue-400 to-blue-500", desc: "职场发展指引" },
-  { icon: "🔮", label: "抽签", href: "/ai?tab=zodiac", color: "from-purple-400 to-purple-500", desc: "随心快速起卦" },
+  { icon: "💰", label: "财运", href: "/ai?tab=lottery", color: "from-amber-400 to-amber-600", desc: "偏财气场推演" },
+  { icon: "❤️", label: "感情", href: "/ai?tab=zodiac", color: "from-pink-400 to-pink-600", desc: "情感运势分析" },
+  { icon: "💼", label: "事业", href: "/ai?tab=zodiac", color: "from-blue-400 to-blue-600", desc: "职场发展指引" },
+  { icon: "🔮", label: "抽签", href: "/ai?tab=zodiac", color: "from-purple-400 to-purple-600", desc: "随心快速起卦" },
   { icon: "🎯", label: "预测加成", href: "/ai?tab=lottery", color: "from-brand-teal to-brand-teal-dark", desc: "AI智能推演" },
   { icon: "📤", label: "分享", href: "", color: "from-brand-gold to-brand-coral", desc: "分享给好友" },
 ];
 
-function seededRandom(seed: number): () => number {
-  let s = seed;
-  return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+const DIM_ICONS: Record<string, string> = {
+  wealth: "💰", love: "❤️", career: "💼", health: "🏥", social: "👥",
+};
+const DIM_LABELS: Record<string, string> = {
+  wealth: "财运", love: "感情", career: "事业", health: "健康", social: "社交",
+};
+
+const WEEK_DAYS = ["日","一","二","三","四","五","六"];
+
+function scoreColor(s: number): string {
+  if (s >= 85) return "text-emerald-600";
+  if (s >= 70) return "text-brand-teal-dark";
+  if (s >= 55) return "text-amber-600";
+  return "text-red-500";
+}
+function scoreBg(s: number): string {
+  if (s >= 85) return "bg-gradient-to-r from-emerald-400 to-emerald-300";
+  if (s >= 70) return "bg-gradient-to-r from-brand-teal to-brand-teal-dark";
+  if (s >= 55) return "bg-gradient-to-r from-amber-400 to-amber-300";
+  return "bg-gradient-to-r from-red-400 to-red-300";
+}
+function scoreLevel(s: number): string {
+  if (s >= 85) return "上吉";
+  if (s >= 70) return "中吉";
+  if (s >= 55) return "中平";
+  return "小凶";
 }
 
-function generateFortune(seed: number) {
-  const rand = seededRandom(seed);
-  const score = Math.floor(70 + rand() * 28);
-  const tag = SCORE_TAGS.find(t => score >= t.min)!;
-  const ci = Math.floor(rand() * LUCKY_COLORS.length);
-  return {
-    score, tag,
-    do: DO_TODOS[Math.floor(rand() * DO_TODOS.length)],
-    dont: DONT_TODOS[Math.floor(rand() * DONT_TODOS.length)],
-    luckyColor: LUCKY_COLORS[ci],
-    luckyColorHex: LUCKY_COLORS_HEX[ci],
-    luckyNumbers: LUCKY_NUMBERS[Math.floor(rand() * LUCKY_NUMBERS.length)],
-    luckyDirection: LUCKY_DIRECTIONS[Math.floor(rand() * LUCKY_DIRECTIONS.length)],
-    tip: ["保持积极心态，好运自然来","今天适合主动出击，抓住机会","多与人交流，好机会在路上","放慢脚步，静心思考再做决定","顺其自然，一切都会好起来","今天宜果断，不宜犹豫"][Math.floor(rand() * 6)],
-  };
-}
+const GUACI_EMOJI: Record<string, string> = {
+  "乾": "☰", "坤": "☷", "震": "☳", "巽": "☴", "坎": "☵", "离": "☲", "艮": "☶", "兑": "☱",
+};
 
 export default function DailyFortunePage() {
   const { user } = useAuth();
   const today = new Date();
-  const seed = (today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate()) + (user?.uid || 0);
-  const fortune = useMemo(() => generateFortune(seed), [seed]);
+  const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+  const weekDay = WEEK_DAYS[today.getDay()];
 
-  const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
-  const weekDays = ["日","一","二","三","四","五","六"];
-  const weekDay = weekDays[today.getDay()];
+  const [todayData, setTodayData] = useState<FortuneToday | null>(null);
+  const [detailData, setDetailData] = useState<FortuneDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const uid = (user as any)?.uid || 0;
+        // Register birth if needed (use defaults for demo)
+        await fetch(`${API_BASE}/api/v1/fortune/birth`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: uid || 1, birth_date: "1990-06-15", birth_hour: 12, gender: 1 }),
+        }).catch(() => {});
+
+        const [todayRes, detailRes] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/fortune/today`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: uid || 1 }),
+          }).then(r => r.json()),
+          fetch(`${API_BASE}/api/v1/fortune/detail`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: uid || 1 }),
+          }).then(r => r.json()),
+        ]);
+
+        if (todayRes.code === 0) setTodayData(todayRes.data);
+        if (detailRes.code === 0) setDetailData(detailRes.data);
+      } catch (e) {
+        setError("加载失败，请稍后重试");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [user]);
+
+  // Current hour index
+  const currentHourIndex = useMemo(() => {
+    const h = today.getHours();
+    return Math.floor(h / 2) % 12;
+  }, []);
+
+  // ── Loading ──
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-purple-50/70 via-white to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl mb-3 animate-bounce">🐙</div>
+          <div className="text-xs text-purple-400 animate-pulse">正在为你推演今日运势…</div>
+        </div>
+      </main>
+    );
+  }
+
+  const td = todayData;
+  const dd = detailData;
+  if (!td || !dd) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-purple-50/70 via-white to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-3xl mb-2">😅</div>
+          <div className="text-xs text-purple-400">{error || "暂无数据，请先设置出生信息"}</div>
+          <Link href="/" className="mt-3 inline-block text-xs text-brand-teal-dark font-medium">返回首页</Link>
+        </div>
+      </main>
+    );
+  }
+
+  const hexagram = dd.hexagram;
+  const dims = dd.dimensions;
+  const hourly = dd.hourly || [];
+  const nowHour = hourly[currentHourIndex] || hourly[0] || null;
+  const rec = dd.recommendation;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-purple-50/70 via-white to-white pb-24">
+    <main className="min-h-screen bg-gradient-to-b from-purple-50/70 via-white to-white pb-28">
       {/* ─── 顶部导航 ─── */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-purple-100/50">
         <div className="flex items-center gap-2 px-4 py-3">
@@ -73,90 +161,235 @@ export default function DailyFortunePage() {
         </div>
       </div>
 
-      {/* ─── 页面内容 ─── */}
       <div className="px-4 pt-5">
 
-        {/* 标题区 */}
-        <div className="text-center mb-6">
-          <div className="text-3xl mb-2">🐙</div>
-          <h1 className="text-lg font-bold text-purple-800">小章鱼今日运势</h1>
-          <p className="text-xs text-purple-400/70 mt-1">用八只触手，抓住今天的好运气</p>
-        </div>
+        {/* ═══════ Hero 区 ═══════ */}
+        <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 rounded-[24px] p-6 mb-5 text-white shadow-lg shadow-purple-200/50">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-xs text-purple-200/80">{dateStr} 星期{weekDay}</div>
+              <div className="text-lg font-bold mt-0.5">小章鱼今日运势</div>
+            </div>
+            <div className="text-3xl">🐙</div>
+          </div>
 
-        {/* 综合运势卡片 */}
-        <div className="bg-white rounded-[24px] p-5 shadow-sm border border-purple-100 mb-5">
-          {/* 评分行 */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-lg shadow-sm">
-                🐙
-              </div>
-              <div>
-                <div className="text-xs font-bold text-purple-800">综合运势</div>
-                <div className="text-[10px] text-purple-400/60">{dateStr} 星期{weekDay}</div>
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <div className="text-5xl font-bold tracking-tight">{td.score}<span className="text-lg font-normal text-purple-200 ml-1">分</span></div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs bg-white/20 rounded-full px-3 py-0.5 font-medium">{td.tag}</span>
+                <span className="text-[10px] text-purple-200">{td.body_use}·{td.body_use_label}</span>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-purple-700">{fortune.score}<span className="text-xs font-normal text-purple-400">分</span></div>
-              <div className="flex items-center gap-0.5 mt-0.5 justify-end">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className={`text-[10px] ${i < fortune.tag.stars ? "text-amber-400" : "text-gray-200"}`}>⭐</span>
+            <div className="flex gap-0.5">
+              {[1,2,3,4,5].map(i => (
+                <span key={i} className={`text-base ${i <= Math.round(td.score/20) ? "text-yellow-300" : "text-white/30"}`}>⭐</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1 bg-white/10 rounded-[14px] px-3.5 py-2.5">
+              <div className="text-[9px] text-green-300 font-medium mb-0.5">✅ 今日宜</div>
+              <div className="text-xs font-bold">{td.advice.do.join(" · ")}</div>
+            </div>
+            <div className="flex-1 bg-white/10 rounded-[14px] px-3.5 py-2.5">
+              <div className="text-[9px] text-red-300 font-medium mb-0.5">❌ 今日忌</div>
+              <div className="text-xs font-bold">{td.advice.dont.join(" · ")}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════ 卦象区 ═══════ */}
+        <div className="bg-white rounded-[20px] p-5 shadow-sm border border-purple-100 mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-purple-800">今日卦象</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-2xl font-bold text-purple-700 shadow-sm">
+              {GUACI_EMOJI[hexagram.use_trigram]}{GUACI_EMOJI[hexagram.body_trigram]}
+            </div>
+            <div>
+              <div className="text-sm font-bold text-purple-800">{hexagram.name}</div>
+              <div className="text-[10px] text-purple-400/70 mt-0.5 italic">&ldquo;{hexagram.gua_ci}&rdquo;</div>
+              <div className="text-[10px] text-purple-500 mt-1 bg-purple-50 inline-block rounded-full px-2.5 py-0.5">
+                {hexagram.body_use}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════ 5维度 ═══════ */}
+        <div className="bg-white rounded-[20px] p-5 shadow-sm border border-purple-100 mb-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Flame className="w-4 h-4 text-brand-teal" />
+            <span className="text-xs font-bold text-purple-800">运势维度</span>
+          </div>
+          <div className="space-y-3.5">
+            {Object.entries(dims).map(([key, dim]) => (
+              <div key={key}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs">{DIM_ICONS[key] || "📊"}</span>
+                    <span className="text-[11px] font-medium text-purple-800">{DIM_LABELS[key] || key}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold ${scoreColor(dim.score)}`}>{dim.score}分</span>
+                    <span className="text-[9px] text-purple-400">{dim.level}</span>
+                  </div>
+                </div>
+                <div className="w-full h-2.5 bg-purple-50 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${scoreBg(dim.score)} transition-all duration-700`} style={{ width: `${dim.score}%` }} />
+                </div>
+                <div className="text-[9px] text-purple-400/60 mt-0.5">{dim.advice}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══════ 幸运信息 ═══════ */}
+        <div className="bg-white rounded-[20px] p-5 shadow-sm border border-purple-100 mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-purple-800">幸运指南</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-purple-50/60 rounded-[14px] p-3">
+              <div className="text-[9px] text-purple-400 mb-1">🎨 幸运色</div>
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full border border-gray-200 shadow-sm" style={{ background: td.lucky.color_hex }} />
+                <span className="text-xs font-bold text-purple-800">{td.lucky.color}</span>
+              </div>
+              <div className="text-[8px] text-purple-400/60 mt-0.5">{td.lucky.color_hex}</div>
+            </div>
+            <div className="bg-purple-50/60 rounded-[14px] p-3">
+              <div className="text-[9px] text-purple-400 mb-1">🔢 幸运数字</div>
+              <div className="flex items-center gap-2">
+                {td.lucky.numbers.map((n, i) => (
+                  <span key={i} className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700">{n}</span>
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* 宜忌行 */}
-          <div className="flex gap-3 mb-3">
-            <div className="flex-1 bg-green-50 rounded-[12px] px-3.5 py-2.5">
-              <div className="text-[9px] text-green-500 font-medium mb-0.5">今日宜</div>
-              <div className="text-xs font-bold text-green-700">{fortune.do}</div>
+            <div className="bg-purple-50/60 rounded-[14px] p-3">
+              <div className="text-[9px] text-purple-400 mb-1">📍 幸运方位</div>
+              <div className="text-xs font-bold text-purple-800">{td.lucky.direction}</div>
             </div>
-            <div className="flex-1 bg-red-50 rounded-[12px] px-3.5 py-2.5">
-              <div className="text-[9px] text-red-400 font-medium mb-0.5">今日忌</div>
-              <div className="text-xs font-bold text-red-500">{fortune.dont}</div>
-            </div>
-          </div>
-
-          {/* 幸运信息 */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 text-xs">
-              <span className="w-16 text-[10px] text-purple-400">🎨 幸运色</span>
-              <div className="flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full border border-gray-200" style={{ background: fortune.luckyColorHex }} />
-                <span className="font-medium text-purple-800">{fortune.luckyColor}</span>
-                <span className="text-[9px] text-gray-400">{fortune.luckyColorHex}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="w-16 text-[10px] text-purple-400">🔢 幸运数字</span>
-              <span className="font-medium text-purple-800">{fortune.luckyNumbers.join("、")}</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="w-16 text-[10px] text-purple-400">📍 幸运方位</span>
-              <span className="font-medium text-purple-800">{fortune.luckyDirection}</span>
-            </div>
-          </div>
-
-          {/* 开运锦囊 */}
-          <div className="mt-3 pt-3 border-t border-purple-50 flex items-start gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
-            <div className="text-[11px] text-purple-500/70 leading-relaxed">
-              {fortune.tip} —— 小章鱼
+            <div className="bg-purple-50/60 rounded-[14px] p-3">
+              <div className="text-[9px] text-purple-400 mb-1">⏰ 最佳时段</div>
+              <div className="text-xs font-bold text-purple-800">{td.best_hour.name} ({td.best_hour.range})</div>
+              <div className="text-[9px] text-purple-500 mt-0.5">加成 +{td.best_hour.bonus}%</div>
             </div>
           </div>
         </div>
 
-        {/* 运势工具 6格 */}
+        {/* ═══════ 当前时辰 ═══════ */}
+        {nowHour && (
+          <div className="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-[20px] p-5 shadow-sm mb-5 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-white/80" />
+                <span className="text-xs font-bold">当前时辰 · {nowHour.hour} ({nowHour.time_range})</span>
+              </div>
+              <div className="bg-white/20 rounded-full px-3 py-0.5 text-[10px] font-medium">{nowHour.zhi_shi_door}</div>
+            </div>
+            <div className="flex items-end justify-between mb-2">
+              <div className="text-3xl font-bold">{nowHour.score}<span className="text-base font-normal text-white/70 ml-1">分</span></div>
+              <div className="text-right">
+                <div className="text-xs font-medium">{nowHour.label}</div>
+                {nowHour.bonus > 0 && <div className="text-[10px] text-yellow-300">预测加成 +{nowHour.bonus}%</div>}
+              </div>
+            </div>
+            <div className="text-xs text-white/80">{nowHour.advice}</div>
+          </div>
+        )}
+
+        {/* ═══════ 12时辰走势 ═══════ */}
+        <div className="bg-white rounded-[20px] p-5 shadow-sm border border-purple-100 mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-brand-teal" />
+            <span className="text-xs font-bold text-purple-800">今日时辰运势走势</span>
+          </div>
+          <div className="overflow-x-auto scrollbar-none -mx-1">
+            <div className="flex gap-2 min-w-max px-1">
+              {hourly.map((h, i) => {
+                const isNow = i === currentHourIndex;
+                return (
+                  <div key={i} className={`flex flex-col items-center gap-1 p-2 rounded-[12px] min-w-[52px] transition-all ${isNow ? "bg-purple-100 ring-2 ring-purple-400 ring-offset-1" : "bg-purple-50/50"}`}>
+                    <div className="text-[9px] text-purple-500 font-medium">{h.hour}</div>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm ${scoreBg(h.score)}`}>
+                      {h.score}
+                    </div>
+                    <div className="text-[8px] text-purple-400">{h.zhi_shi_door}</div>
+                    {h.bonus > 0 && <div className="text-[7px] text-amber-500 font-bold">+{h.bonus}%</div>}
+                    {isNow && <div className="text-[7px] text-purple-600 font-bold">← 现在</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex items-center gap-3 mt-3 pt-2 border-t border-purple-50 text-[9px] text-purple-400">
+            <span>🟣 上吉</span><span>🟢 中吉</span><span>🟡 中平</span><span>🔴 小凶</span>
+          </div>
+        </div>
+
+        {/* ═══════ 平台推荐 ═══════ */}
+        {rec && (
+          <div className="bg-white rounded-[20px] p-5 shadow-sm border border-purple-100 mb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Bot className="w-4 h-4 text-brand-teal" />
+              <span className="text-xs font-bold text-purple-800">平台推荐</span>
+              {rec.prediction_bonus > 0 && (
+                <span className="text-[9px] bg-amber-50 text-amber-600 rounded-full px-2 py-0.5 font-medium">今日加成 +{rec.prediction_bonus}%</span>
+              )}
+            </div>
+
+            {rec.rooms && rec.rooms.length > 0 && (
+              <div className="mb-3">
+                <div className="text-[10px] text-purple-400 mb-2">🎯 推荐PK房间</div>
+                {rec.rooms.map((room, i) => (
+                  <div key={i} className="flex items-center justify-between bg-purple-50/60 rounded-[12px] px-3.5 py-2.5 mb-1.5">
+                    <span className="text-xs font-medium text-purple-800">{room.name}</span>
+                    <span className="text-[9px] text-purple-400">{room.type}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {rec.stores && rec.stores.length > 0 && (
+              <div>
+                <div className="text-[10px] text-purple-400 mb-2">📍 附近门店</div>
+                {rec.stores.map((store, i) => (
+                  <div key={i} className="flex items-center justify-between bg-purple-50/60 rounded-[12px] px-3.5 py-2.5 mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3 h-3 text-brand-coral" />
+                      <span className="text-xs font-medium text-purple-800">{store.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px] text-purple-400">
+                      <span>{store.direction}</span>
+                      <span>{store.distance}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══════ 运势工具 6格 ═══════ */}
         <div className="mb-5">
           <div className="flex items-center gap-1.5 mb-3">
-            <Flame className="w-3.5 h-3.5 text-brand-gold" />
+            <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
             <span className="text-xs font-bold text-purple-800">运势工具</span>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
             {FORTUNE_TOOLS.map((tool, i) => (
               tool.label === "分享" ? (
-                <button key={i} onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => alert("链接已复制！")).catch(() => {}); }}
+                <button key={i} onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                    .then(() => { const el = document.createElement('div'); el.className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-800 text-white text-xs px-4 py-2 rounded-full shadow-lg z-50 animate-bounce'; el.textContent='✅ 链接已复制！'; document.body.appendChild(el); setTimeout(()=>el.remove(),2000); })
+                    .catch(() => {});
+                }}
                   className="bg-white rounded-[16px] p-3.5 text-center shadow-sm border border-purple-100 active:scale-95 transition-transform">
                   <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${tool.color} flex items-center justify-center mx-auto mb-1.5 text-white text-sm shadow-sm`}>
                     {tool.icon}
@@ -180,7 +413,8 @@ export default function DailyFortunePage() {
 
         {/* 免责声明 */}
         <div className="p-3.5 rounded-[16px] bg-purple-50/50 border border-purple-100/50 text-[9px] text-purple-400/60 text-center leading-relaxed">
-          本运势由 AI 基于传统文化娱乐推演生成，仅供娱乐参考。<br />事在人为，保持积极心态方能顺势而行。
+          本运势由 AI 基于八字命理 · 奇门遁甲 · 六十四卦算法综合生成，仅供娱乐参考。<br />
+          事在人为，保持积极心态方能顺势而行。
         </div>
 
       </div>
