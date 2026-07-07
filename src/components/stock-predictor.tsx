@@ -28,8 +28,8 @@ interface ComprehensiveScore {
   total_score: number;
   signal: string;
   breakdown: {
-    institutional: { score: number; buy: number; sell: number; total: number };
-    fund_flow: { score: number; net: number; consecutive: number };
+    institutional: { score: number; buy_orgs: number; total_orgs: number };
+    fund_flow: { score: number; net: number; consecutive: number; net_pct: number };
     wuxing: { score: number; element: string; trigram: string; reason: string; relation: string; god_relation: string };
   };
 }
@@ -76,16 +76,19 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
   const [error, setError] = useState("");
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [compScore, setCompScore] = useState<ComprehensiveScore | null>(null);
+  const [stockAccuracy, setStockAccuracy] = useState<number | null>(null);
+  const [accuracyDays, setAccuracyDays] = useState(30);
   const chartRef = useRef<HTMLCanvasElement>(null);
 
   const fetchAnalysis = async (stockCode: string) => {
     setLoading(true);
     setError("");
     try {
-      // 并行调两个API: 技术分析 + 多源评分
-      const [res1, res2] = await Promise.all([
+      // 并行调三个API: 技术分析 + 多源评分 + 准确率
+      const [res1, res2, res3] = await Promise.all([
         fetch(`${API_BASE}/api/stock/analysis?code=${stockCode}`),
         fetch(`${API_BASE}/api/stock/comprehensive?code=${stockCode}`),
+        fetch(`${API_BASE}/api/stock/accuracy?code=${stockCode}&days=30`),
       ]);
       const json1 = await res1.json();
       if (json1.code !== 0) throw new Error(json1.msg || "分析失败");
@@ -95,6 +98,15 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
       try {
         const json2 = await res2.json();
         if (json2.code === 0) setCompScore(json2.data);
+      } catch {}
+      
+      // 准确率(非必须)
+      try {
+        const json3 = await res3.json();
+        if (json3.code === 0) {
+          setStockAccuracy(json3.data.accuracy);
+          setAccuracyDays(json3.data.period_days);
+        }
       } catch {}
       
       onData?.(json1.data);
@@ -446,12 +458,35 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           {/* ─────── 多源综合评分 ─────── */}
           {compScore && (
             <>
+              {/* 准确率 */}
+              {stockAccuracy !== null && (
+                <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-text-secondary">📊 近{accuracyDays}日本模型准确率</span>
+                    {stockAccuracy > 0 && (
+                      <span className={`text-sm font-bold ${stockAccuracy >= 60 ? 'text-green-600' : stockAccuracy >= 45 ? 'text-amber-600' : 'text-red-500'}`}>
+                        {stockAccuracy}%
+                      </span>
+                    )}
+                  </div>
+                  {stockAccuracy === null && <div className="text-[10px] text-text-tertiary">数据收集中，还需{accuracyDays}天</div>}
+                  <div className="w-full h-1.5 rounded-full bg-gray-100 mt-1 overflow-hidden">
+                    {stockAccuracy !== null && (
+                      <div className="h-full rounded-full transition-all" style={{
+                        width: `${stockAccuracy}%`,
+                        background: stockAccuracy >= 60 ? 'linear-gradient(90deg, #10B981, #059669)' : stockAccuracy >= 45 ? 'linear-gradient(90deg, #F59E0B, #D97706)' : 'linear-gradient(90deg, #EF4444, #DC2626)'
+                      }} />
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* 机构观点 */}
               <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center gap-2 mb-3">
                   <Building2 className="w-4 h-4 text-text-tertiary" />
                   <span className="text-sm font-semibold">机构观点</span>
-                  <span className="ml-auto text-[10px] text-text-tertiary">{compScore.breakdown.institutional.total}家</span>
+                  <span className="ml-auto text-[10px] text-text-tertiary">{compScore.breakdown.institutional.buy_orgs}/{compScore.breakdown.institutional.total_orgs}家看多</span>
                 </div>
                 <div className="space-y-2">
                   {(compScore as any).raw_ratings?.length > 0 ? (
