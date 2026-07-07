@@ -25,21 +25,17 @@ export function middleware(request: NextRequest) {
 
   // 处理通配子域名路由
   if (subdomain) {
-    // 门店专属 H5: store-{id}.ws.hi.cn
+    // 门店专属 H5: store-{id}.ws.hi.cn → /{id}
     const storeMatch = subdomain.match(/^store-(\d+)$/);
     if (storeMatch) {
       const storeId = storeMatch[1];
-      // 已经是 /store/{id} 路径 → 直接放行
-      if (pathname.startsWith(`/store/${storeId}`)) {
-        return NextResponse.next();
-      }
-      // 重写到 /store/{storeId}/{originalPath}
       const url = request.nextUrl.clone();
-      url.pathname = `/store/${storeId}${pathname === "/" ? "" : pathname}`;
+      url.pathname = `/${storeId}${pathname === "/" ? "" : pathname}`;
       return NextResponse.rewrite(url);
     }
 
-    // SaaS 租户: {tenant}.ws.hi.cn
+    // SaaS 租户: {tenant}.ws.hi.cn → /{tenant}
+    // 或者 store-{id}.ws.hi.cn → /{id}
     if (
       subdomain !== "h5" &&
       subdomain !== "merchant" &&
@@ -48,10 +44,8 @@ export function middleware(request: NextRequest) {
       subdomain !== "region" &&
       subdomain !== "www"
     ) {
-      // 非保留子域名 → 视为租户
       const url = request.nextUrl.clone();
-      url.pathname = `/tenant/${subdomain}${pathname === "/" ? "" : pathname}`;
-      return NextResponse.rewrite(url);
+      url.pathname = `/${subdomain}${pathname === "/" ? "" : pathname}`;
     }
   }
 

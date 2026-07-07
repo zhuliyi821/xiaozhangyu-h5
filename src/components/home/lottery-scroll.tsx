@@ -18,14 +18,14 @@ export function LotteryScroll() {
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-gold">
           更多彩种
         </h2>
-        <span className="text-xs text-brand-teal-dark font-medium">全部</span>
+        <span className="text-xs text-brand-teal font-medium">全部</span>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         {chips.map((chip) => (
           <Link
             key={chip.key}
             href={`/lottery/${chip.key}/chart`}
-            className="flex-shrink-0 px-4 py-2 rounded-[20px] text-xs font-medium transition-all duration-250 whitespace-nowrap bg-surface shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[rgba(69,204,213,0.1)] text-text-secondary hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-teal-dark hover:text-white"
+            className="flex-shrink-0 px-4 py-2 rounded-[20px] text-xs font-medium transition-all duration-250 whitespace-nowrap bg-white shadow-sm border border-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-gold hover:text-white"
           >
             {chip.name}
           </Link>

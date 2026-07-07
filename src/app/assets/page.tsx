@@ -6,20 +6,18 @@ import { API_BASE, apiFetch, ApiError } from "@/config/api";
 interface WalletData {
   uid: number; nickname: string;
   credit1: number; credit2: number; credit3: number;
-  credit4: number; credit5: number; credit6: number;
-  sim_coin: number; granted_game_coins: number;
+  credit4: number; credit5: number;
   credit1_label: string; credit2_label: string;
   credit3_label: string; credit4_label: string;
-  credit5_label: string; credit6_label: string;
+  credit5_label: string;
 }
 
 const assetList = [
-  { key: "credit1", icon: "🎮", color: "from-indigo-400 to-purple-500" },
+  { key: "credit1", icon: "🎮", color: "from-brand-teal to-brand-teal-dark" },
   { key: "credit5", icon: "⛏️", color: "from-amber-400 to-orange-500" },
-  { key: "credit6", icon: "❄️", color: "from-cyan-400 to-blue-500", sub: "冻结豆" },
   { key: "credit3", icon: "🔮", color: "from-violet-400 to-pink-500" },
   { key: "credit4", icon: "💰", color: "from-green-400 to-emerald-500" },
-  { key: "credit2", icon: "🏪", color: "from-amber-400 to-orange-500" },
+  { key: "credit2", icon: "🏪", color: "from-amber-400 to-amber-600" },
 ];
 
 export default function AssetsPage() {
@@ -56,22 +54,19 @@ export default function AssetsPage() {
   const getVal = (k: string) => {
     if (!w) return 0;
     if (k === "credit4") return `¥${w.credit4.toFixed(2)}`;
-    if (k === "credit6") return `${Math.floor(w.credit6)} (冻结)`;
     return String(Math.floor((w as any)[k] ?? 0));
   };
   const getLabel = (k: string) => {
     if (!w) return "";
-    if (k === "credit6") return `${w.credit6_label} (注册投注赢得)`;
     return (w as any)[`${k}_label`] ?? k;
   };
   const getDesc = (k: string) => {
     const descs: Record<string, string> = {
-      credit1: "用于投注预测",
-      credit5: "投注赢得的奖励",
-      credit6: "注册赠送游戏豆投注赢得",
-      credit3: "荣誉值/权益",
-      credit4: "可消费/购物",
-      credit2: "仅有点闲商城使用",
+      credit1: "投注 / 投票 / AI会话消耗",
+      credit5: "PK竞技赢得，注册豆赢得100%冻结",
+      credit3: "荣誉值，享有赢家盈利分红",
+      credit4: "消费 / 购物 / 兑换游戏豆",
+      credit2: "物资/服务置换获得，仅商城使用",
     };
     return descs[k] || "";
   };

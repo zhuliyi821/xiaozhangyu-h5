@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { TabBar } from "@/components/ui/tab-bar";
 import ClientLayout from "@/components/client-layout";
+import ConditionalTabBar from "@/components/ui/conditional-tab-bar";
 
 export const metadata: Metadata = {
   title: "小章鱼 · AI趣预测",
@@ -23,7 +24,7 @@ export default function RootLayout({
       <body>
         <ClientLayout>
           {children}
-          <TabBar />
+          <ConditionalTabBar />
         </ClientLayout>
       </body>
     </html>

@@ -21,7 +21,7 @@ export function DrawCard() {
   if (loading) {
     return (
       <section className="mt-5 px-4">
-        <div className="bg-surface rounded-[28px] p-5 shadow-soft border border-[rgba(69,204,213,0.1)] animate-pulse">
+        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-100 animate-pulse">
           <div className="h-5 w-40 bg-gray-200 rounded mb-3" />
           <div className="flex gap-1 mb-3">
             {[...Array(7)].map((_, i) => (
@@ -41,18 +41,18 @@ export function DrawCard() {
   return (
     <section className="mt-5 px-4">
       <div className="flex items-center justify-between mb-3 px-0.5">
-        <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-gold to-brand-coral">
+        <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-coral">
           最新开奖
         </h2>
-        <span className="text-xs text-brand-teal-dark font-medium">全部</span>
+        <span className="text-xs text-brand-teal font-medium">全部</span>
       </div>
 
       {draws.slice(0, 3).map((draw) => (
-        <Link key={draw.key} href={`/lottery/${draw.key}/chart`} className="bg-surface rounded-[20px] p-4 mb-2.5 shadow-sm border border-[rgba(69,204,213,0.08)] block active:scale-[0.98] transition-transform">
+        <Link key={draw.key} href={`/lottery/${draw.key}/chart`} className="bg-white rounded-[20px] p-4 mb-2.5 shadow-sm border border-gray-100 block active:scale-[0.98] transition-transform">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-1.5 font-semibold text-sm">
               <span>{draw.name}</span>
-              <span className="bg-gradient-to-r from-brand-gold to-brand-coral text-white text-[10px] px-2 py-0.5 rounded-[10px]">
+              <span className="bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white text-[10px] px-2 py-0.5 rounded-[10px]">
                 {draw.period} 期
               </span>
             </div>
@@ -60,7 +60,7 @@ export function DrawCard() {
           </div>
           <div className="flex items-center gap-1 flex-wrap">
             {draw.front.map((n, i) => (
-              <span key={i} className="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark text-white flex items-center justify-center text-[11px] font-bold shadow-[0_2px_6px_rgba(242,113,82,0.25)]">
+              <span key={i} className="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
                 {n}
               </span>
             ))}
@@ -68,7 +68,7 @@ export function DrawCard() {
               <>
                 <span className="text-text-tertiary text-xs mx-0.5">+</span>
                 {draw.back.map((n, i) => (
-                  <span key={i} className="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-[11px] font-bold shadow-[0_2px_6px_rgba(69,204,213,0.25)]">
+                  <span key={i} className="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white flex items-center justify-center text-[11px] font-bold shadow-sm">
                     {n}
                   </span>
                 ))}

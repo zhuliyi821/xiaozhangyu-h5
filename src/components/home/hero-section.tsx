@@ -6,18 +6,19 @@ export function HeroSection() {
   const [showShare, setShowShare] = useState(false);
 
   return (
-    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-[#5DD9E2] to-brand-gold rounded-[28px] p-6 shadow-soft overflow-hidden">
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.35)_0%,transparent_70%)] blur-[20px]" />
+    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-[28px] p-6 shadow-lg shadow-brand-teal/20 overflow-hidden">
+      <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[radial-gradient(circle,rgba(242,182,49,0.25)_0%,transparent_70%)]" />
+      <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
       <div className="relative z-10">
         {/* 门店信息 */}
-        <div className="inline-flex items-center gap-1.5 bg-white/30 backdrop-blur-md border border-white/40 rounded-full px-3 py-1 text-white text-[11px] font-medium mb-2">
-          <span className="w-[7px] h-[7px] rounded-full bg-brand-gold shadow-[0_0_8px_rgba(242,182,49,0.6)]" />
+        <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-3 py-1 text-white text-[11px] font-medium mb-2">
+          <span className="w-[7px] h-[7px] rounded-full bg-brand-gold shadow-[0_0_8px_rgba(242,182,49,0.5)]" />
           小章鱼体彩投注站
         </div>
-        <h1 className="text-[24px] font-bold text-white leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.1)]">
+        <h1 className="text-[24px] font-bold text-white leading-tight">
           小章鱼
         </h1>
-        <p className="text-[14px] text-white/90 mt-1 flex items-center gap-1.5">
+        <p className="text-[14px] text-white/85 mt-1 flex items-center gap-1.5">
           AI趣预测 · 门店优选 · 到店消费送游戏豆
         </p>
       </div>

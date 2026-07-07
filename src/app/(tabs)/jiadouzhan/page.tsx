@@ -34,23 +34,17 @@ interface FlowItem {
   created_at: string;
 }
 
-// ─── 辅助: 冻结水晶石数据（模拟字段，需后端返回 frozen_credit5） ───
-const FROZEN_CRYSTAL_KEY = "frozen_credit5";
-
 // ─── 组件 ───
 
 function AssetCard({ credits, onExchangeClick }: { credits: WalletBrief; onExchangeClick: () => void }) {
-  // 假设水晶石 = credit5，冻结部分由后端返回 frozen_credit5
-  // 无后端字段时, 默认 70% 冻结
   const totalCrystal = Math.floor(credits.credit5);
-  const [frozen, setFrozen] = useState(Math.floor(totalCrystal * 0.7));
+  // 冻结逻辑: 用注册赠送游戏豆赢得的水晶石 100% 冻结
+  // 自己赚的游戏豆赢得的不冻结 → 需要后端 frozen_crystal 字段区分
+  // 当前模拟: 50% 冻结 (待后端完善后替换)
+  const [frozen, setFrozen] = useState(Math.floor(totalCrystal * 0.5));
   const active = totalCrystal - frozen;
+  const frozenRatio = totalCrystal > 0 ? Math.round((frozen / totalCrystal) * 100) : 0;
   const totalValuation = Math.floor(credits.credit1) + totalCrystal + credits.credit4;
-
-  useEffect(() => {
-    // 模拟: 从 user.balance 扩展 frozen_credit5
-    // 实际接入时从后端获取
-  }, [credits]);
 
   return (
     <section className="mx-4 mt-4">

@@ -4,71 +4,60 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { CATEGORY_CONFIG, PKTopic, APIResponse } from "../../types";
 
-const catConfig: Record<string, { name: string; icon: string; color: string; desc: string }> = {
-  sports:  { name: "体育赛事", icon: "⚽", color: "from-brand-coral to-brand-coral-dark", desc: "球赛·电竞·田径" },
-  social:  { name: "社会热点", icon: "🌐", color: "from-brand-teal to-brand-teal-dark", desc: "民生·经济·科技" },
-  event:   { name: "突发事件", icon: "⚡", color: "from-brand-gold to-brand-gold-dark", desc: "快讯·突发·新发现" },
-  general: { name: "一言不合", icon: "💬", color: "from-purple-400 to-purple-600", desc: "日常·娱乐·随便聊" },
-};
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
 export default function PKRoomPage() {
   const params = useParams();
   const router = useRouter();
   const category = (params?.category as string) || "";
   const pkId = parseInt(params?.id as string || "0");
-  const cfg = catConfig[category] || catConfig.general;
+  const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.general;
   const { user } = useAuth();
   const uid = user?.uid || 0;
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
 
-  const [topic, setTopic] = useState<any>(null);
+  const [topic, setTopic] = useState<PKTopic | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
   const [voteMsg, setVoteMsg] = useState("");
   const [showLogin, setShowLogin] = useState(false);
-
-  // 投注确认弹窗
-  const [confirmVote, setConfirmVote] = useState<{
-    choice: string; betAmount: number; estimatedReward: number;
-  } | null>(null);
+  const [confirmVote, setConfirmVote] = useState<{ choice: string; betAmount: number } | null>(null);
+  const [showBindWx, setShowBindWx] = useState(false);
+  const [bindMsg, setBindMsg] = useState("");
 
   const loadDetail = useCallback(() => {
     if (!pkId) return;
     fetch(`${API_BASE}/api/pk?action=detail&id=${pkId}`)
       .then(r => r.json())
-      .then(j => { if (j.code === 0) setTopic(j.data); })
-      .catch(() => {})
+      .then((j: APIResponse<PKTopic>) => { if (j.code === 0 && j.data) setTopic(j.data); else setError("加载失败"); })
+      .catch(() => setError("网络不太给力"))
       .finally(() => setLoading(false));
-  }, [API_BASE, pkId]);
+  }, [pkId]);
 
   const loadComments = useCallback(() => {
     fetch(`${API_BASE}/api/pk?action=comments&pk_id=${pkId}`)
       .then(r => r.json())
-      .then(j => { if (j.code === 0) setComments(j.data || []); })
+      .then((j: APIResponse<any[]>) => { if (j.code === 0) setComments(j.data || []); })
       .catch(() => {});
-  }, [API_BASE, pkId]);
+  }, [pkId]);
 
   useEffect(() => { loadDetail(); loadComments(); }, [loadDetail, loadComments]);
 
-  // 围观一次
+  // 围观
   useEffect(() => {
-    if (pkId) {
-      fetch(`${API_BASE}/api/pk?action=spectate`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pk_id: pkId }),
-      }).catch(() => {});
-    }
-  }, [pkId, API_BASE]);
+    if (pkId) fetch(`${API_BASE}/api/pk?action=spectate`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pk_id: pkId }),
+    }).catch(() => {});
+  }, [pkId]);
 
-  // 投票
   const handleOptionClick = (choice: string) => {
     if (!uid) { setShowLogin(true); return; }
     if (!topic || topic.status !== 1) { setVoteMsg("话题已结束"); setTimeout(() => setVoteMsg(""), 2000); return; }
-    const bet = topic.min_bet || 10;
-    const est = choice === 'A' ? (topic.estimated_reward_a || 0) : (topic.estimated_reward_b || 0);
-    setConfirmVote({ choice, betAmount: bet, estimatedReward: est });
+    setConfirmVote({ choice, betAmount: topic.min_bet });
   };
 
   const executeVote = async () => {
@@ -80,14 +69,13 @@ export default function PKRoomPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pk_id: pkId, uid, option_choice: choice, bet_amount: betAmount }),
       });
-      const j = await res.json();
+      const j: APIResponse = await res.json();
       setVoteMsg(j.msg || (j.code === 0 ? `✅ 投注${betAmount}豆成功` : `❌ ${j.msg}`));
-      if (j.code === 0) { loadDetail(); loadComments(); }
+      if (j.code === 0) { loadDetail(); loadComments(); setTimeout(() => setShowBindWx(true), 800); }
     } catch { setVoteMsg("❌ 网络错误"); }
     setTimeout(() => setVoteMsg(""), 3000);
   };
 
-  // 评论
   const handleComment = async () => {
     if (!uid || !commentText.trim()) return;
     try {
@@ -95,20 +83,18 @@ export default function PKRoomPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pk_id: pkId, uid, content: commentText.trim() }),
       });
-      const j = await res.json();
+      const j: APIResponse = await res.json();
       if (j.code === 0) { setCommentText(""); loadComments(); }
-      else { setVoteMsg(j.msg); setTimeout(() => setVoteMsg(""), 2000); }
-    } catch { setVoteMsg("❌ 评论失败"); setTimeout(() => setVoteMsg(""), 2000); }
+      else setVoteMsg(j.msg || "评论失败");
+    } catch { setVoteMsg("❌ 评论失败"); }
+    setTimeout(() => setVoteMsg(""), 2000);
   };
 
-  // 邀请
   const handleInvite = () => {
     if (!topic) return;
-    const text = `⚔️ PK挑战邀请\n\n「${topic.title}」\n选【${topic.option_a}】VS【${topic.option_b}】\n💰当前奖池：${topic.total_pool || 0}豆 · 👥${topic.total_votes || 0}人参与\n\n来小章鱼AI趣预测站队投票！\nhttps://h5.ws.hi.cn/pk-hall/${category}/${pkId}`;
-    navigator.clipboard.writeText(text).then(() => {
-      setVoteMsg("✅ 邀请链接已复制！");
-      setTimeout(() => setVoteMsg(""), 2000);
-    });
+    navigator.clipboard.writeText(
+      `⚔️ PK挑战邀请\n「${topic.title}」\n选【${topic.option_a}】VS【${topic.option_b}】\n💰当前奖池：${topic.total_pool}豆 · 👥${topic.total_votes}人参与\nhttps://h5.ws.hi.cn/pk-hall/${category}/${pkId}`
+    ).then(() => { setVoteMsg("✅ 邀请链接已复制！"); setTimeout(() => setVoteMsg(""), 2000); }).catch(() => {});
   };
 
   if (loading) return (
@@ -116,18 +102,19 @@ export default function PKRoomPage() {
       <div className={`bg-gradient-to-r ${cfg.color} px-6 pt-8 pb-7`}>
         <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">←</button>
       </div>
-      <div className="mx-4 mt-4 h-40 bg-surface rounded-[20px] animate-pulse" />
+      <div className="mx-4 mt-4 h-40 bg-white rounded-[20px] animate-pulse border border-gray-100" />
     </main>
   );
 
-  if (!topic) return (
+  if (error || !topic) return (
     <main className="pb-20">
       <div className={`bg-gradient-to-r ${cfg.color} px-6 pt-8 pb-7`}>
         <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">←</button>
       </div>
-      <div className="mx-4 mt-4 bg-surface rounded-[20px] p-8 text-center">
+      <div className="mx-4 mt-4 bg-white rounded-[20px] p-8 text-center border border-gray-100">
         <div className="text-2xl mb-2">🔍</div>
-        <div className="text-[11px] text-text-tertiary">PK话题不存在</div>
+        <div className="text-[11px] text-gray-400">{error || "PK话题不存在"}</div>
+        <button onClick={() => { setError(""); setLoading(true); loadDetail(); }} className="mt-2 text-xs text-teal-600 font-medium">重试</button>
       </div>
     </main>
   );
@@ -145,7 +132,7 @@ export default function PKRoomPage() {
       {/* Header */}
       <div className={`bg-gradient-to-r ${cfg.color} px-6 pt-8 pb-6 relative overflow-hidden`}>
         <button onClick={() => router.back()} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm z-10">←</button>
-        <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.2),transparent_70%)] blur-[16px]" />
+        <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.2),transparent_70%)]" />
         <div className="text-center relative z-10 pt-4">
           <div className="text-xs text-white/70">{cfg.icon} {cfg.name} PK厅</div>
           <h1 className="text-base font-bold text-white mt-1 leading-snug line-clamp-2">{topic.title}</h1>
@@ -153,196 +140,165 @@ export default function PKRoomPage() {
       </div>
 
       {/* 状态条 */}
-      <div className="mx-4 -mt-3 relative z-20 bg-surface rounded-[16px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] flex justify-around text-center">
-        <div>
-          <div className="text-[10px] text-text-tertiary">状态</div>
-          <div className={`text-[11px] font-medium ${isSettled ? 'text-brand-gold' : isActive ? 'text-green-600' : 'text-red-400'}`}>{topic.status_label}</div>
-        </div>
+      <div className="mx-4 -mt-3 relative z-20 bg-white rounded-[16px] p-3 shadow-sm border border-gray-100 flex justify-around text-center">
+        <div><div className="text-[10px] text-gray-400">状态</div><div className={`text-[11px] font-medium ${isSettled ? 'text-amber-600' : isActive ? 'text-green-600' : 'text-red-400'}`}>{topic.status_label}</div></div>
         <div className="w-px bg-gray-100" />
-        <div>
-          <div className="text-[10px] text-text-tertiary">倒计时</div>
-          <div className="text-[11px] font-medium">{topic.time_label}</div>
-        </div>
+        <div><div className="text-[10px] text-gray-400">倒计时</div><div className="text-[11px] font-medium">{topic.time_label}</div></div>
         <div className="w-px bg-gray-100" />
-        <div>
-          <div className="text-[10px] text-text-tertiary">围观</div>
-          <div className="text-[11px] font-medium">{(topic.spectator_count || 0) + 1}人</div>
-        </div>
+        <div><div className="text-[10px] text-gray-400">围观</div><div className="text-[11px] font-medium">{(topic.spectator_count || 0) + 1}人</div></div>
         <div className="w-px bg-gray-100" />
-        <div>
-          <div className="text-[10px] text-text-tertiary">奖池💰</div>
-          <div className="text-[11px] font-bold text-brand-gold">{topic.total_pool || 0}</div>
-        </div>
+        <div><div className="text-[10px] text-gray-400">奖池💰</div><div className="text-[11px] font-bold text-amber-500">{topic.total_pool}</div></div>
       </div>
 
       {/* PK对战卡片 */}
-      <div className="mx-4 mt-3 bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
-        {/* 选项A */}
-        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-brand-gold/10 border-2 border-brand-gold' : 'bg-brand-coral/5 border border-brand-coral/10'}`}>
-          <div className={`text-sm font-bold ${isSettled && topic.winner === 'A' ? 'text-brand-gold-dark' : 'text-brand-coral-dark'}`}>
+      <div className="mx-4 mt-3 bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-teal-50 border border-teal-100'}`}>
+          <div className={`text-sm font-bold ${isSettled && topic.winner === 'A' ? 'text-amber-600' : 'text-teal-700'}`}>
             {topic.option_a} {isSettled && topic.winner === 'A' && '🏆'}
           </div>
           {isActive && (
-            <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-brand-coral text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
+            <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
               投{topic.min_bet}豆支持
             </button>
           )}
-          <div className="flex items-center gap-2 mt-2 text-[10px] text-text-tertiary">
+          <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-coral rounded-full transition-all" style={{ width: `${aPct}%` }} />
+              <div className="h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-full transition-all" style={{ width: `${aPct}%` }} />
             </div>
             <span className="font-medium">{aVotes}票 ({aPct}%)</span>
           </div>
-          <div className="text-[9px] text-text-tertiary mt-1">💰 奖池 {topic.pool_a || 0}豆</div>
+          <div className="text-[9px] text-gray-400 mt-1">💰 奖池 {topic.pool_a}豆</div>
         </div>
 
-        {/* VS */}
         <div className="text-center my-2">
           <span className="inline-block w-8 h-8 rounded-full bg-gray-100 text-[11px] font-bold flex items-center justify-center mx-auto">VS</span>
         </div>
 
-        {/* 选项B */}
-        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-brand-gold/10 border-2 border-brand-gold' : 'bg-brand-teal/5 border border-brand-teal/10'}`}>
-          <div className={`text-sm font-bold ${isSettled && topic.winner === 'B' ? 'text-brand-gold-dark' : 'text-brand-teal-dark'}`}>
+        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-orange-50 border border-orange-100'}`}>
+          <div className={`text-sm font-bold ${isSettled && topic.winner === 'B' ? 'text-amber-600' : 'text-orange-600'}`}>
             {topic.option_b} {isSettled && topic.winner === 'B' && '🏆'}
           </div>
           {isActive && (
-            <button onClick={() => handleOptionClick('B')} className="mt-2 px-5 py-1.5 bg-brand-teal text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
+            <button onClick={() => handleOptionClick('B')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
               投{topic.min_bet}豆支持
             </button>
           )}
-          <div className="flex items-center gap-2 mt-2 text-[10px] text-text-tertiary">
+          <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-teal rounded-full transition-all" style={{ width: `${bPct}%` }} />
+              <div className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all" style={{ width: `${bPct}%` }} />
             </div>
             <span className="font-medium">{bVotes}票 ({bPct}%)</span>
           </div>
-          <div className="text-[9px] text-text-tertiary mt-1">💰 奖池 {topic.pool_b || 0}豆</div>
+          <div className="text-[9px] text-gray-400 mt-1">💰 奖池 {topic.pool_b}豆</div>
         </div>
 
-        {/* 发起信息 */}
-        <div className="flex justify-center gap-4 mt-3 text-[10px] text-text-tertiary">
+        <div className="flex justify-center gap-4 mt-3 text-[10px] text-gray-400">
           <span>{topic.creator_name} 发起</span>
           <span>{total} 人参与</span>
-          <button onClick={handleInvite} className="text-brand-teal font-medium">↗ 邀请好友</button>
+          <button onClick={handleInvite} className="text-teal-600 font-medium">↗ 邀请好友</button>
         </div>
 
-        {/* 预估收益提示(进行中) */}
         {isActive && (
-          <div className="mt-2 bg-bg rounded-[10px] px-3 py-2 text-[9px] text-text-tertiary text-center">
+          <div className="mt-2 bg-gray-50 rounded-[10px] px-3 py-2 text-[9px] text-gray-400 text-center">
             💡 投{topic.min_bet}豆：选[{topic.option_a}]预估赢{topic.estimated_reward_a}豆 · 选[{topic.option_b}]预估赢{topic.estimated_reward_b}豆
           </div>
         )}
       </div>
 
       {/* 评论区 */}
-      <div className="mx-4 mt-3 bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+      <div className="mx-4 mt-3 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
         <div className="text-[11px] font-semibold mb-3">💬 评论 ({comments.length})</div>
-
-        {/* 评论列表 */}
         <div className="space-y-2.5 max-h-48 overflow-y-auto mb-3">
           {comments.length === 0 ? (
-            <div className="text-center text-[10px] text-text-tertiary py-4">暂无评论，来说两句吧</div>
+            <div className="text-center text-[10px] text-gray-400 py-4">暂无评论，来说两句吧</div>
           ) : (
-            comments.map((c: any, i: number) => (
+            comments.map((c: any) => (
               <div key={c.id} className="flex gap-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-gold flex items-center justify-center text-[10px] text-white shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-amber-400 flex items-center justify-center text-[10px] text-white shrink-0">
                   {c.nickname?.charAt(0) || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-medium">{c.nickname}</span>
-                    <span className="text-[8px] text-text-tertiary">{c.created_at?.substring(11, 16) || ""}</span>
+                    <span className="text-[8px] text-gray-400">{c.created_at?.substring(11, 16) || ""}</span>
                   </div>
-                  <div className="text-[11px] text-text-primary mt-0.5">{c.content}</div>
+                  <div className="text-[11px] mt-0.5">{c.content}</div>
                 </div>
               </div>
             ))
           )}
         </div>
-
-        {/* 输入框 */}
         {uid ? (
           <div className="flex gap-2">
             <input type="text" value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleComment()}
               placeholder="说点什么..."
-              className="flex-1 px-3 py-2 bg-gray-50 rounded-[12px] text-[11px] outline-none focus:ring-2 focus:ring-brand-teal/30" />
+              className="flex-1 px-3 py-2 bg-gray-50 rounded-[12px] text-[11px] outline-none focus:ring-2 focus:ring-teal-500/30" />
             <button onClick={handleComment} disabled={!commentText.trim()}
-              className="px-4 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-[11px] font-medium disabled:opacity-50">
-              发送
-            </button>
+              className="px-4 py-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-[11px] font-medium disabled:opacity-50">发送</button>
           </div>
         ) : (
-          <div className="text-center text-[10px] text-text-tertiary py-2">登录后可以参与评论</div>
+          <div className="text-center text-[10px] text-gray-400 py-2">登录后可以参与评论</div>
         )}
       </div>
 
-      {/* 消息提示 */}
       {voteMsg && (
-        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[12px] animate-fade-in z-50 shadow-lg">
+        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[12px] z-50 shadow-lg">
           {voteMsg}
         </div>
       )}
 
-      {/* 底部操作栏 */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
           <button onClick={() => handleOptionClick('A')} disabled={!isActive}
-            className="flex-1 bg-brand-coral text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-[0_4px_12px_rgba(242,113,82,0.25)]">
-            {topic.option_a?.length > 6 ? topic.option_a?.substring(0, 6) + '..' : topic.option_a}
+            className="flex-1 bg-gradient-to-r from-teal-400 to-teal-500 text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            {topic.option_a?.substring(0, 6)}
           </button>
           <button onClick={handleInvite}
-            className="w-[52px] h-[52px] rounded-full bg-gray-100 flex items-center justify-center text-lg active:scale-90 transition-transform shrink-0">
-            ↗
-          </button>
+            className="w-[52px] h-[52px] rounded-full bg-gray-100 flex items-center justify-center text-lg active:scale-90 transition-transform shrink-0">↗</button>
           <button onClick={() => handleOptionClick('B')} disabled={!isActive}
-            className="flex-1 bg-brand-teal text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-[0_4px_12px_rgba(69,204,213,0.25)]">
-            {topic.option_b?.length > 6 ? topic.option_b?.substring(0, 6) + '..' : topic.option_b}
+            className="flex-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            {topic.option_b?.substring(0, 6)}
           </button>
         </div>
       </div>
 
-      {/* 投注确认弹窗 */}
       {confirmVote && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setConfirmVote(null)}>
           <div className="bg-white rounded-[24px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-3">🎯 投注确认</h3>
             <div className="space-y-2.5 text-xs">
               <div className="bg-gray-50 rounded-[12px] p-3">
-                <div className="font-medium text-text-primary mb-1">{topic.title}</div>
-                <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal font-medium">
+                <div className="font-medium mb-1">{topic.title}</div>
+                <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-teal-600 font-medium">
                   {confirmVote.choice === 'A' ? topic.option_a : topic.option_b}
                 </span>
               </div>
               <div className="flex gap-2">
                 {[10, 50, 100, 200].map(amt => (
-                  <button key={amt} onClick={() => setConfirmVote(prev => prev ? {...prev, betAmount: amt} : null)}
-                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-brand-teal text-white shadow-sm' : 'bg-gray-50 text-text-secondary hover:bg-gray-100'}`}>
+                  <button key={amt} onClick={() => setConfirmVote(v => v ? {...v, betAmount: amt} : null)}
+                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-teal-500 text-white shadow-sm' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}>
                     {amt}豆
                   </button>
                 ))}
               </div>
-              <div className="bg-brand-gold/5 rounded-[12px] p-3 text-center">
-                <div className="text-[10px] text-text-tertiary">预估正确可赢得</div>
-                <div className="text-lg font-bold text-brand-gold-dark">
+              <div className="bg-amber-50 rounded-[12px] p-3 text-center">
+                <div className="text-[10px] text-gray-400">预估正确可赢得</div>
+                <div className="text-lg font-bold text-amber-600">
                   +{(() => {
                     const bet = confirmVote.betAmount; const ch = confirmVote.choice;
-                    const myP = ch === 'A' ? (topic.pool_a || 0) : (topic.pool_b || 0);
-                    const oppP = ch === 'A' ? (topic.pool_b || 0) : (topic.pool_a || 0);
+                    const myP = ch === 'A' ? topic.pool_a : topic.pool_b;
+                    const oppP = ch === 'A' ? topic.pool_b : topic.pool_a;
                     if (oppP <= 0) return bet;
-                    const fee = Math.floor(oppP * 20 / 100);
-                    const rp = oppP - fee;
-                    if (rp <= 0) return bet;
-                    const est = Math.floor(bet / (myP + bet) * rp);
-                    return est + bet;
-                  })()} 豆 <span className="text-[10px] text-text-tertiary font-normal">(含本金)</span>
+                    const rp = oppP - Math.floor(oppP * topic.platform_fee_ratio / 100);
+                    return rp <= 0 ? bet : Math.floor(bet / (myP + bet) * rp) + bet;
+                  })()} 豆 <span className="text-[10px] text-gray-400 font-normal">(含本金)</span>
                 </div>
               </div>
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[12px] text-xs font-medium">取消</button>
-              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-medium">
+              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-medium">
                 确认投注 {confirmVote.betAmount} 豆
               </button>
             </div>
@@ -350,8 +306,65 @@ export default function PKRoomPage() {
         </div>
       )}
 
-      {/* 登录弹窗 */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+
+      {/* ─── 投注成功→绑定企微引导 ─── */}
+      {showBindWx && (
+        <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowBindWx(false)}>
+          <div className="bg-white rounded-[24px] w-full max-w-[340px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-center mb-4">
+              <div className="text-2xl mb-2">🎉</div>
+              <div className="text-sm font-bold">投注成功！</div>
+              <div className="text-[11px] text-gray-400 mt-1">结果一出马上通知你</div>
+            </div>
+            <div className="bg-teal-50 rounded-[12px] p-3 mb-3 text-center">
+              <div className="text-[10px] text-gray-400">当前投注</div>
+              <div className="text-xs font-bold text-teal-700">{confirmVote?.choice === 'A' ? topic?.option_a : topic?.option_b}</div>
+              <div className="text-[20px] font-bold text-teal-600">{confirmVote?.betAmount || 0}豆</div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowBindWx(false)}
+                className="flex-1 py-2.5 bg-gray-100 rounded-[12px] text-xs font-medium text-gray-500">下次再说</button>
+              <button onClick={async () => {
+                  try {
+                    const r = await fetch(`${API_BASE}/api/pk?action=bind_identity`, {
+                      method:"POST",headers:{"Content-Type":"application/json"},
+                      body:JSON.stringify({uid,source:"h5",external_id:`user_${uid}`})
+                    });
+                    const j = await r.json();
+                    setBindMsg(j.code === 0 ? "✅ 绑定成功，后续结果将推送到企微" : `❌ ${j.msg}`);
+                    if (j.code === 0) setTimeout(() => setShowBindWx(false), 2000);
+                  } catch { setBindMsg("❌ 网络错误"); }
+                }}
+                className="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-semibold shadow-sm">
+                📱 添加企微通知
+              </button>
+            </div>
+            {bindMsg && <div className="text-center text-[11px] mt-2" style={{color: bindMsg.includes("✅") ? "#2AA8B0" : "#F27152"}}>{bindMsg}</div>}
+          </div>
+        </div>
+      )}
+
+      {/* ─── 到店核销LBS卡片 ─── */}
+      {topic && (
+        <div className="mx-4 mt-3 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+          <div className="text-[11px] font-semibold mb-3">📍 附近门店</div>
+          <div className="bg-gradient-to-r from-teal-50 to-amber-50 rounded-[14px] p-3 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-teal-400 to-amber-400 flex items-center justify-center text-white text-xl shrink-0">
+              🏪
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-semibold">小章鱼体彩投注站</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">距您约 800m</div>
+              <div className="text-[10px] text-teal-600 font-medium mt-1">🎁 到店出示PK战绩 → 送200豆</div>
+            </div>
+            <button onClick={() => { navigator.clipboard.writeText("小章鱼体彩投注站 - 地址：门店详情页"); setVoteMsg("✅ 门店信息已复制"); setTimeout(() => setVoteMsg(""), 2000); }}
+              className="px-3 py-1.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[10px] text-[10px] font-medium shrink-0">
+              🗺 导航
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

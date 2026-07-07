@@ -31,7 +31,7 @@ export default function ProfileTemplate() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
 
-  const credits = user?.balance ?? { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0, credit6: 0, granted_game_coins: 0 };
+  const credits = user?.balance ?? { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0 };
   const [couponCount, setCouponCount] = useState(0);
 
   // 查卡券数
@@ -116,21 +116,6 @@ export default function ProfileTemplate() {
         {user && (
           <div className="mt-2 flex justify-end">
             <span className="text-[10px] opacity-60">资产同步 · 实时更新</span>
-          </div>
-        )}
-        {/* Frozen Beans */}
-        {user && credits.credit6 > 0 && (
-          <div className="mt-2 flex items-center justify-between bg-white/10 rounded-[12px] px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] opacity-80">🧊 冻结豆</span>
-              <span className="text-sm font-bold">{Math.floor(credits.credit6)}</span>
-            </div>
-            <button
-              onClick={() => alert("激活功能开发中，请前往资产页操作")}
-              className="text-[10px] bg-white/20 px-3 py-1 rounded-[20px] active:scale-95 transition-transform"
-            >
-              激活
-            </button>
           </div>
         )}
       </div>

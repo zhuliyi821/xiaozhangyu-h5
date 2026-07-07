@@ -8,7 +8,7 @@
  *   2. 水晶石 → 水晶球50% + 余额50%
  *   3. 余额   → 游戏豆 (1:100)
  *   4. 水晶球 → 游戏豆 (1:100)
- *   5. 激活水晶石 — 引导消费激活冻结水晶石
+ *   5. 激活水晶石 — 消耗游戏豆解冻冻结的水晶石
  */
 
 import { useState, useRef, useEffect } from "react";
@@ -199,8 +199,8 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
               <div className="bg-amber-50 border border-amber-200 rounded-[12px] px-4 py-3">
                 <div className="text-[11px] font-medium text-amber-800 mb-1">💡 如何激活</div>
                 <p className="text-[10px] text-amber-700 leading-relaxed">
-                  每消费获得 100 游戏豆，即可激活 100 颗冻结水晶石。
-                  去门店消费或在商城购物，即可获得游戏豆并自动激活水晶石。
+                  消耗游戏豆即可激活冻结的水晶石。去投注、投票或使用AI会话，获得的游戏豆可自动用于激活。
+                  用注册赠送游戏豆赢得的水晶石 100% 冻结，自己赚的游戏豆赢得的水晶石不冻结。
                 </p>
               </div>
 

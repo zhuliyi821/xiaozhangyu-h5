@@ -120,20 +120,20 @@ export default function SettingsPage() {
             <h2 className="text-sm font-semibold mb-3">账户信息</h2>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="bg-bg rounded-[12px] p-3">
-                <div className="text-text-tertiary mb-1">🎮 积分</div>
-                <div className="font-bold">{profile.assets.credit1}</div>
+                <div className="text-text-tertiary mb-1">🎮 游戏豆</div>
+                <div className="font-bold">{profile.assets.credit1 || 0}</div>
               </div>
               <div className="bg-bg rounded-[12px] p-3">
-                <div className="text-text-tertiary mb-1">🫘 游戏豆</div>
-                <div className="font-bold">{profile.assets.sim_coin}</div>
+                <div className="text-text-tertiary mb-1">⛏️ 水晶石</div>
+                <div className="font-bold">{profile.assets.credit5 || 0}</div>
               </div>
               <div className="bg-bg rounded-[12px] p-3">
                 <div className="text-text-tertiary mb-1">🔮 水晶球</div>
-                <div className="font-bold">{profile.assets.credit3}</div>
+                <div className="font-bold">{profile.assets.credit3 || 0}</div>
               </div>
               <div className="bg-bg rounded-[12px] p-3">
-                <div className="text-text-tertiary mb-1">¥ 余额</div>
-                <div className="font-bold">{profile.assets.credit2}</div>
+                <div className="text-text-tertiary mb-1">🏪 闲豆</div>
+                <div className="font-bold">{profile.assets.credit2 || 0}</div>
               </div>
             </div>
           </div>

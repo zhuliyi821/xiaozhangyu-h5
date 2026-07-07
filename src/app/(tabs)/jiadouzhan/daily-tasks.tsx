@@ -119,7 +119,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
       done: false,
       maxDaily: 5,
       currentDaily: 0,
-      link: "/predict",
+      link: "/pk-hall",
     },
     {
       icon: <Users className="w-4 h-4 text-purple-500" />,

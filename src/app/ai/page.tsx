@@ -1,47 +1,78 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, AlertTriangle, ChevronDown, Shield } from "lucide-react";
+import { Send, Bot, AlertTriangle, ChevronDown, Shield, Sparkles } from "lucide-react";
 import { API_BASE } from "@/config/api";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 
-interface Message { role: "user" | "assistant"; content: string; }
+// ── 小龙虾图标 ──
+function LobsterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className || "w-7 h-7"} xmlns="http://www.w3.org/2000/svg">
+      {/* 身体 */}
+      <ellipse cx="24" cy="30" rx="8" ry="12" fill="#D85A30" />
+      {/* 尾部 */}
+      <path d="M18 38C18 38 16 44 14 46" stroke="#D85A30" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M20 40C20 40 18.5 45 17 47" stroke="#D85A30" strokeWidth="2" strokeLinecap="round" />
+      <path d="M22 41C22 41 21 45.5 20 47.5" stroke="#D85A30" strokeWidth="1.8" strokeLinecap="round" />
+      {/* 头部 */}
+      <ellipse cx="24" cy="20" rx="7" ry="6" fill="#F27152" />
+      {/* 眼睛 */}
+      <circle cx="21" cy="18" r="2" fill="white" />
+      <circle cx="27" cy="18" r="2" fill="white" />
+      <circle cx="21" cy="18" r="1" fill="#333" />
+      <circle cx="27" cy="18" r="1" fill="#333" />
+      {/* 触须 */}
+      <path d="M19 15C17 10 15 8 10 6" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M20 14C18 9 17 6 13 3" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M29 15C31 10 33 8 38 6" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M28 14C30 9 31 6 35 3" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      {/* 左钳 */}
+      <path d="M16 24C12 22 8 20 6 16C5 14 5 12 7 11C9 10 11 11 12 13C13 15 14 18 16 22" fill="#F27152" />
+      {/* 右钳 */}
+      <path d="M32 24C36 22 40 20 42 16C43 14 43 12 41 11C39 10 37 11 36 13C35 15 34 18 32 22" fill="#F27152" />
+      {/* 脚 */}
+      <path d="M17 32H14" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M17 35H13" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M17 38H14" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M31 32H34" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M31 35H35" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M31 38H34" stroke="#D85A30" strokeWidth="1.5" strokeLinecap="round" />
+      {/* 身体条纹 */}
+      <path d="M20 27H28" stroke="#C62828" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
+      <path d="M19 31H29" stroke="#C62828" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
+      <path d="M20 35H28" stroke="#C62828" strokeWidth="0.8" strokeLinecap="round" opacity="0.4" />
+    </svg>
+  );
+}
 
-// ── 运势工具快捷入口 ──
-const FORTUNE_TOOLS = [
-  { icon: "💰", label: "财运", tab: "lottery", question: "近期偏财气场如何" },
-  { icon: "❤️", label: "感情", tab: "zodiac", question: "情感婚姻运势如何" },
-  { icon: "💼", label: "事业", tab: "zodiac", question: "职场事业发展运势如何" },
-  { icon: "🔮", label: "抽签", tab: "zodiac", question: "帮我起一卦随心快速起卦" },
-  { icon: "🎯", label: "预测", tab: "lottery", question: "近期有什么好机遇" },
-  { icon: "📤", label: "分享", tab: "", question: "" },
-];
+interface Message { role: "user" | "assistant"; content: string; }
 
 const TAB_CONFIG = [
   {
-    id: "lottery", label: "彩运趣味推演", cost: 5, icon: "🎱",
+    id: "lottery", label: "彩运", cost: 5, icon: "🎱",
     subtitle: "仅传统文化娱乐推演，不作为购彩依据，网络售彩均违法，理性娱乐勿沉迷",
     disclaimer: "本服务仅传统文化娱乐推演，不作为购彩依据。网络售彩均违法，请理性娱乐勿沉迷。",
     subs: ["短期偏财气场参考", "财运心态疏导", "近期机遇参考"],
     questions: ["近期偏财气场如何", "如何调整购彩心态", "近期有什么好机遇"],
   },
   {
-    id: "stock", label: "股市行情参考", cost: 8, icon: "📈",
+    id: "stock", label: "股市", cost: 8, icon: "📈",
     subtitle: "无证券咨询资质，仅运势娱乐参考，不构成买卖建议，投资有风险",
     disclaimer: "本平台无证券咨询资质，仅运势娱乐参考，不构成任何买卖建议。投资有风险，入市须谨慎。",
     subs: ["个股短期气场", "账户整体财运", "合伙投资风险", "择时心态提醒"],
     questions: ["这只股票短期气场如何", "我账户最近财运如何", "合伙投资要注意什么", "现在适合操作吗"],
   },
   {
-    id: "crypto", label: "加密行情趣味解读", cost: 10, icon: "₿",
+    id: "crypto", label: "加密", cost: 10, icon: "₿",
     subtitle: "虚拟货币交易属于非法金融活动，本内容仅娱乐，请勿参与币圈交易",
     disclaimer: "虚拟货币交易属于非法金融活动，本内容仅传统文化娱乐解读，请勿参与任何币圈交易。",
     subs: ["短期投机气场", "偏财风险预警", "心态疏导参考"],
     questions: ["短期行情怎么看", "有什么风险需要注意", "如何调整投资心态"],
   },
   {
-    id: "zodiac", label: "周易综合运势", cost: 0, icon: "🔮",
+    id: "zodiac", label: "周易", cost: 0, icon: "🔮",
     subtitle: "卦象仅供自我梳理，事在人为，保持积极心态方能顺势而行",
     disclaimer: "",
     subs: [], cost_map: [
@@ -81,9 +112,7 @@ function getGreeting(): string {
 export default function AIChatPage() {
   const { user } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  // 会话ID：每次进入页面生成一次，后续对话复用
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 10));
-  // 从 URL 参数读取默认 tab：/ai?tab=lottery
   const getInitialTab = () => {
     if (typeof window !== "undefined") {
       const p = new URLSearchParams(window.location.search);
@@ -106,6 +135,7 @@ export default function AIChatPage() {
   const [subCategory, setSubCategory] = useState("");
   const [showSubs, setShowSubs] = useState(false);
   const [zodiacCost, setZodiacCost] = useState(1);
+  const [toast, setToast] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const cfg = TAB_CONFIG.find(t => t.id === tab)!;
@@ -113,7 +143,6 @@ export default function AIChatPage() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  // 读取真实余额
   useEffect(() => {
     if (!user) { setBalance(0); return; }
     fetch(API_BASE + "/api/ai-deduct", {
@@ -123,7 +152,6 @@ export default function AIChatPage() {
     }).then(r => r.json()).then(j => { if (j.code === 0) setBalance(j.data.balance); }).catch(() => {});
   }, [user]);
 
-  // Check disclaimer when switching to financial tabs
   useEffect(() => {
     if (isFinancial && !localStorage.getItem("ai_disclaimer_" + tab)) {
       setDisclaimerTab(tab);
@@ -132,11 +160,24 @@ export default function AIChatPage() {
     }
   }, [tab]);
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2000);
+  };
+
   const handleQuickQuestion = (q: string, cost: number) => {
     if (isFinancial && !localStorage.getItem("ai_disclaimer_" + tab)) {
       setDisclaimerTab(tab); setShowDisclaimer(true); return;
     }
-    setPendingMsg(q); setDeductCost(cost); setShowConfirm(true);
+    if (!user) { setShowLogin(true); return; }
+    if (balance < cost) { setMessages(prev => [...prev, { role: "assistant", content: "😅 游戏豆不足，去做任务或签到领取更多豆子吧！" }]); return; }
+    
+    // ≤10豆直接发送, >10豆弹确认
+    if (cost <= 10) {
+      doSend(q, cost);
+    } else {
+      setPendingMsg(q); setDeductCost(cost); setShowConfirm(true);
+    }
   };
 
   const confirmDisclaimer = () => {
@@ -145,7 +186,6 @@ export default function AIChatPage() {
     setShowDisclaimer(false);
   };
 
-  // 用户反馈（准/不准）
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const handleFeedback = async (msgIndex: number, feedback: number) => {
     try {
@@ -164,21 +204,19 @@ export default function AIChatPage() {
     } catch {}
   };
 
-  const confirmSend = async () => {
-    setShowConfirm(false);
+  const doSend = async (msg: string, cost: number) => {
     if (!user) { setShowLogin(true); return; }
-    if (balance < deductCost) { setMessages(prev => [...prev, { role: "assistant", content: "😅 游戏豆不足，去做任务或签到领取更多豆子吧！" }]); return; }
-    // 扣真实游戏豆
+    if (balance < cost) { showToast("豆子不足"); return; }
     try {
       await fetch(API_BASE + "/api/ai-deduct", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: user.uid, action: "deduct", cost: deductCost, category: cfg.label }),
+        body: JSON.stringify({ uid: user.uid, action: "deduct", cost, category: cfg.label }),
       });
     } catch {}
-    setBalance(b => b - deductCost);
-    const msg = pendingMsg;
+    setBalance(b => b - cost);
     setMessages(prev => [...prev, { role: "user", content: msg }]);
     setLoading(true);
+    if (cost <= 10) showToast(`-${cost}🎮`);
     try {
       const r = await fetch(`${API_BASE}/api/ai/chat`, {
         method: "POST",
@@ -196,7 +234,6 @@ export default function AIChatPage() {
       });
       const data = await r.json();
       let reply = data?.choices?.[0]?.message?.content || data?.response || "抱歉，我暂时无法回答。";
-      // Append inspiring word if not already present
       if (!reply.includes("事在人为") && !reply.includes("心态")) {
         reply += "\n\n—— " + INSPIRING_WORDS[Math.floor(Math.random() * INSPIRING_WORDS.length)];
       }
@@ -205,6 +242,11 @@ export default function AIChatPage() {
       setMessages(prev => [...prev, { role: "assistant", content: "网络开小差了，请稍后重试 🙏" }]);
     }
     setLoading(false);
+  };
+
+  const confirmSend = async () => {
+    setShowConfirm(false);
+    await doSend(pendingMsg, deductCost);
   };
 
   const sendMessage = () => {
@@ -223,8 +265,8 @@ export default function AIChatPage() {
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-border-tertiary">
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🤖</span>
-            <span className="text-sm font-bold text-text-primary">AI趣预测</span>
+            <LobsterIcon className="w-6 h-6" />
+            <span className="text-sm font-bold text-text-primary">小龙虾</span>
           </div>
           <button onClick={() => { if (!user) setShowLogin(true); }} className="flex items-center gap-1.5 bg-bg rounded-full px-3 py-1.5 border border-border-tertiary active:scale-95 transition-transform">
             <span className="w-2 h-2 rounded-full bg-brand-gold" />
@@ -233,38 +275,13 @@ export default function AIChatPage() {
         </div>
       </div>
 
-      {/* ── 运势工具快捷入口 ── */}
-      <div className="sticky top-[52px] z-20 bg-white border-b border-border-tertiary overflow-x-auto scrollbar-none">
-        <div className="flex gap-1.5 px-3 py-2.5">
-          {FORTUNE_TOOLS.map((tool, i) => (
-            <button key={i} onClick={() => {
-              if (tool.tab) {
-                setTab(tool.tab);
-                setMessages([{ role: "assistant", content: getGreeting() }]);
-                setSubCategory("");
-                if (tool.question) {
-                  handleQuickQuestion(tool.question, TAB_CONFIG.find(t => t.id === tool.tab)?.cost || 5);
-                }
-              } else if (tool.label === "分享") {
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                  alert("链接已复制，分享给朋友一起来测运势吧！");
-                }).catch(() => {});
-              }
-            }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-gradient-to-r from-purple-50 to-purple-100/60 border border-purple-200/60 active:scale-95 transition-transform shadow-sm">
-              <span className="text-sm">{tool.icon}</span>
-              <span className="text-purple-700">{tool.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 4 Category Tabs ── */}
-      <div className="sticky top-[104px] z-20 bg-white border-b border-border-tertiary overflow-x-auto scrollbar-none">
-        <div className="flex gap-0.5 px-2">
+      {/* ── Category Tabs + Subtitle (merged) ── */}
+      <div className="sticky top-[52px] z-20 bg-white border-b border-border-tertiary">
+        {/* Tabs row */}
+        <div className="flex px-2 overflow-x-auto scrollbar-none">
           {TAB_CONFIG.map(t => (
             <button key={t.id} onClick={() => { setTab(t.id); setMessages([{ role: "assistant", content: getGreeting() }]); setSubCategory(""); }}
-              className={`flex-1 whitespace-nowrap py-3 px-2 text-[11px] font-medium text-center transition-all relative ${
+              className={`flex-1 whitespace-nowrap py-2.5 px-1 text-[11px] font-medium text-center transition-all relative ${
                 tab === t.id ? "text-brand-teal-dark font-semibold" : "text-text-tertiary"
               }`}>
               {t.icon} {t.label}
@@ -272,20 +289,24 @@ export default function AIChatPage() {
             </button>
           ))}
         </div>
+        {/* Subtitle - only when not zodiac */}
+        {cfg.subtitle && tab !== "zodiac" && (
+          <div className="px-4 py-1.5 bg-gradient-to-r from-brand-teal-light/15 to-brand-teal-light/5 border-t border-brand-teal-light/20">
+            <p className="text-[9px] text-brand-teal-dark/70 leading-relaxed">{cfg.subtitle}</p>
+          </div>
+        )}
       </div>
 
-      {/* ── Subtitle / Disclaimer ── */}
-      {cfg.subtitle && (
-        <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100/50">
-          <p className="text-[10px] text-amber-700/80 leading-relaxed">{cfg.subtitle}</p>
+      {/* ── Subcategory Selector (zodiac only) ── */}
+      {tab === "zodiac" && cfg.subtitle && (
+        <div className="sticky top-[92px] z-20 px-4 py-1.5 bg-gradient-to-r from-brand-teal-light/15 to-brand-teal-light/5 border-b border-brand-teal-light/20">
+          <p className="text-[9px] text-brand-teal-dark/70 leading-relaxed mb-1.5">{cfg.subtitle}</p>
         </div>
       )}
-
-      {/* ── Subcategory Selector ── */}
       {tab === "zodiac" && (
         <div className="px-4 py-2 bg-white border-b border-border-tertiary">
           <button onClick={() => setShowSubs(!showSubs)}
-            className="w-full flex items-center justify-between bg-bg rounded-[12px] px-3 py-2 text-xs">
+            className="w-full flex items-center justify-between bg-brand-teal-light/10 rounded-[12px] px-3 py-2 text-xs border border-brand-teal-light/20">
             <span className="text-text-primary font-medium">
               {subCategory || "选择咨询类型"}
             </span>
@@ -319,14 +340,16 @@ export default function AIChatPage() {
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {cfg.questions.map((q, i) => (
                   <button key={i} onClick={() => handleQuickQuestion(q, cfg.cost)}
-                    className="text-[10px] bg-surface rounded-xl px-2.5 py-2.5 text-left border border-border-tertiary shadow-sm active:scale-[0.97] transition-transform hover:border-brand-teal/30">
+                    className="text-[10px] bg-surface rounded-xl px-2.5 py-2.5 text-left border border-brand-teal-light/30 shadow-sm active:scale-[0.97] transition-transform hover:border-brand-teal/40">
                     {q}
+                    <span className="block text-[8px] text-brand-teal mt-1">{cfg.cost}🎮</span>
                   </button>
                 ))}
               </div>
             )}
             {tab === "zodiac" && !subCategory && (
               <div className="text-center py-6">
+                <Sparkles className="w-8 h-8 text-brand-teal mx-auto mb-2" />
                 <p className="text-xs text-text-tertiary">请先选择咨询类型</p>
               </div>
             )}
@@ -336,8 +359,8 @@ export default function AIChatPage() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "assistant" && (
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center mr-2 mt-0.5 shrink-0">
-                <Bot className="w-3.5 h-3.5 text-white" />
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center mr-2 mt-0.5 shrink-0">
+                <LobsterIcon className="w-4 h-4" />
               </div>
             )}
             <div>
@@ -348,7 +371,6 @@ export default function AIChatPage() {
               }`}>
                 {msg.content}
               </div>
-              {/* 反馈按钮：只显示在assistant消息 */}
               {msg.role === "assistant" && msg.content !== getGreeting() && i > 0 && (
                 <div className="flex gap-2 mt-1 ml-1">
                   <button onClick={() => handleFeedback(i, 1)}
@@ -363,8 +385,8 @@ export default function AIChatPage() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center mr-2 shrink-0">
-              <Bot className="w-3.5 h-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center mr-2 shrink-0">
+              <LobsterIcon className="w-4 h-4" />
             </div>
             <div className="bg-surface border border-border-tertiary shadow-sm rounded-2xl rounded-bl-md px-4 py-3">
               <div className="flex gap-1">
@@ -377,6 +399,13 @@ export default function AIChatPage() {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-brand-teal-dark text-white text-xs px-4 py-2 rounded-full shadow-lg animate-bounce">
+          {toast}
+        </div>
+      )}
 
       {/* ── Input ── */}
       <div className="sticky bottom-[64px] bg-white border-t border-border-tertiary px-4 py-3"
@@ -413,7 +442,7 @@ export default function AIChatPage() {
         </div>
       )}
 
-      {/* ── Confirm Deduct Modal ── */}
+      {/* ── Confirm Deduct Modal (only for >10豆) ── */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-6">
           <div className="bg-white rounded-[24px] p-5 max-w-sm w-full shadow-xl">

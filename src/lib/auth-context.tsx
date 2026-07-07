@@ -21,8 +21,6 @@ interface UserInfo {
     credit3: number;  // 🔮 水晶球
     credit4: number;  // 💰 余额
     credit5: number;  // ⛏️ 水晶石
-    credit6: number;  // ❄️ 冻结豆
-    granted_game_coins: number;
   };
 }
 

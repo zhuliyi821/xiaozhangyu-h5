@@ -14,7 +14,7 @@ function AIBadge({ className }: { className?: string }) {
 const tabs: { href: string; label: string; icon: any; badge?: boolean }[] = [
   { href: "/", label: "首页", icon: Home },
   { href: "/jiadouzhan", label: "加豆站", icon: Plus, badge: true },
-  { href: "/predict", label: "PK大厅", icon: Sparkles },
+  { href: "/pk-hall", label: "PK大厅", icon: Sparkles },
   { href: "/ai", label: "小章鱼", icon: Bot },
   { href: "/profile", label: "我的", icon: User },
 ] as const;

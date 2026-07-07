@@ -22,8 +22,6 @@ export interface LoginResult {
     credit3: number;  // 🔮 水晶球
     credit4: number;  // 💰 余额
     credit5: number;  // ⛏️ 水晶石
-    credit6: number;  // ❄️ 冻结豆
-    granted_game_coins: number;
   };
 }
 
@@ -270,13 +268,11 @@ export interface MemberProfile {
   email: string;
   avatar: string;
   assets: {
-    credit1: number;        // 积分
-    credit2: number;        // 余额
-    credit3: number;        // 水晶球(闲豆可用)
-    frozen_credit3: number; // 冻结豆
-    credit4: number;        // 闲豆
-    sim_coin: number;       // 游戏豆
-    granted_sim_coin: number; // 授予游戏豆(累计)
+    credit1: number;        // 🎮 游戏豆
+    credit2: number;        // 🏪 闲豆
+    credit3: number;        // 🔮 水晶球
+    credit4: number;        // 💰 余额
+    credit5: number;        // ⛏️ 水晶石
   };
 }
 
