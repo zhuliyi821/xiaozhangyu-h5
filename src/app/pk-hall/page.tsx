@@ -124,73 +124,65 @@ export default function PKHallPage() {
   };
 
   return (
-    <div style={{width:"100%",maxWidth:420,margin:"0 auto",background:"#FFFFFF",minHeight:"100vh",position:"relative",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+    <div className="w-full max-w-[420px] mx-auto bg-white min-h-screen relative">
 
       {/* ─── Header ─── */}
-      <div style={{background:"linear-gradient(135deg,#45CCD5 0%,#2BAAAF 50%,#F2B631 100%)",borderRadius:"0 0 20px 20px",padding:"20px 16px 16px",color:"white",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,255,255,0.25) 0%,transparent 70%)"}} />
-        <div style={{position:"relative",zIndex:1,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[20px] px-4 pt-5 pb-4 text-white relative overflow-hidden">
+        <div className="absolute -top-7 -right-7 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_70%)]" />
+        <div className="relative z-10 flex justify-between items-center">
           <div>
-            <div style={{fontSize:20,fontWeight:700}}>PK 大厅</div>
-            <div style={{fontSize:12,opacity:0.85,marginTop:2}}>选择方向，发起PK对战</div>
+            <div className="text-xl font-bold">PK 大厅</div>
+            <div className="text-xs opacity-85 mt-0.5">选择方向，发起PK对战</div>
           </div>
-          <div style={{width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>⚔</div>
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">⚔</div>
         </div>
-        <div style={{display:"flex",gap:8,marginTop:14,background:"rgba(255,255,255,0.12)",borderRadius:12,padding:"10px 8px",position:"relative",zIndex:1}}>
-          <div style={{flex:1,textAlign:"center"}}>
-            <div style={{fontSize:16,fontWeight:700}}>{stats.active}</div>
-            <div style={{fontSize:9,opacity:0.75}}>进行中</div>
+        <div className="flex gap-2 mt-3.5 bg-white/12 backdrop-blur-sm rounded-[12px] p-2 relative z-10">
+          <div className="flex-1 text-center">
+            <div className="text-base font-bold">{stats.active}</div>
+            <div className="text-[9px] opacity-75">进行中</div>
           </div>
-          <div style={{width:1,background:"rgba(255,255,255,0.2)"}} />
-          <div style={{flex:1,textAlign:"center"}}>
-            <div style={{fontSize:16,fontWeight:700}}>{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
-            <div style={{fontSize:9,opacity:0.75}}>总奖池 💰</div>
+          <div className="w-px bg-white/20" />
+          <div className="flex-1 text-center">
+            <div className="text-base font-bold">{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
+            <div className="text-[9px] opacity-75">总奖池 💰</div>
           </div>
-          <div style={{width:1,background:"rgba(255,255,255,0.2)"}} />
-          <div style={{flex:1,textAlign:"center"}}>
-            <div style={{fontSize:16,fontWeight:700}}>{stats.voters}</div>
-            <div style={{fontSize:9,opacity:0.75}}>总参与</div>
+          <div className="w-px bg-white/20" />
+          <div className="flex-1 text-center">
+            <div className="text-base font-bold">{stats.voters}</div>
+            <div className="text-[9px] opacity-75">总参与</div>
           </div>
         </div>
       </div>
 
-      <div style={{padding:"0 12px"}}>
+      <div className="px-3">
         {/* ─── 错误提示 ─── */}
         {error && (
-          <div style={{marginTop:8,padding:"10px 16px",background:"#FEF2F2",color:"#DC2626",fontSize:11,borderRadius:12,textAlign:"center"}}>
+          <div className="mt-2 px-4 py-2.5 bg-red-50 text-red-600 text-[11px] rounded-[12px] text-center">
             {error}
-            <span style={{marginLeft:8,textDecoration:"underline",cursor:"pointer"}} onClick={() => window.location.reload()}>重试</span>
+            <span className="ml-2 underline cursor-pointer" onClick={() => window.location.reload()}>重试</span>
           </div>
         )}
 
         {/* ─── 身份绑定入口 ─── */}
         {user && !showBind && (
           <div onClick={() => setShowBind(true)}
-            style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:8,marginBottom:0,
-              padding:"4px 10px",borderRadius:999,fontSize:10,color:"#6B6B6E",
-              border:"1px solid #E7E7E8",cursor:"pointer",background:"white"}}>
+            className="inline-flex items-center gap-1 mt-2 mb-0 px-2.5 py-1 rounded-full text-[10px] text-[#6B6B6E] border border-[#E7E7E8] cursor-pointer bg-white">
             🔗 绑定账号
           </div>
         )}
         {showBind && (
-          <div style={{background:"white",borderRadius:12,padding:12,marginTop:8,marginBottom:8,
-            border:"1px solid #45CCD5",boxShadow:"0 2px 12px rgba(69,204,213,0.15)",position:"relative"}}>
-            <div style={{fontSize:11,fontWeight:600,color:"#2BAAAF",marginBottom:6}}>🔗 身份绑定</div>
-            <div style={{fontSize:10,color:"#6B6B6E",marginBottom:8}}>
-              绑定后可在企微接收结算通知、到店核销奖励
-            </div>
-            <div style={{display:"flex",gap:6}}>
+          <div className="bg-white rounded-[12px] p-3 mt-2 mb-2 border border-brand-teal shadow-[0_2px_12px_rgba(69,204,213,0.15)] relative">
+            <div className="text-[11px] font-semibold text-brand-teal-dark mb-1.5">🔗 身份绑定</div>
+            <div className="text-[10px] text-[#6B6B6E] mb-2">绑定后可在企微接收结算通知、到店核销奖励</div>
+            <div className="flex gap-1.5">
               <input id="bindSource" placeholder="来源 (h5/wecom)"
-                style={{flex:1,padding:"6px 8px",borderRadius:8,border:"1px solid #E7E7E8",
-                  fontSize:11,outline:"none"}} />
+                className="flex-1 px-2 py-1.5 rounded-[8px] border border-[#E7E7E8] text-[11px] outline-none" />
               <input id="bindExtId" placeholder="外部ID"
-                style={{flex:1,padding:"6px 8px",borderRadius:8,border:"1px solid #E7E7E8",
-                  fontSize:11,outline:"none"}} />
+                className="flex-1 px-2 py-1.5 rounded-[8px] border border-[#E7E7E8] text-[11px] outline-none" />
             </div>
-            <div style={{display:"flex",gap:6,marginTop:6,justifyContent:"flex-end"}}>
+            <div className="flex gap-1.5 mt-1.5 justify-end">
               <div onClick={() => { setShowBind(false); setBindMsg(""); }}
-                style={{padding:"6px 12px",borderRadius:8,border:"1px solid #E7E7E8",
-                  fontSize:11,color:"#6B6B6E",cursor:"pointer"}}>取消</div>
+                className="px-3 py-1.5 rounded-[8px] border border-[#E7E7E8] text-[11px] text-[#6B6B6E] cursor-pointer">取消</div>
               <div onClick={async () => {
                   const src = (document.getElementById("bindSource") as HTMLInputElement)?.value || "h5";
                   const extId = (document.getElementById("bindExtId") as HTMLInputElement)?.value || `user_${(user as any)?.uid || 0}`;
@@ -204,59 +196,50 @@ export default function PKHallPage() {
                     if (j.code === 0) setTimeout(() => setShowBind(false), 1500);
                   } catch { setBindMsg("❌ 网络错误"); }
                 }}
-                style={{padding:"6px 16px",borderRadius:8,
-                  background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",
-                  fontSize:11,fontWeight:600,cursor:"pointer"}}>确认绑定</div>
+                className="px-4 py-1.5 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[11px] font-semibold cursor-pointer">确认绑定</div>
             </div>
-            {bindMsg && <div style={{fontSize:10,color:bindMsg.includes("✅") ? "#2BAAAF" : "#F27152",marginTop:4}}>{bindMsg}</div>}
+            {bindMsg && <div className={`text-[10px] mt-1 ${bindMsg.includes("✅") ? 'text-brand-teal-dark' : 'text-brand-coral'}`}>{bindMsg}</div>}
           </div>
         )}
 
         {/* ─── 品类 Tabs ─── */}
-        <div style={{display:"flex",gap:4,padding:4,marginTop:12,background:"white",borderRadius:999,boxShadow:"0 2px 8px rgba(69,204,213,0.08)",overflow:"hidden"}}>
+        <div className="flex gap-1 p-1 mt-3 bg-white rounded-full shadow-[0_2px_8px_rgba(69,204,213,0.08)] overflow-hidden">
           {CATEGORIES.map(cat => (
             <div key={cat.key}
               onClick={() => setActiveCat(cat.key)}
-              style={{
-                flex:1,padding:"8px 0",textAlign:"center",fontSize:12,fontWeight: activeCat === cat.key ? 600 : 500,
-                borderRadius:999,cursor:"pointer",
-                background: activeCat === cat.key ? "linear-gradient(135deg,#45CCD5,#2BAAAF)" : "transparent",
-                color: activeCat === cat.key ? "white" : "#9A9A9D",
-                boxShadow: activeCat === cat.key ? "0 2px 6px rgba(69,204,213,0.2)" : "none",
-                transition:"all 0.2s",
-              }}>
+              className={`flex-1 py-2 text-center text-xs font-medium rounded-full cursor-pointer transition-all ${
+                activeCat === cat.key
+                  ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-[0_2px_6px_rgba(69,204,213,0.2)]"
+                  : "text-[#9A9A9D] hover:text-gray-600"
+              }`}>
               {cat.label}
             </div>
           ))}
         </div>
 
         {/* ─── 模式筛选 ─── */}
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>
+        <div className="flex flex-wrap gap-1.5 mt-3">
           {MODES.map(mode => (
             <span key={mode.key} onClick={() => setActiveMode(mode.key)}
-              style={{
-                padding:"4px 12px",borderRadius:999,fontSize:11,fontWeight:500,cursor:"pointer",
-                background: activeMode === mode.key ? "linear-gradient(135deg,#45CCD5,#2BAAAF)" : "white",
-                color: activeMode === mode.key ? "white" : "#6B6B6E",
-                border: activeMode === mode.key ? "none" : "1px solid #E7E7E8",
-                transition:"all 0.2s",
-              }}>
+              className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
+                activeMode === mode.key
+                  ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white"
+                  : "bg-white text-[#6B6B6E] border border-[#E7E7E8]"
+              }`}>
               {mode.label}
             </span>
           ))}
         </div>
 
         {/* ─── 排序筛选 ─── */}
-        <div style={{display:"flex",gap:6,marginTop:8,marginBottom:12}}>
+        <div className="flex gap-1.5 mt-2 mb-3">
           {SORTS.map(s => (
             <span key={s.key} onClick={() => setActiveSort(s.key)}
-              style={{
-                padding:"4px 12px",borderRadius:999,fontSize:11,fontWeight:500,cursor:"pointer",
-                background: activeSort === s.key ? "#FFF5E6" : "white",
-                color: activeSort === s.key ? "#D97706" : "#6B6B6E",
-                border: activeSort === s.key ? "none" : "1px solid #E7E7E8",
-                transition:"all 0.2s",
-              }}>
+              className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
+                activeSort === s.key
+                  ? "bg-[#FFF5E6] text-[#D97706]"
+                  : "bg-white text-[#6B6B6E] border border-[#E7E7E8]"
+              }`}>
               {s.label}
             </span>
           ))}
@@ -264,91 +247,93 @@ export default function PKHallPage() {
 
         {/* ─── 实时动态条 ─── */}
         {topics.length > 0 && (
-          <div style={{background:"white",borderRadius:10,padding:"8px 12px",marginBottom:12,border:"1px solid #E7E7E8",display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:6,height:6,borderRadius:"50%",background:"#45CCD5",animation:"pkPulse 1.5s infinite"}} />
-            <div style={{fontSize:11,color:"#6B6B6E",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>
-              <span style={{fontWeight:500,color:"#45CCD5"}}>{topics[0]?.creator_name || "用户"}</span> 刚刚投了{" "}
-              <span style={{fontWeight:500,color:"#F27152"}}>{topics[0]?.option_a} {topics[0]?.min_bet}豆</span>
+          <div className="bg-white rounded-[10px] px-3 py-2 mb-3 border border-[#E7E7E8] flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-ping" />
+            <div className="text-[11px] text-[#6B6B6E] truncate">
+              <span className="font-medium text-brand-teal">{topics[0]?.creator_name || "用户"}</span> 刚刚投了{" "}
+              <span className="font-medium text-brand-coral">{topics[0]?.option_a} {topics[0]?.min_bet}豆</span>
             </div>
           </div>
         )}
 
         {/* ─── 房间列表 ─── */}
         {loading ? (
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div className="flex flex-col gap-2.5">
             {[1,2,3].map(i => (
-              <div key={i} style={{background:"white",borderRadius:16,padding:16,boxShadow:"0 2px 8px rgba(69,204,213,0.05)",border:"1px solid #E7E7E8",animation:"pulse 1.5s infinite"}}>
-                <div style={{height:14,width:"60%",background:"#E7E7E8",borderRadius:4,marginBottom:12}} />
-                <div style={{height:10,width:"100%",background:"#E7E7E8",borderRadius:4,marginBottom:8}} />
-                <div style={{height:8,width:"100%",background:"#E7E7E8",borderRadius:4}} />
+              <div key={i} className="bg-white rounded-[16px] p-4 shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-[#E7E7E8] animate-pulse">
+                <div className="h-3.5 w-3/5 bg-[#E7E7E8] rounded mb-3" />
+                <div className="h-2.5 w-full bg-[#E7E7E8] rounded mb-2" />
+                <div className="h-2 w-full bg-[#E7E7E8] rounded" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{textAlign:"center",padding:"40px 0",color:"#9A9A9D",fontSize:12}}>
-            <div style={{fontSize:40,marginBottom:8}}>🏟</div>
+          <div className="text-center py-10 text-[#9A9A9D] text-xs">
+            <div className="text-[40px] mb-2">🏟</div>
             当前还没有PK话题
-            <div style={{marginTop:8}}>成为第一个发起PK的人</div>
+            <div className="mt-2">成为第一个发起PK的人</div>
           </div>
         ) : (
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div className="flex flex-col gap-2.5">
             {filtered.map(pk => (
               <div key={pk.id} onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
-                style={{background:"white",borderRadius:16,padding:16,cursor:"pointer",
-                  boxShadow:"0 2px 8px rgba(69,204,213,0.05)",border:"1px solid #E7E7E8",
-                  transition:"all 0.15s"}}>
+                className="bg-white rounded-[16px] p-4 cursor-pointer shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-[#E7E7E8] transition-all active:scale-[0.98]">
 
                 {/* 顶栏标签 */}
-                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8,flexWrap:"wrap"}}>
-                  <span style={{padding:"2px 8px",borderRadius:6,fontSize:10,fontWeight:600,
-                    background: pk.category === "sports" ? "#E8FAFB" : pk.category === "social" ? "#FFF5E6" : pk.category === "event" ? "#FFF0ED" : "#F5E8F8",
-                    color: pk.category === "sports" ? "#2BAAAF" : pk.category === "social" ? "#D97706" : pk.category === "event" ? "#F27152" : "#682575"}}>
+                <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-semibold ${
+                    pk.category === "sports" ? "bg-[#E8FAFB] text-brand-teal-dark"
+                    : pk.category === "social" ? "bg-[#FFF5E6] text-[#D97706]"
+                    : pk.category === "event" ? "bg-[#FFF0ED] text-brand-coral"
+                    : "bg-[#F5E8F8] text-[#682575]"
+                  }`}>
                     {pk.category === "sports" ? "⚽" : pk.category === "social" ? "🌐" : pk.category === "event" ? "⚡" : "💬"} {pk.category === "sports" ? "体育" : pk.category === "social" ? "社会" : pk.category === "event" ? "突发" : "一言"}
                   </span>
                   {/* PK 形态标签 */}
-                  <span style={{padding:"2px 8px",borderRadius:6,fontSize:10,fontWeight:600,
-                    background: pk.mode === "1v1" ? "#E8FAFB" : pk.mode === "1vN" ? "#FFF5E6" : "#F0E8FF",
-                    color: pk.mode === "1v1" ? "#2BAAAF" : pk.mode === "1vN" ? "#D97706" : "#682575"}}>
+                  <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-semibold ${
+                    pk.mode === "1v1" ? "bg-[#E8FAFB] text-brand-teal-dark"
+                    : pk.mode === "1vN" ? "bg-[#FFF5E6] text-[#D97706]"
+                    : "bg-[#F0E8FF] text-[#682575]"
+                  }`}>
                     {pk.mode === "1v1" ? "⚔️1v1" : pk.mode === "1vN" ? "🥊打擂" : "👥阵营"}
                   </span>
                   {/* 公益标签 */}
                   {pk.charity && pk.charity !== "none" && (
-                    <span style={{padding:"2px 8px",borderRadius:6,fontSize:10,fontWeight:600,
-                      background:"#FFF0ED",color:"#F27152"}}>
+                    <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-semibold bg-[#FFF0ED] text-brand-coral">
                       ❤️公益
                     </span>
                   )}
-                  <span style={{marginLeft:"auto",fontSize:10,color: pk.time_remaining < 1800 ? "#F27152" : "#6B6B6E"}}>
+                  <span className={`ml-auto text-[10px] ${pk.time_remaining < 1800 ? 'text-brand-coral' : 'text-[#6B6B6E]'}`}>
                     ⏰ {pk.time_label}
                   </span>
                 </div>
 
                 {/* 标题 */}
-                <div style={{fontSize:14,fontWeight:600,color:"#1C1C1D",marginBottom:6}}>
+                <div className="text-sm font-semibold text-[#1C1C1D] mb-1.5">
                   {pk.title}
                 </div>
-                <div style={{fontSize:11,color:"#9A9A9D",marginBottom:8}}>
+                <div className="text-[11px] text-[#9A9A9D] mb-2">
                   💰 奖池 {pk.total_pool}豆 · 👥 {pk.total_votes}人参与
                 </div>
 
-                {/* 双进度条 - 始终1v1 */}
-                  <div style={{marginBottom:10}}>
-                    <div style={{display:"flex",height:8,borderRadius:999,overflow:"hidden",marginBottom:6}}>
-                      <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}%`,background:"linear-gradient(90deg,#45CCD5,#2BAAAF)"}} />
-                      <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}%`,background:"linear-gradient(90deg,#F27152,#E05A3D)"}} />
-                    </div>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:11}}>
-                      <span style={{color:"#2BAAAF",fontWeight:500}}>{pk.option_a || pk.options?.[0] || "A"} {pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_a ?? 0)}豆</span>
-                      <span style={{color:"#F27152",fontWeight:500}}>{pk.option_b || pk.options?.[1] || "B"} {pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_b ?? 0)}豆</span>
-                    </div>
+                {/* 双进度条 */}
+                <div className="mb-2.5">
+                  <div className="flex h-2 rounded-full overflow-hidden mb-1.5">
+                    <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}%`}} className="bg-gradient-to-r from-brand-teal to-brand-teal-dark" />
+                    <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}%`}} className="bg-gradient-to-r from-brand-coral to-[#E05A3D]" />
                   </div>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-brand-teal-dark font-medium">{pk.option_a || pk.options?.[0] || "A"} {pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_a ?? 0)}豆</span>
+                    <span className="text-brand-coral font-medium">{pk.option_b || pk.options?.[1] || "B"} {pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_b ?? 0)}豆</span>
+                  </div>
+                </div>
 
                 {/* CTA 行 */}
-                <div style={{display:"flex",gap:8,alignItems:"center",marginTop:4}}>
-                  <div style={{flex:1,fontSize:10,color:"#9A9A9D"}}>起投 {pk.min_bet}豆</div>
-                  <div style={{display:"flex",gap:6}}>
-                    <div style={{padding:"6px 14px",borderRadius:10,border:"1px solid #E7E7E8",fontSize:12,color:"#2BAAAF",fontWeight:500}}>👀 围观</div>
-                    <div style={{padding:"6px 18px",borderRadius:10,background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",fontSize:12,fontWeight:600,boxShadow:"0 2px 8px rgba(69,204,213,0.2)"}}>💰 下注</div>
+                <div className="flex gap-2 items-center mt-1">
+                  <div className="flex-1 text-[10px] text-[#9A9A9D]">起投 {pk.min_bet}豆</div>
+                  <div className="flex gap-1.5">
+                    <div className="px-3.5 py-1.5 rounded-[10px] border border-[#E7E7E8] text-xs text-brand-teal-dark font-medium">👀 围观</div>
+                    <div className="px-4.5 py-1.5 rounded-[10px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-semibold shadow-[0_2px_8px_rgba(69,204,213,0.2)]">💰 下注</div>
                   </div>
                 </div>
               </div>
@@ -360,22 +345,17 @@ export default function PKHallPage() {
 
       {/* ─── FAB按钮 ─── */}
       <div onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
-        style={{position:"fixed",bottom:80,right:16,width:56,height:56,borderRadius:"50%",
-          background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",
-          display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",
-          fontSize:20,fontWeight:300,boxShadow:"0 4px 16px rgba(69,204,213,0.35)",cursor:"pointer",
-          zIndex:100,lineHeight:1}}>
-        <span style={{marginTop:-2}}>+</span>
-        <span style={{fontSize:9}}>PK</span>
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white flex items-center justify-center flex-col text-xl font-light shadow-[0_4px_16px_rgba(69,204,213,0.35)] cursor-pointer z-[100] leading-none">
+        <span className="-mt-0.5">+</span>
+        <span className="text-[9px]">PK</span>
       </div>
 
       <style>{`
-        @keyframes pkPulse { 0%,100% { opacity:1;transform:scale(1) }
-50%{opacity:.6;transform:scale(.8)} }
+        @keyframes ping { 0%,100% { opacity:1;transform:scale(1) } 50%{opacity:.6;transform:scale(.8)} }
         @keyframes pulse { 0%,100% { opacity:1 } 50%{ opacity:.5 } }
       `}</style>
 
-      {/* ─── 发起PK弹窗 — 完整设计方案 ─── */}
+      {/* ─── 发起PK弹窗 ─── */}
       {showCreate && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
           <div className="bg-white rounded-[24px] w-full max-w-[400px] p-5 shadow-2xl overflow-y-auto" style={{ maxHeight: "85vh" }} onClick={e => e.stopPropagation()}>

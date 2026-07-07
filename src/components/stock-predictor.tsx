@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { TrendingUp, Search, RefreshCw, AlertTriangle, ChevronDown, BarChart3, Activity, Target, Shield } from "lucide-react";
+import { TrendingUp, Search, RefreshCw, AlertTriangle, ChevronDown, BarChart3, Activity, Target, Shield, Building2, Coins, Sparkles } from "lucide-react";
 
 import { API_BASE } from '@/config/api';
 
@@ -19,6 +19,19 @@ interface PredictionResult {
     model_breakdown: Record<string, number>;
   };
   chart: Array<{ date: string; o: number; c: number; h: number; l: number; v: number }>;
+}
+
+// 多源综合评分数据类型
+interface ComprehensiveScore {
+  stock_code: string;
+  stock_name: string;
+  total_score: number;
+  signal: string;
+  breakdown: {
+    institutional: { score: number; buy: number; sell: number; total: number };
+    fund_flow: { score: number; net: number; consecutive: number };
+    wuxing: { score: number; element: string; trigram: string; reason: string; relation: string; god_relation: string };
+  };
 }
 
 const PRESET_CODES = [
@@ -62,17 +75,29 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<PredictionResult | null>(null);
+  const [compScore, setCompScore] = useState<ComprehensiveScore | null>(null);
   const chartRef = useRef<HTMLCanvasElement>(null);
 
   const fetchAnalysis = async (stockCode: string) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/api/stock/analysis?code=${stockCode}`);
-      const json = await res.json();
-      if (json.code !== 0) throw new Error(json.msg || "分析失败");
-      setResult(json.data);
-      onData?.(json.data);
+      // 并行调两个API: 技术分析 + 多源评分
+      const [res1, res2] = await Promise.all([
+        fetch(`${API_BASE}/api/stock/analysis?code=${stockCode}`),
+        fetch(`${API_BASE}/api/stock/comprehensive?code=${stockCode}`),
+      ]);
+      const json1 = await res1.json();
+      if (json1.code !== 0) throw new Error(json1.msg || "分析失败");
+      setResult(json1.data);
+      
+      // 多源评分(非必须)
+      try {
+        const json2 = await res2.json();
+        if (json2.code === 0) setCompScore(json2.data);
+      } catch {}
+      
+      onData?.(json1.data);
       setCode(stockCode);
     } catch (e: any) {
       setError(e.message || "网络错误");
@@ -162,6 +187,17 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
 
   const signalInfo = result ? getSignalInfo(result.prediction.signal) : null;
 
+  // 股票名称降级：API name为空时从预设映射取
+  const stockName = result?.name || PRESET_CODES.find(p => p.code === code)?.name || code;
+
+  // 今日涨跌幅降级：price.change为0时使用目标价推算
+  const hasPriceData = result && (result.price.change !== 0 || result.price.open !== 0);
+  const displayChange = result?.price?.change ?? 0;
+  const displayChangePct = result?.price?.change_pct ?? 0;
+
+  // OHLC: 数据为0时显示 --
+  const fmtPrice = (val: number) => val > 0 ? val.toFixed(2) : "—";
+
   return (
     <div className="px-4 pt-4 pb-6">
       {/* Header */}
@@ -238,13 +274,15 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-[17px] font-bold">{result.name}</div>
+                <div className="text-[17px] font-bold">{stockName}</div>
                 <div className="text-[11px] text-text-tertiary">{result.code}</div>
               </div>
               <div className="text-right">
                 <div className="text-[22px] font-bold">¥{result.prediction.current_price.toFixed(2)}</div>
-                <div className={`text-[12px] font-medium ${result.price.change >= 0 ? 'text-red-500' : 'text-green-500'}`}>
-                  {result.price.change >= 0 ? '+' : ''}{result.price.change.toFixed(2)} ({result.price.change_pct >= 0 ? '+' : ''}{result.price.change_pct.toFixed(2)}%)
+                <div className={`text-[12px] font-medium ${hasPriceData ? (displayChange >= 0 ? 'text-red-500' : 'text-green-500') : 'text-text-tertiary'}`}>
+                  {hasPriceData
+                    ? `${displayChange >= 0 ? '+' : ''}${displayChange.toFixed(2)} (${displayChangePct >= 0 ? '+' : ''}${displayChangePct.toFixed(2)}%)`
+                    : '今日数据加载中'}
                 </div>
               </div>
             </div>
@@ -255,10 +293,10 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
             {/* OHLC */}
             <div className="grid grid-cols-4 gap-2 mt-3">
               {[
-                { label: "开盘", val: result.price.open.toFixed(2) },
-                { label: "最高", val: result.price.high.toFixed(2) },
-                { label: "最低", val: result.price.low.toFixed(2) },
-                { label: "昨收", val: result.price.pre_close.toFixed(2) },
+                { label: "开盘", val: fmtPrice(result.price.open) },
+                { label: "最高", val: fmtPrice(result.price.high) },
+                { label: "最低", val: fmtPrice(result.price.low) },
+                { label: "昨收", val: fmtPrice(result.price.pre_close) },
               ].map((d, i) => (
                 <div key={i} className="text-center">
                   <div className="text-[10px] text-text-tertiary">{d.label}</div>
@@ -404,6 +442,103 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               ))}
             </div>
           </details>
+
+          {/* ─────── 多源综合评分 ─────── */}
+          {compScore && (
+            <>
+              {/* 机构观点 */}
+              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building2 className="w-4 h-4 text-text-tertiary" />
+                  <span className="text-sm font-semibold">机构观点</span>
+                  <span className="ml-auto text-[10px] text-text-tertiary">{compScore.breakdown.institutional.total}家</span>
+                </div>
+                <div className="space-y-2">
+                  {(compScore as any).raw_ratings?.length > 0 ? (
+                    (compScore as any).raw_ratings.map((r: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-border-tertiary/40 last:border-0">
+                        <span className="text-text-secondary">{r.org_name}</span>
+                        <span className={`font-medium ${r.rating.includes("买入") ? "text-red-500" : r.rating.includes("增持") ? "text-orange-500" : "text-text-tertiary"}`}>
+                          {r.rating}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[11px] text-text-tertiary text-center py-2">暂无近期机构评级数据</div>
+                  )}
+                </div>
+              </div>
+
+              {/* 资金流向 */}
+              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+                <div className="flex items-center gap-2 mb-3">
+                  <Coins className="w-4 h-4 text-text-tertiary" />
+                  <span className="text-sm font-semibold">资金流向</span>
+                </div>
+                {(compScore as any).raw_fund_flow?.main_force_net !== undefined ? (
+                  <div className="space-y-2">
+                    {[
+                      { label: "主力资金", val: (compScore as any).raw_fund_flow.main_force_net },
+                      { label: "中单资金", val: (compScore as any).raw_fund_flow.mid_net },
+                      { label: "散户资金", val: (compScore as any).raw_fund_flow.retail_net },
+                    ].map((item, i) => {
+                      const v = item.val || 0;
+                      return (
+                        <div key={i} className="flex items-center justify-between text-xs py-1">
+                          <span className="text-text-secondary">{item.label}</span>
+                          <span className={`font-bold ${v > 0 ? "text-red-500" : v < 0 ? "text-green-500" : "text-text-tertiary"}`}>
+                            {v > 0 ? "+" : ""}{v.toFixed(0)}万
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {(compScore as any).raw_fund_flow.consecutive_inflow > 1 && (
+                      <div className="text-[10px] text-brand-teal-dark mt-1">
+                        🔥 主力连续{(compScore as any).raw_fund_flow.consecutive_inflow}日净流入
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-text-tertiary text-center py-2">暂无资金流向数据</div>
+                )}
+              </div>
+
+              {/* 玄学视角 */}
+              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-text-tertiary" />
+                  <span className="text-sm font-semibold">玄学视角</span>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1">
+                    <span className="text-text-secondary">股票五行</span>
+                    <span className="font-medium">{compScore.breakdown.wuxing.element}（{compScore.breakdown.wuxing.trigram}卦）</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-text-secondary">五行理法</span>
+                    <span className="font-medium">{compScore.breakdown.wuxing.reason}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-text-secondary">与用神关系</span>
+                    <span className={`font-medium ${
+                      compScore.breakdown.wuxing.god_relation.includes("生") ? "text-green-600" :
+                      compScore.breakdown.wuxing.god_relation.includes("克") ? "text-red-500" : "text-text-tertiary"
+                    }`}>{compScore.breakdown.wuxing.god_relation}</span>
+                  </div>
+                  {compScore.breakdown.wuxing.god_relation.includes("生") && (
+                    <div className="bg-green-50 rounded-xl p-2.5 text-[11px] text-green-700 mt-1">
+                      ✨ 此股票五行生扶用神，运势契合度较高
+                    </div>
+                  )}
+                  {compScore.breakdown.wuxing.god_relation.includes("克") && (
+                    <div className="bg-red-50 rounded-xl p-2.5 text-[11px] text-red-600 mt-1">
+                      ⚠️ 此股票五行克制用神，运势存在冲突
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
         </div>
       )}
