@@ -30,6 +30,7 @@ interface ComprehensiveScore {
   breakdown: {
     institutional: { score: number; buy_orgs: number; total_orgs: number };
     fund_flow: { score: number; net: number; consecutive: number; net_pct: number };
+    fundamentals: { score: number; pe: number | null; pb: number | null; roe: number | null; rev_growth: number | null; profit_growth: number | null };
     wuxing: { score: number; element: string; trigram: string; reason: string; relation: string; god_relation: string };
   };
 }
@@ -536,6 +537,37 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
                 ) : (
                   <div className="text-[11px] text-text-tertiary text-center py-2">暂无资金流向数据</div>
                 )}
+              </div>
+
+              {/* 基本面 */}
+              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-4 h-4 text-text-tertiary" />
+                  <span className="text-sm font-semibold">基本面</span>
+                  <span className={`ml-auto text-[10px] font-medium ${compScore.breakdown.fundamentals.score >= 60 ? 'text-green-600' : compScore.breakdown.fundamentals.score >= 40 ? 'text-amber-600' : 'text-red-500'}`}>
+                    {compScore.breakdown.fundamentals.score}分
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {compScore.breakdown.fundamentals.pe !== null ? (
+                    <>
+                      {[
+                        { label: "市盈率 PE", val: compScore.breakdown.fundamentals.pe, unit: "" },
+                        { label: "市净率 PB", val: compScore.breakdown.fundamentals.pb, unit: "" },
+                        { label: "净资产收益率 ROE", val: compScore.breakdown.fundamentals.roe, unit: "%" },
+                        { label: "营收增长率", val: compScore.breakdown.fundamentals.rev_growth, unit: "%" },
+                        { label: "利润增长率", val: compScore.breakdown.fundamentals.profit_growth, unit: "%" },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-border-tertiary/40 last:border-0">
+                          <span className="text-text-secondary">{item.label}</span>
+                          <span className="font-semibold">{item.val !== null ? `${item.val.toFixed(2)}${item.unit}` : '--'}</span>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="text-[11px] text-text-tertiary text-center py-2">暂无基本面数据</div>
+                  )}
+                </div>
               </div>
 
               {/* 玄学视角 */}
