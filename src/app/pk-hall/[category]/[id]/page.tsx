@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { CATEGORY_CONFIG, PKTopic, APIResponse } from "../../types";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
@@ -92,9 +93,11 @@ export default function PKRoomPage() {
 
   const handleInvite = () => {
     if (!topic) return;
-    navigator.clipboard.writeText(
-      `⚔️ PK挑战邀请\n「${topic.title}」\n选【${topic.option_a}】VS【${topic.option_b}】\n💰当前奖池：${topic.total_pool}豆 · 👥${topic.total_votes}人参与\nhttps://h5.ws.hi.cn/pk-hall/${category}/${pkId}`
-    ).then(() => { setVoteMsg("✅ 邀请链接已复制！"); setTimeout(() => setVoteMsg(""), 2000); }).catch(() => {});
+    const text = buildShareText(
+      "⚔️ PK挑战邀请",
+      `「${topic.title}」选【${topic.option_a}】VS【${topic.option_b}】· 💰奖池${topic.total_pool}豆·👥${topic.total_votes}人参与`
+    );
+    shareToWeChat(text);
   };
 
   if (loading) return (
@@ -114,7 +117,7 @@ export default function PKRoomPage() {
       <div className="mx-4 mt-4 bg-white rounded-[20px] p-8 text-center border border-gray-100">
         <div className="text-2xl mb-2">🔍</div>
         <div className="text-[11px] text-gray-400">{error || "PK话题不存在"}</div>
-        <button onClick={() => { setError(""); setLoading(true); loadDetail(); }} className="mt-2 text-xs text-teal-600 font-medium">重试</button>
+        <button onClick={() => { setError(""); setLoading(true); loadDetail(); }} className="mt-2 text-xs text-brand-teal-dark font-medium">重试</button>
       </div>
     </main>
   );
@@ -157,13 +160,13 @@ export default function PKRoomPage() {
             {topic.option_a} {isSettled && topic.winner === 'A' && '🏆'}
           </div>
           {isActive && (
-            <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
+            <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
               投{topic.min_bet}豆支持
             </button>
           )}
           <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-teal-400 to-teal-500 rounded-full transition-all" style={{ width: `${aPct}%` }} />
+              <div className="h-full bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-full transition-all" style={{ width: `${aPct}%` }} />
             </div>
             <span className="font-medium">{aVotes}票 ({aPct}%)</span>
           </div>
@@ -195,7 +198,7 @@ export default function PKRoomPage() {
         <div className="flex justify-center gap-4 mt-3 text-[10px] text-gray-400">
           <span>{topic.creator_name} 发起</span>
           <span>{total} 人参与</span>
-          <button onClick={handleInvite} className="text-teal-600 font-medium">↗ 邀请好友</button>
+          <button onClick={handleInvite} className="text-brand-teal-dark font-medium">↗ 邀请好友</button>
         </div>
 
         {isActive && (
@@ -235,7 +238,7 @@ export default function PKRoomPage() {
               placeholder="说点什么..."
               className="flex-1 px-3 py-2 bg-gray-50 rounded-[12px] text-[11px] outline-none focus:ring-2 focus:ring-teal-500/30" />
             <button onClick={handleComment} disabled={!commentText.trim()}
-              className="px-4 py-2 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-[11px] font-medium disabled:opacity-50">发送</button>
+              className="px-4 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-[11px] font-medium disabled:opacity-50">发送</button>
           </div>
         ) : (
           <div className="text-center text-[10px] text-gray-400 py-2">登录后可以参与评论</div>
@@ -251,7 +254,7 @@ export default function PKRoomPage() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
           <button onClick={() => handleOptionClick('A')} disabled={!isActive}
-            className="flex-1 bg-gradient-to-r from-teal-400 to-teal-500 text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            className="flex-1 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
             {topic.option_a?.substring(0, 6)}
           </button>
           <button onClick={handleInvite}
@@ -270,7 +273,7 @@ export default function PKRoomPage() {
             <div className="space-y-2.5 text-xs">
               <div className="bg-gray-50 rounded-[12px] p-3">
                 <div className="font-medium mb-1">{topic.title}</div>
-                <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-teal-600 font-medium">
+                <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-brand-teal-dark font-medium">
                   {confirmVote.choice === 'A' ? topic.option_a : topic.option_b}
                 </span>
               </div>
@@ -298,7 +301,7 @@ export default function PKRoomPage() {
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[12px] text-xs font-medium">取消</button>
-              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-medium">
+              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-medium">
                 确认投注 {confirmVote.betAmount} 豆
               </button>
             </div>
@@ -320,7 +323,7 @@ export default function PKRoomPage() {
             <div className="bg-teal-50 rounded-[12px] p-3 mb-3 text-center">
               <div className="text-[10px] text-gray-400">当前投注</div>
               <div className="text-xs font-bold text-teal-700">{confirmVote?.choice === 'A' ? topic?.option_a : topic?.option_b}</div>
-              <div className="text-[20px] font-bold text-teal-600">{confirmVote?.betAmount || 0}豆</div>
+              <div className="text-[20px] font-bold text-brand-teal-dark">{confirmVote?.betAmount || 0}豆</div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowBindWx(false)}
@@ -336,7 +339,7 @@ export default function PKRoomPage() {
                     if (j.code === 0) setTimeout(() => setShowBindWx(false), 2000);
                   } catch { setBindMsg("❌ 网络错误"); }
                 }}
-                className="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-semibold shadow-sm">
+                className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-semibold shadow-sm">
                 📱 添加企微通知
               </button>
             </div>
@@ -356,11 +359,13 @@ export default function PKRoomPage() {
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-semibold">小章鱼体彩投注站</div>
               <div className="text-[10px] text-gray-400 mt-0.5">距您约 800m</div>
-              <div className="text-[10px] text-teal-600 font-medium mt-1">🎁 到店出示PK战绩 → 送200豆</div>
+              <div className="text-[10px] text-brand-teal-dark font-medium mt-1">🎁 到店出示PK战绩 → 送200豆</div>
             </div>
-            <button onClick={() => { navigator.clipboard.writeText("小章鱼体彩投注站 - 地址：门店详情页"); setVoteMsg("✅ 门店信息已复制"); setTimeout(() => setVoteMsg(""), 2000); }}
-              className="px-3 py-1.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[10px] text-[10px] font-medium shrink-0">
-              🗺 导航
+            <button onClick={() => {
+              shareToWeChat("小章鱼体彩投注站 - 地址：门店详情页\n到店出示PK战绩 → 送200豆");
+            }}
+              className="px-3 py-1.5 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white rounded-[10px] text-[10px] font-medium shrink-0">
+              📋 复制门店信息
             </button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 🏪 加豆站 — 全资产聚合中心
+ * 🏪 加豆站 — 资产聚合中心
  *
  * 七大模块: 资产卡片(含冻结) | 激活引导 | 邀请好友 | 兑换中心 | 快捷入口 | 日常任务 | 游戏豆流水
  */
@@ -16,13 +16,15 @@ import {
 } from "lucide-react";
 import ExchangeModal from "./exchange-modal";
 import DailyTasks from "./daily-tasks";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 // ─── 接口 ───
 interface WalletBrief {
   credit1: number;
-  credit5: number;
+  credit2: number;
   credit3: number;
   credit4: number;
+  credit5: number;
 }
 
 interface FlowItem {
@@ -34,24 +36,27 @@ interface FlowItem {
   created_at: string;
 }
 
+// 冻结比例（后续从后端API获取）
+const CRYSTAL_FROZEN_RATIO = 0.7;
+
 // ─── 组件 ───
 
-function AssetCard({ credits, onExchangeClick }: { credits: WalletBrief; onExchangeClick: () => void }) {
+function AssetCard({ credits, frozenRatio, onExchangeClick }: { credits: WalletBrief; frozenRatio: number; onExchangeClick: () => void }) {
   const totalCrystal = Math.floor(credits.credit5);
-  // 冻结逻辑: 用注册赠送游戏豆赢得的水晶石 100% 冻结
-  // 自己赚的游戏豆赢得的不冻结 → 需要后端 frozen_crystal 字段区分
-  // 当前模拟: 50% 冻结 (待后端完善后替换)
-  const [frozen, setFrozen] = useState(Math.floor(totalCrystal * 0.5));
+  // 冻结比例由父组件决定，统一来源
+  const totalBall = Math.floor(credits.credit3);
+  const totalIdle = Math.floor(credits.credit2);
+  const frozen = Math.floor(totalCrystal * frozenRatio);
   const active = totalCrystal - frozen;
-  const frozenRatio = totalCrystal > 0 ? Math.round((frozen / totalCrystal) * 100) : 0;
-  const totalValuation = Math.floor(credits.credit1) + totalCrystal + credits.credit4;
+  const frozenPct = totalCrystal > 0 ? Math.round((frozen / totalCrystal) * 100) : 0;
+  const totalValuation = Math.floor(credits.credit1) + totalCrystal + totalBall + credits.credit4;
 
   return (
     <section className="mx-4 mt-4">
       <div className="bg-white rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-text text-sm font-semibold">💰 我的资产</h2>
-          <span className="text-text-tertiary text-[10px]">总估值 ≈ ¥{totalValuation.toFixed(2)}</span>
+          <span className="text-text-tertiary text-[10px]">总估值 ≈ {totalValuation.toLocaleString()}</span>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mt-4">
@@ -67,14 +72,12 @@ function AssetCard({ credits, onExchangeClick }: { credits: WalletBrief; onExcha
             <div className="text-2xl mb-1">⛏️</div>
             <div className="text-text text-sm font-bold">{totalCrystal.toLocaleString()}</div>
             <div className="text-text-tertiary text-[10px] mt-0.5">水晶石</div>
-            {/* 冻结标识 */}
             {frozen > 0 && (
               <div className="mt-1.5 space-y-0.5">
                 <div className="flex justify-center gap-2 text-[9px]">
                   <span className="text-brand-coral">🔒 {frozen}冻结</span>
                   <span className="text-[#45CCD5]">✅ {active}可用</span>
                 </div>
-                {/* 进度条 */}
                 <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden mx-2">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-brand-coral to-brand-gold"
@@ -85,11 +88,29 @@ function AssetCard({ credits, onExchangeClick }: { credits: WalletBrief; onExcha
             )}
           </div>
 
+          {/* 水晶球 */}
+          <div className="bg-bg rounded-[12px] p-3 text-center">
+            <div className="text-2xl mb-1">🔮</div>
+            <div className="text-text text-sm font-bold">{totalBall.toLocaleString()}</div>
+            <div className="text-text-tertiary text-[10px] mt-0.5">水晶球</div>
+            <div className="text-[8px] text-text-tertiary mt-0.5">享分红</div>
+          </div>
+        </div>
+
+        {/* 第二行: 余额 + 闲豆 */}
+        <div className="grid grid-cols-2 gap-3 mt-3">
           {/* 余额 */}
           <div className="bg-bg rounded-[12px] p-3 text-center">
             <div className="text-2xl mb-1">💵</div>
             <div className="text-text text-sm font-bold">¥{credits.credit4.toFixed(2)}</div>
             <div className="text-text-tertiary text-[10px] mt-0.5">余额</div>
+          </div>
+          {/* 闲豆 */}
+          <div className="bg-bg rounded-[12px] p-3 text-center">
+            <div className="text-2xl mb-1">🫘</div>
+            <div className="text-text text-sm font-bold">{totalIdle.toLocaleString()}</div>
+            <div className="text-text-tertiary text-[10px] mt-0.5">闲豆</div>
+            <div className="text-[8px] text-text-tertiary mt-0.5">商城专用</div>
           </div>
         </div>
 
@@ -156,16 +177,16 @@ function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number;
 function InviteCard() {
   const { user } = useAuth();
   const inviteUrl = user
-    ? `https://h5.ws.hi.cn?invite=${user.uid}`
+    ? `https://h5.ws.hi.cn?ref=${user.uid}`
     : "https://h5.ws.hi.cn";
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(inviteUrl).catch(() => {});
+    shareToWeChat(inviteUrl);
   };
 
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-gradient-to-r from-amber-400 to-orange-500 rounded-[20px] p-5 shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-brand-gold to-brand-gold-dark rounded-[20px] p-5 shadow-lg relative overflow-hidden">
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
         <div className="relative z-10">
@@ -184,9 +205,8 @@ function InviteCard() {
             </button>
             <button
               onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: "小章鱼", text: `邀请你一起玩！注册即送 150,000 游戏豆 🎉`, url: inviteUrl });
-                }
+                const text = buildShareText("小章鱼", "邀请你一起玩！注册即送 150,000 游戏豆 🎉", inviteUrl);
+                shareToWeChat(text);
               }}
               className="flex-1 bg-white/20 backdrop-blur-sm rounded-[10px] py-2.5 text-white text-xs font-medium active:scale-95 transition-transform"
             >
@@ -227,12 +247,14 @@ function QuickLinks() {
 function RecentFlow({ uid }: { uid: number }) {
   const [flows, setFlows] = useState<FlowItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const loadFlows = useCallback(() => {
     setLoading(true);
+    setError(false);
     apiFetch(`/api/wallet/flow?uid=${uid}&limit=5`)
       .then((d: any) => setFlows(d.list || []))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [uid]);
 
@@ -271,6 +293,12 @@ function RecentFlow({ uid }: { uid: number }) {
       <div className="bg-surface rounded-[16px] border border-[rgba(69,204,213,0.08)] overflow-hidden">
         {loading ? (
           <div className="p-4 text-center text-[11px] text-text-tertiary animate-pulse">加载中...</div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <div className="text-2xl mb-2">⚠️</div>
+            <div className="text-[11px] text-brand-coral">加载失败</div>
+            <button onClick={loadFlows} className="mt-2 text-[10px] text-brand-teal-dark underline">点击重试</button>
+          </div>
         ) : flows.length === 0 ? (
           <div className="p-6 text-center">
             <div className="text-2xl mb-2">📭</div>
@@ -305,11 +333,11 @@ export default function JiadouzhanPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showExchange, setShowExchange] = useState(false);
   const [credits, setCredits] = useState<WalletBrief>({
-    credit1: 0, credit5: 0, credit3: 0, credit4: 0,
+    credit1: 0, credit5: 0, credit3: 0, credit4: 0, credit2: 0,
   });
-  // 水晶石冻结数和可用数
+  // 水晶石冻结 — 统一使用全局变量 CRYSTAL_FROZEN_RATIO
   const totalCrystal = Math.floor(credits.credit5);
-  const frozenCrystal = Math.floor(totalCrystal * 0.7); // 模拟: 后端返回实际冻结数
+  const frozenCrystal = Math.floor(totalCrystal * CRYSTAL_FROZEN_RATIO);
   const activeCrystal = totalCrystal - frozenCrystal;
 
   useEffect(() => {
@@ -321,6 +349,7 @@ export default function JiadouzhanPage() {
         credit5: b.credit5 ?? 0,
         credit3: b.credit3 ?? 0,
         credit4: b.credit4 ?? 0,
+        credit2: b.credit2 ?? 0,
       });
     }
   }, [user]);
@@ -332,6 +361,7 @@ export default function JiadouzhanPage() {
         credit5: user.balance.credit5 ?? 0,
         credit3: user.balance.credit3 ?? 0,
         credit4: user.balance.credit4 ?? 0,
+        credit2: user.balance.credit2 ?? 0,
       });
     }
   }, [user]);
@@ -369,8 +399,8 @@ export default function JiadouzhanPage() {
         </div>
       ) : (
         <>
-          {/* 模块一: 资产卡片(含冻结) + 兑换入口 */}
-          <AssetCard credits={credits} onExchangeClick={() => setShowExchange(true)} />
+          {/* 模块一: 资产卡片(含冻结+水晶球+闲豆) + 兑换入口 */}
+          <AssetCard credits={credits} frozenRatio={CRYSTAL_FROZEN_RATIO} onExchangeClick={() => setShowExchange(true)} />
 
           {/* 模块二: 激活引导（新增） */}
           <ActivationCard frozenCount={frozenCrystal} onExchangeClick={() => setShowExchange(true)} />

@@ -7,6 +7,7 @@ import { ChevronLeft, Sparkles, Flame, TrendingUp, MapPin, Clock, Bot, AlertCirc
 import { API_BASE } from "@/config/api";
 import FortuneShare from "@/components/fortune/fortune-share";
 import LoginModal from "@/components/ui/login-modal";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 // ── Types ──
 interface WuxingLevel {
@@ -17,6 +18,9 @@ interface WuxingDress {
   day_element: string;
   levels: WuxingLevel[];
   advice: string;
+  use_god?: string;
+  user_element?: string;
+  personalized?: boolean;
 }
 
 interface FortuneToday {
@@ -439,130 +443,89 @@ export default function DailyFortunePage() {
           </div>
         </div>
 
-        {/* ═══════ 五行穿衣指南 — 线条版 · 主题居中 ═══════ */}
+        {/* ═══════ 五行穿衣指南 — 全面优化版 ═══════ */}
         {td.wuxing_dress && (() => {
           const wd = td.wuxing_dress;
-          const useGod = wd.levels.find(l => l.level === "次吉");
+          const useGodName = wd.use_god || "";
+          const userEl = wd.user_element || "";
+          const isPersonalized = wd.personalized || false;
+          const dayEl = wd.day_element || "";
           const WUXING_ROW = [
-            { key: "金", icon: "⚜️", color: "#FFD700" },
-            { key: "木", icon: "🌿", color: "#4CAF50" },
-            { key: "水", icon: "💧", color: "#2196F3" },
-            { key: "火", icon: "🔥", color: "#F44336" },
-            { key: "土", icon: "⛰️", color: "#8D6E63" },
+            { key: "金", icon: "⚜️" }, { key: "木", icon: "🌿" }, { key: "水", icon: "💧" },
+            { key: "火", icon: "🔥" }, { key: "土", icon: "⛰️" },
           ];
-          const dayIdx = WUXING_ROW.findIndex(w => w.key === wd.day_element);
+          const dayIdx = WUXING_ROW.findIndex(w => w.key === dayEl);
+          const lc = (level: string) => {
+            if (level === "大吉") return "text-emerald-600";
+            if (level === "吉") return "text-blue-600";
+            if (level === "平") return "text-amber-600";
+            return "text-red-600";
+          };
+          const dc = (level: string) => {
+            if (level === "大吉") return "#4CAF50"; if (level === "吉") return "#2196F3";
+            if (level === "平") return "#FFC107"; return "#F44336";
+          };
           return (
-          <div className="bg-white rounded-[16px] p-4 shadow-sm border border-gray-100 mb-5">
-            {/* 标题 */}
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="text-base">👗</span>
-              <span className="text-xs font-bold text-brand-teal-dark">今日五行穿衣</span>
-            </div>
-
-            {/* Info bar */}
-            <div className="flex gap-2 mb-4">
-              <span className="text-[10px] bg-brand-teal-light/30 text-brand-teal-dark rounded-[6px] px-2.5 py-0.5 font-medium">
-                今日五行：{wd.day_element}旺
-              </span>
-              {useGod && (
-                <span className="text-[10px] bg-brand-teal-light/30 text-brand-teal-dark rounded-[6px] px-2.5 py-0.5 font-medium">
-                  你的用神：{useGod.element}
-                </span>
-              )}
-            </div>
-
-            {/* ══ 主题居中 — 五行行（直角线条） ══ */}
-            <div className="flex items-center justify-center gap-3 mb-4">
-              {WUXING_ROW.map((wx, i) => {
-                const isActive = i === dayIdx;
-                return (
+          <div className="bg-white rounded-[16px] shadow-sm border border-gray-100 mb-5 overflow-hidden">
+            <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark px-4 pt-4 pb-5 text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">&#128085;</span>
+                <span className="text-sm font-bold">今日五行穿衣</span>
+                {isPersonalized && <span className="text-[9px] bg-white/20 px-2 py-0.5 ml-auto">个性化</span>}
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                {WUXING_ROW.map((wx, i) => (
                   <div key={wx.key} className="flex flex-col items-center gap-0.5">
-                    <div className={`flex items-center gap-1 px-2.5 py-1.5 text-xs transition-all ${
-                      isActive
-                        ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-bold shadow-sm"
-                        : "text-gray-400"
-                    }`}>
-                      <span>{wx.icon}</span>
-                      <span>{wx.key}</span>
-                    </div>
-                    {isActive && (
-                      <span className="text-[7px] text-brand-teal-dark font-bold">↑旺</span>
-                    )}
+                    <div className={`w-9 h-9 flex items-center justify-center text-base ${i === dayIdx ? "bg-white/20 text-white rounded-[4px] scale-110" : "text-white/50"}`}>{wx.icon}</div>
+                    <span className={`text-[9px] ${i === dayIdx ? "text-white font-bold" : "text-white/40"}`}>{wx.key}</span>
+                    {i === dayIdx && <span className="text-[7px] bg-white/20 text-white px-1">旺</span>}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-
-            {/* 颜色级别 — 线条版 */}
-            {wd.levels.map((lv, i) => {
-              const isLucky = lv.level === "大吉";
-              const isAvoid = lv.level === "忌";
-              const dotColor = isLucky ? "#4CAF50" : lv.level === "次吉" ? "#F44336" : lv.level === "平" ? "#FFC107" : "#BDBDBD";
-              // Build gradient bar from shades
-              const barGrad = lv.shades.length > 1
-                ? `linear-gradient(90deg, ${lv.shades.map((s, si) => `${s} ${si * (100 / lv.shades.length)}%, ${s} ${(si + 1) * (100 / lv.shades.length)}%`).join(", ")})`
-                : lv.shades[0];
-              return (
-                <div key={i} className="mb-3 last:mb-4">
-                  {/* 标题行 */}
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <div className="w-3 h-3 flex-shrink-0" style={{ background: dotColor, border: isAvoid ? '0.5px solid #ddd' : 'none' }} />
-                    <span className="text-[11px] font-medium text-text-secondary">
-                      {lv.level} · {lv.name}系
-                    </span>
-                    <span className="text-[9px] text-gray-400">· {lv.relation}</span>
+            <div className="px-4 pt-3 pb-2 flex gap-2 flex-wrap border-b border-gray-50">
+              <span className="text-[10px] bg-brand-teal-light/30 text-brand-teal-dark px-2.5 py-1 font-medium">今日五行：{dayEl}旺</span>
+              {isPersonalized && useGodName && <span className="text-[10px] bg-amber-50 text-amber-700 px-2.5 py-1 font-medium border border-amber-200">⭐ 你的用神：{useGodName}</span>}
+              {isPersonalized && userEl && <span className="text-[10px] bg-brand-teal-light/30 text-brand-teal-dark px-2.5 py-1 font-medium">日主：{userEl}</span>}
+            </div>
+            <div className="px-4 py-3">
+              {wd.levels.map((lv: any, i: number) => (
+                <div key={i} className="mb-3 last:mb-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-4 h-4 rounded-sm" style={{ background: dc(lv.level) }} />
+                    <span className={`text-[11px] font-bold ${lc(lv.level)}`}>{lv.level}</span>
+                    <span className="text-[10px] text-gray-500">· {lv.name}系</span>
+                    <span className="text-[8px] text-gray-400 ml-auto">{lv.relation || ""}</span>
                   </div>
-                  {/* 渐变条 */}
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="flex-1 h-[10px] overflow-hidden"
-                      style={{ background: barGrad }}
-                    />
-                    <span className="text-[8px] text-gray-400 w-8 text-right">
-                      {lv.shades.length}色
-                    </span>
-                  </div>
-                  {/* 颜色名 */}
-                  <div className="flex mt-0.5" style={{ gap: `calc(${100 / lv.shades.length}% - 20px)`, maxWidth: '100%' }}>
-                    {lv.shades.map((_, si) => (
-                      <span key={si} className="text-[8px] text-gray-400 flex-1">&nbsp;</span>
+                  <div className="flex gap-2.5">
+                    {lv.shades.map((s: string, si: number) => (
+                      <div key={si} className="w-10 h-10 rounded-md shadow-sm border border-gray-100/50" style={{ background: s }} />
                     ))}
                   </div>
                 </div>
-              );
-            })}
-
-            {/* 分隔线 */}
-            <div className="h-px bg-gray-100 -mx-4 mb-3"></div>
-
-            {/* AI 穿搭建议 */}
-            <div className="bg-brand-teal-light/20 rounded-[12px] p-3 mb-3">
-              <div className="text-[11px] font-medium text-brand-teal-dark mb-1">💡 小章鱼穿搭建议</div>
-              <div className="text-[11px] text-text-secondary leading-relaxed">
-                &ldquo;{wd.advice}&rdquo;
+              ))}
+            </div>
+            <div className="h-px bg-gray-100 mx-4" />
+            <div className="px-4 py-3">
+              <div className="bg-gradient-to-r from-brand-teal-light/30 to-brand-teal-light/10 rounded-[10px] p-3">
+                <div className="text-[10px] font-medium text-brand-teal-dark mb-1">&#128161; 小章鱼穿搭建议</div>
+                <div className="text-[11px] text-text-secondary leading-relaxed">&ldquo;{wd.advice}&rdquo;</div>
               </div>
             </div>
-
-            {/* 分享按钮 */}
-            <div className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-[10px] border border-gray-200 text-[11px] text-brand-teal-dark font-medium cursor-pointer active:scale-95 transition-transform"
-              onClick={() => {
-                const text = `今日五行穿衣指南\n\n${wd.levels.map(l => `${l.level} · ${l.name}系：${l.shades.join("、")}`).join("\n")}\n\n💡 ${wd.advice}`;
-                navigator.clipboard.writeText(text)
-                  .then(() => {
-                    const el = document.createElement('div');
-                    el.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-teal-dark text-white text-xs px-4 py-2 rounded-full shadow-lg z-50 animate-bounce';
-                    el.textContent = '✅ 穿搭指南已复制！';
-                    document.body.appendChild(el);
-                    setTimeout(() => el.remove(), 2000);
-                  })
-                  .catch(() => {});
-              }}>
-              <span>📤</span>
-              <span>分享穿衣指南</span>
+            <div className="px-4 pb-4">
+              <button className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[8px] border border-gray-200 text-[11px] text-brand-teal-dark font-medium bg-white hover:bg-gray-50 active:scale-[0.97] transition-transform"
+                onClick={async () => {
+                  const t = buildShareText("今日五行穿衣指南", `等级·色系\n${wd.levels.map((l: any) => `${l.level}·${l.name}系`).join("\n")}\n\n💡 ${wd.advice}`);
+                  await shareToWeChat(t);
+                }}>
+                <span>&#128229;</span>
+                <span>分享穿衣指南</span>
+              </button>
             </div>
           </div>
           );
         })()}
+
 
         {/* ═══════ 5维度 ═══════ */}
         <div className="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 mb-5">
@@ -694,7 +657,7 @@ export default function DailyFortunePage() {
             {rec.rooms && rec.rooms.length > 0 && (
               <div className="mb-3">
                 <div className="text-[10px] text-gray-400 mb-2">🎯 推荐PK房间</div>
-                {rec.rooms.map((room, i) => (
+                {rec.rooms.map((room: any, i: number) => (
                   <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[12px] px-3.5 py-2.5 mb-1.5">
                     <span className="text-xs font-medium text-brand-teal-dark">{room.name}</span>
                     <span className="text-[9px] text-gray-400">{room.type}</span>
@@ -706,7 +669,7 @@ export default function DailyFortunePage() {
             {rec.stores && rec.stores.length > 0 && (
               <div>
                 <div className="text-[10px] text-gray-400 mb-2">📍 附近门店</div>
-                {rec.stores.map((store, i) => (
+                {rec.stores.map((store: any, i: number) => (
                   <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[12px] px-3.5 py-2.5 mb-1.5">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3 h-3 text-brand-coral" />

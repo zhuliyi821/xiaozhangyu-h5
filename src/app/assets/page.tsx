@@ -14,10 +14,10 @@ interface WalletData {
 
 const assetList = [
   { key: "credit1", icon: "🎮", color: "from-brand-teal to-brand-teal-dark" },
-  { key: "credit5", icon: "⛏️", color: "from-amber-400 to-orange-500" },
-  { key: "credit3", icon: "🔮", color: "from-violet-400 to-pink-500" },
-  { key: "credit4", icon: "💰", color: "from-green-400 to-emerald-500" },
-  { key: "credit2", icon: "🏪", color: "from-amber-400 to-amber-600" },
+  { key: "credit5", icon: "⛏️", color: "from-brand-coral to-brand-coral-dark" },
+  { key: "credit3", icon: "🔮", color: "from-brand-teal/60 to-brand-gold" },
+  { key: "credit4", icon: "💰", color: "from-brand-gold to-brand-gold-dark" },
+  { key: "credit2", icon: "🏪", color: "from-brand-teal to-brand-gold" },
 ];
 
 export default function AssetsPage() {

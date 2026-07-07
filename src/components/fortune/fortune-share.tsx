@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Share2 } from "lucide-react";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 interface FortuneShareProps {
   score: number;
@@ -28,11 +29,11 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     const W = 540, H = 960;
     canvas.width = W; canvas.height = H;
 
-    // 背景渐变
+    // 背景渐变 — 品牌金青珊瑚色系
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#4A1D8F");
-    grad.addColorStop(0.5, "#6C3CE1");
-    grad.addColorStop(1, "#2D0B5E");
+    grad.addColorStop(0, "#45CCD5");    // brand-teal
+    grad.addColorStop(0.5, "#2BAAAF");  // brand-teal-dark
+    grad.addColorStop(1, "#D99A0F");    // brand-gold-dark
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
@@ -40,7 +41,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     ctx.save();
     ctx.globalAlpha = 0.08;
     const g2 = ctx.createRadialGradient(270, 200, 10, 270, 200, 250);
-    g2.addColorStop(0, "#F5A623");
+    g2.addColorStop(0, "#F2B631");    // brand-gold
     g2.addColorStop(1, "transparent");
     ctx.fillStyle = g2;
     ctx.fillRect(0, 0, W, H);
@@ -167,33 +168,19 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     setSaving(true);
     try {
       const blob = await generatePoster();
-      if (!blob) return;
-
-      // Try Web Share API first
-      if (typeof navigator.share === "function") {
-        const file = new File([blob], "xiaozhangyu-fortune.png", { type: "image/png" });
-        await navigator.share({ files: [file], title: "小章鱼每日运势", text: `今日运势 ${score}分 ${tag}` });
-      } else {
-        // Fallback: download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `小章鱼_运势_${score}分.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-    } catch (e) {
-      // Fallback for user cancel or error
-      const blob = await generatePoster();
+      const text = buildShareText(
+        "小章鱼每日运势",
+        `今日运势 ${score}分 ${tag} · ${Object.entries(dimensions).slice(0,5).map(([k,v]) => `${k}${v.score}`).join(" ")}`
+      );
       if (blob) {
+        // 有海报 = 复制海报 + 文字
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `小章鱼_运势_${score}分.png`;
-        a.click();
-        URL.revokeObjectURL(url);
+        // 复制文字 + 海报 URL (用户去微信里贴)
+        await shareToWeChat(`${text}\n海报: ${url}`);
+      } else {
+        await shareToWeChat(text);
       }
-    }
+    } catch {}
     setSaving(false);
   };
 
@@ -203,10 +190,10 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
       <button
         onClick={handleShare}
         disabled={saving}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-gradient-to-r from-purple-50 to-purple-100/60 border border-purple-200/60 active:scale-95 transition-transform shadow-sm disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-gradient-to-r from-brand-teal-light/30 to-brand-teal/20 border border-brand-teal/30 active:scale-95 transition-transform shadow-sm disabled:opacity-50"
       >
-        <Share2 className="w-3 h-3 text-purple-500" />
-        <span className="text-purple-700">{saving ? "生成中…" : "分享运势"}</span>
+        <Share2 className="w-3 h-3 text-brand-teal" />
+        <span className="text-brand-teal-dark">{saving ? "生成中…" : "分享到微信"}</span>
       </button>
     </>
   );

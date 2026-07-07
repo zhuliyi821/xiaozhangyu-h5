@@ -34,11 +34,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const [codeSent, setCodeSent] = useState(false);
   const [debugCode, setDebugCode] = useState("");
 
-  // 检测 URL 中的推荐参数 ?ref=UID
+  // 检测 URL 中的推荐参数 ?ref=UID 或 ?invite=UID
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const ref = params.get("ref");
+      const ref = params.get("ref") || params.get("invite");
       if (ref && /^\d+$/.test(ref)) {
         const refUid = parseInt(ref);
         checkReferral(refUid)
@@ -168,7 +168,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           </p>
           {referrer && mode === "register" && (
             <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[20px]">
-              <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你 · 你们各得 1,000 游戏豆
+              <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你，你们各得 1,000 游戏豆 🎉
             </div>
           )}
         </div>

@@ -60,22 +60,22 @@ export interface CatConfig {
   desc: string;
 }
 
-// 品牌色 tokens — 金青珊瑚体系
+// 品牌色 tokens — 金青珊瑚体系 (改用项目 CSS 变量 brand-*)
 export const BRAND = {
-  teal: "from-teal-400 to-teal-500",
-  tealDark: "text-teal-600",
-  gold: "from-amber-400 to-amber-500",
-  goldDark: "text-amber-600",
-  coral: "from-orange-400 to-orange-500",
-  coralDark: "text-orange-600",
+  teal: "from-brand-teal to-brand-teal-dark",
+  tealDark: "text-brand-teal-dark",
+  gold: "from-brand-gold to-brand-gold-dark",
+  goldDark: "text-brand-gold-dark",
+  coral: "from-brand-coral to-brand-coral-dark",
+  coralDark: "text-brand-coral-dark",
   bgSurface: "bg-white",
   borderSoft: "border-gray-100",
 } as const;
 
-// 品类配置
+// 品类配置 — 品牌色
 export const CATEGORY_CONFIG: Record<string, CatConfig> = {
-  sports:  { name: "体育赛事", icon: "⚽", color: "from-teal-400 to-teal-500", desc: "球赛·电竞·田径" },
-  social:  { name: "社会热点", icon: "🌐", color: "from-amber-400 to-amber-500", desc: "民生·经济·科技" },
-  event:   { name: "突发事件", icon: "⚡", color: "from-orange-400 to-orange-500", desc: "快讯·突发·新发现" },
-  general: { name: "一言不合", icon: "💬", color: "from-purple-400 to-purple-600", desc: "日常·娱乐·随便聊" },
+  sports:  { name: "体育赛事", icon: "⚽", color: "from-brand-teal to-brand-teal-dark", desc: "球赛·电竞·田径" },
+  social:  { name: "社会热点", icon: "🌐", color: "from-brand-gold to-brand-gold-dark", desc: "民生·经济·科技" },
+  event:   { name: "突发事件", icon: "⚡", color: "from-brand-coral to-brand-coral-dark", desc: "快讯·突发·新发现" },
+  general: { name: "一言不合", icon: "💬", color: "from-brand-teal to-brand-coral", desc: "日常·娱乐·随便聊" },
 };

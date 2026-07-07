@@ -34,6 +34,7 @@ export default function PKHallPage() {
   const { user } = useAuth();
   const [topics, setTopics] = useState<PKTopic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeCat, setActiveCat] = useState("");
   const [activeMode, setActiveMode] = useState("");
   const [activeSort, setActiveSort] = useState("hot");
@@ -87,7 +88,7 @@ export default function PKHallPage() {
           setTopics(j.data);
         }
       })
-      .catch(() => {})
+      .catch(() => setError("网络不太给力"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -108,7 +109,7 @@ export default function PKHallPage() {
     <div style={{width:"100%",maxWidth:420,margin:"0 auto",background:"#FFFFFF",minHeight:"100vh",position:"relative",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
 
       {/* ─── Header ─── */}
-      <div style={{background:"linear-gradient(135deg,#45CCD5 0%,#2AA8B0 50%,#F2B631 100%)",borderRadius:"0 0 20px 20px",padding:"20px 16px 16px",color:"white",position:"relative",overflow:"hidden"}}>
+      <div style={{background:"linear-gradient(135deg,#45CCD5 0%,#2BAAAF 50%,#F2B631 100%)",borderRadius:"0 0 20px 20px",padding:"20px 16px 16px",color:"white",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"radial-gradient(circle,rgba(255,255,255,0.25) 0%,transparent 70%)"}} />
         <div style={{position:"relative",zIndex:1,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
@@ -136,6 +137,14 @@ export default function PKHallPage() {
       </div>
 
       <div style={{padding:"0 12px"}}>
+        {/* ─── 错误提示 ─── */}
+        {error && (
+          <div style={{marginTop:8,padding:"10px 16px",background:"#FEF2F2",color:"#DC2626",fontSize:11,borderRadius:12,textAlign:"center"}}>
+            {error}
+            <span style={{marginLeft:8,textDecoration:"underline",cursor:"pointer"}} onClick={() => window.location.reload()}>重试</span>
+          </div>
+        )}
+
         {/* ─── 身份绑定入口 ─── */}
         {user && !showBind && (
           <div onClick={() => setShowBind(true)}
@@ -148,7 +157,7 @@ export default function PKHallPage() {
         {showBind && (
           <div style={{background:"white",borderRadius:12,padding:12,marginTop:8,marginBottom:8,
             border:"1px solid #45CCD5",boxShadow:"0 2px 12px rgba(69,204,213,0.15)",position:"relative"}}>
-            <div style={{fontSize:11,fontWeight:600,color:"#2AA8B0",marginBottom:6}}>🔗 身份绑定</div>
+            <div style={{fontSize:11,fontWeight:600,color:"#2BAAAF",marginBottom:6}}>🔗 身份绑定</div>
             <div style={{fontSize:10,color:"#6B6B6E",marginBottom:8}}>
               绑定后可在企微接收结算通知、到店核销奖励
             </div>
@@ -178,10 +187,10 @@ export default function PKHallPage() {
                   } catch { setBindMsg("❌ 网络错误"); }
                 }}
                 style={{padding:"6px 16px",borderRadius:8,
-                  background:"linear-gradient(135deg,#45CCD5,#2AA8B0)",color:"white",
+                  background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",
                   fontSize:11,fontWeight:600,cursor:"pointer"}}>确认绑定</div>
             </div>
-            {bindMsg && <div style={{fontSize:10,color:bindMsg.includes("✅") ? "#2AA8B0" : "#F27152",marginTop:4}}>{bindMsg}</div>}
+            {bindMsg && <div style={{fontSize:10,color:bindMsg.includes("✅") ? "#2BAAAF" : "#F27152",marginTop:4}}>{bindMsg}</div>}
           </div>
         )}
 
@@ -193,7 +202,7 @@ export default function PKHallPage() {
               style={{
                 flex:1,padding:"8px 0",textAlign:"center",fontSize:12,fontWeight: activeCat === cat.key ? 600 : 500,
                 borderRadius:999,cursor:"pointer",
-                background: activeCat === cat.key ? "linear-gradient(135deg,#45CCD5,#2AA8B0)" : "transparent",
+                background: activeCat === cat.key ? "linear-gradient(135deg,#45CCD5,#2BAAAF)" : "transparent",
                 color: activeCat === cat.key ? "white" : "#9A9A9D",
                 boxShadow: activeCat === cat.key ? "0 2px 6px rgba(69,204,213,0.2)" : "none",
                 transition:"all 0.2s",
@@ -209,7 +218,7 @@ export default function PKHallPage() {
             <span key={mode.key} onClick={() => setActiveMode(mode.key)}
               style={{
                 padding:"4px 12px",borderRadius:999,fontSize:11,fontWeight:500,cursor:"pointer",
-                background: activeMode === mode.key ? "linear-gradient(135deg,#45CCD5,#2AA8B0)" : "white",
+                background: activeMode === mode.key ? "linear-gradient(135deg,#45CCD5,#2BAAAF)" : "white",
                 color: activeMode === mode.key ? "white" : "#6B6B6E",
                 border: activeMode === mode.key ? "none" : "1px solid #E7E7E8",
                 transition:"all 0.2s",
@@ -275,7 +284,7 @@ export default function PKHallPage() {
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                   <span style={{padding:"2px 8px",borderRadius:6,fontSize:10,fontWeight:600,
                     background: pk.category === "sports" ? "#E8FAFB" : pk.category === "social" ? "#FFF5E6" : pk.category === "event" ? "#FFF0ED" : "#F5E8F8",
-                    color: pk.category === "sports" ? "#2AA8B0" : pk.category === "social" ? "#D97706" : pk.category === "event" ? "#F27152" : "#682575"}}>
+                    color: pk.category === "sports" ? "#2BAAAF" : pk.category === "social" ? "#D97706" : pk.category === "event" ? "#F27152" : "#682575"}}>
                     {pk.category === "sports" ? "⚽" : pk.category === "social" ? "🌐" : pk.category === "event" ? "⚡" : "💬"} {pk.category === "sports" ? "体育" : pk.category === "social" ? "社会" : pk.category === "event" ? "突发" : "一言"}
                   </span>
                   <span style={{padding:"2px 8px",borderRadius:6,fontSize:10,fontWeight:600,background:"#FFF0ED",color:"#F27152"}}>
@@ -297,11 +306,11 @@ export default function PKHallPage() {
                 {/* 双进度条 - 始终1v1 */}
                   <div style={{marginBottom:10}}>
                     <div style={{display:"flex",height:8,borderRadius:999,overflow:"hidden",marginBottom:6}}>
-                      <div style={{width:`${pk.total_votes > 0 ? Math.round(pk.vote_a/pk.total_votes*100) : 50}%`,background:"linear-gradient(90deg,#45CCD5,#2AA8B0)"}} />
+                      <div style={{width:`${pk.total_votes > 0 ? Math.round(pk.vote_a/pk.total_votes*100) : 50}%`,background:"linear-gradient(90deg,#45CCD5,#2BAAAF)"}} />
                       <div style={{width:`${pk.total_votes > 0 ? Math.round(pk.vote_b/pk.total_votes*100) : 50}%`,background:"linear-gradient(90deg,#F27152,#E05A3D)"}} />
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:11}}>
-                      <span style={{color:"#2AA8B0",fontWeight:500}}>{pk.option_a} {pk.total_votes > 0 ? Math.round(pk.vote_a/pk.total_votes*100) : 50}% · {pk.pool_a}豆</span>
+                      <span style={{color:"#2BAAAF",fontWeight:500}}>{pk.option_a} {pk.total_votes > 0 ? Math.round(pk.vote_a/pk.total_votes*100) : 50}% · {pk.pool_a}豆</span>
                       <span style={{color:"#F27152",fontWeight:500}}>{pk.option_b} {pk.total_votes > 0 ? Math.round(pk.vote_b/pk.total_votes*100) : 50}% · {pk.pool_b}豆</span>
                     </div>
                   </div>
@@ -310,8 +319,8 @@ export default function PKHallPage() {
                 <div style={{display:"flex",gap:8,alignItems:"center",marginTop:4}}>
                   <div style={{flex:1,fontSize:10,color:"#9A9A9D"}}>起投 {pk.min_bet}豆</div>
                   <div style={{display:"flex",gap:6}}>
-                    <div style={{padding:"6px 14px",borderRadius:10,border:"1px solid #E7E7E8",fontSize:12,color:"#2AA8B0",fontWeight:500}}>👀 围观</div>
-                    <div style={{padding:"6px 18px",borderRadius:10,background:"linear-gradient(135deg,#45CCD5,#2AA8B0)",color:"white",fontSize:12,fontWeight:600,boxShadow:"0 2px 8px rgba(69,204,213,0.2)"}}>💰 下注</div>
+                    <div style={{padding:"6px 14px",borderRadius:10,border:"1px solid #E7E7E8",fontSize:12,color:"#2BAAAF",fontWeight:500}}>👀 围观</div>
+                    <div style={{padding:"6px 18px",borderRadius:10,background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",fontSize:12,fontWeight:600,boxShadow:"0 2px 8px rgba(69,204,213,0.2)"}}>💰 下注</div>
                   </div>
                 </div>
               </div>
@@ -324,7 +333,7 @@ export default function PKHallPage() {
       {/* ─── FAB按钮 ─── */}
       <div onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
         style={{position:"fixed",bottom:80,right:16,width:56,height:56,borderRadius:"50%",
-          background:"linear-gradient(135deg,#45CCD5,#2AA8B0)",color:"white",
+          background:"linear-gradient(135deg,#45CCD5,#2BAAAF)",color:"white",
           display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",
           fontSize:20,fontWeight:300,boxShadow:"0 4px 16px rgba(69,204,213,0.35)",cursor:"pointer",
           zIndex:100,lineHeight:1}}>

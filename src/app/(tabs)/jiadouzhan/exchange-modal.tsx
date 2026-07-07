@@ -14,7 +14,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { apiFetch, ApiError } from "@/config/api";
-import { X, ArrowRightLeft, CheckCircle, Loader2, ShoppingBag } from "lucide-react";
+import { X, ArrowRightLeft, CheckCircle, Loader2, ShoppingBag, Zap } from "lucide-react";
 
 type ExchangeType = "beans_to_game" | "beans_split" | "balance_to_game" | "crystal_to_game" | "activate";
 
@@ -40,7 +40,7 @@ const tabs: TabDef[] = [
   { key: "beans_to_game",    label: "水晶石→游戏豆",  fromLabel: "水晶石", toLabel: "游戏豆", rate: 1,   fromAsset: "credit5", fromField: "credit5", minAmount: 10 },
   { key: "balance_to_game",  label: "余额→游戏豆",    fromLabel: "余额",   toLabel: "游戏豆", rate: 100, fromAsset: "credit4", fromField: "credit4", minAmount: 1 },
   { key: "crystal_to_game",  label: "水晶球→游戏豆",  fromLabel: "水晶球", toLabel: "游戏豆", rate: 100, fromAsset: "credit3", fromField: "credit3", minAmount: 1 },
-  { key: "beans_split",      label: "水晶石拆分",      fromLabel: "水晶石", toLabel: "水晶球+余额", rate: 0.5, fromAsset: "credit5", fromField: "credit5", minAmount: 10 },
+  { key: "beans_split",      label: "水晶石→水晶球+余额", fromLabel: "水晶石", toLabel: "水晶球+余额", rate: 0.5, fromAsset: "credit5", fromField: "credit5", minAmount: 10 },
   { key: "activate",         label: "🔓 激活水晶石" },
 ];
 
@@ -62,9 +62,13 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
   const tab = tabs.find((t) => t.key === activeTab)!;
   const balance = tab.fromField ? (user?.balance?.[tab.fromField] ?? 0) : 0;
   const parsedAmount = parseFloat(amount) || 0;
-  // 冻结/可用水晶石 (credit5 为原始值, 模拟 70% 冻结)
+  // 冻结/可用水晶石 — 统一使用 70% 冻结比例
   const totalCrystal = Math.floor(user?.balance?.credit5 ?? 0);
   const frozenCrystal = Math.floor(totalCrystal * 0.7);
+  // 激活相关状态
+  const [activateAmount, setActivateAmount] = useState("");
+  const parsedActivate = parseInt(activateAmount) || 0;
+  const canActivate = parsedActivate > 0 && parsedActivate <= (user?.balance?.credit1 ?? 0);
 
   // 计算兑换结果
   const getExchangeResult = () => {
@@ -89,6 +93,27 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
   };
 
   // 执行兑换
+  // 执行激活
+  const handleActivate = async () => {
+    if (!canActivate || submitting) return;
+    setSubmitting(true);
+    setResult(null);
+    try {
+      await apiFetch("/wallet_api.php", {
+        method: "POST",
+        params: { action: "activate_crystal" },
+        body: JSON.stringify({ uid: user!.uid, game_coins: parsedActivate }),
+      });
+      await refreshBalance();
+      setResult({ ok: true, msg: `✅ 激活成功！${parsedActivate} 水晶石已解锁` });
+      setTimeout(() => { setActivateAmount(""); setResult(null); onSuccess(); }, 2000);
+    } catch (err) {
+      setResult({ ok: false, msg: err instanceof ApiError ? err.message : "激活失败" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleExchange = async () => {
     if (activeTab === "activate") return; // 激活不是兑换操作
     if (parsedAmount <= 0 || parsedAmount > balance) return;
@@ -129,12 +154,13 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
 
   const exchangeResult = getExchangeResult();
   const canSubmit = activeTab !== "activate" && parsedAmount > 0 && parsedAmount <= balance && !submitting;
+  const canActivateNow = canActivate && !submitting;
 
   return (
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/40 backdrop-blur-sm"
     >
       <div
         className="w-full max-w-[430px] bg-white rounded-t-[24px] shadow-2xl animate-slide-up"
@@ -176,7 +202,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
 
         <div className="px-5 pt-2 pb-6 space-y-4">
 
-          {/* ===== 激活水晶石 Tab ===== */}
+          {/* ===== 激活水晶石 Tab — 真操作界面 ===== */}
           {activeTab === "activate" ? (
             <>
               {/* 冻结状态总览 */}
@@ -187,7 +213,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                 </div>
                 <div className="flex-1 bg-gray-50 rounded-[12px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">可用</div>
-                  <div className="text-lg font-bold text-[#45CCD5] mt-1">{totalCrystal - frozenCrystal}</div>
+                  <div className="text-lg font-bold text-brand-teal mt-1">{totalCrystal - frozenCrystal}</div>
                 </div>
                 <div className="flex-1 bg-gray-50 rounded-[12px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">总计</div>
@@ -195,16 +221,48 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                 </div>
               </div>
 
-              {/* 激活说明 */}
-              <div className="bg-amber-50 border border-amber-200 rounded-[12px] px-4 py-3">
-                <div className="text-[11px] font-medium text-amber-800 mb-1">💡 如何激活</div>
-                <p className="text-[10px] text-amber-700 leading-relaxed">
-                  消耗游戏豆即可激活冻结的水晶石。去投注、投票或使用AI会话，获得的游戏豆可自动用于激活。
-                  用注册赠送游戏豆赢得的水晶石 100% 冻结，自己赚的游戏豆赢得的水晶石不冻结。
-                </p>
+              {/* 激活操作 */}
+              <div className="bg-gradient-to-r from-amber-50 to-brand-gold-light/20 rounded-[12px] p-4 border border-brand-gold/20">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Zap className="w-4 h-4 text-brand-gold-dark" />
+                  <span className="text-[11px] font-semibold text-amber-800">消耗游戏豆激活水晶石</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="number"
+                    value={activateAmount}
+                    onChange={(e) => setActivateAmount(e.target.value)}
+                    placeholder="输入游戏豆数量"
+                    className="flex-1 px-4 py-3 bg-white rounded-[12px] text-sm font-medium outline-none focus:ring-2 focus:ring-brand-teal/30 transition-all"
+                    min="0"
+                    max={user?.balance?.credit1 ?? 0}
+                  />
+                  <span className="text-[10px] text-gray-400 w-14 text-right">游戏豆</span>
+                </div>
+                <div className="text-[10px] text-amber-700 mb-1">
+                  消耗 1 游戏豆 = 激活 1 水晶石 · 账户余额：{(user?.balance?.credit1 ?? 0).toLocaleString()} 游戏豆
+                </div>
+                {parsedActivate > frozenCrystal && (
+                  <div className="text-[10px] text-brand-coral mb-1">⚠️ 输入超过冻结数量({frozenCrystal})，多余部分将无法激活</div>
+                )}
+                {/* 快捷选择 */}
+                <div className="flex gap-2 mt-2">
+                  {[0.25, 0.5, 0.75, 1].map((pct) => {
+                    const val = Math.min(Math.floor((user?.balance?.credit1 ?? 0) * pct), frozenCrystal);
+                    return (
+                      <button
+                        key={pct}
+                        onClick={() => setActivateAmount(String(val))}
+                        className="flex-1 py-1.5 bg-white/60 rounded-[8px] text-[10px] text-gray-400 active:bg-gray-100 transition-colors"
+                      >
+                        {Math.round(pct * 100)}%
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* 激活进度 */}
+              {/* 激活进度条 */}
               {totalCrystal > 0 && (
                 <div>
                   <div className="flex justify-between text-[10px] text-gray-400 mb-1">
@@ -220,24 +278,53 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                 </div>
               )}
 
+              {/* 激活结果 */}
+              {result && (
+                <div className={`px-4 py-2.5 rounded-[10px] text-xs font-medium text-center ${
+                  result.ok ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
+                }`}>
+                  {result.msg}
+                </div>
+              )}
+
+              {/* 确认激活按钮 */}
+              <button
+                onClick={handleActivate}
+                disabled={!canActivate || submitting}
+                className={`w-full py-3 rounded-[14px] text-sm font-semibold transition-all active:scale-[0.98] ${
+                  canActivate
+                    ? "bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white shadow-[0_4px_16px_rgba(242,182,49,0.3)]"
+                    : "bg-gray-100 text-gray-300 cursor-not-allowed"
+                }`}
+              >
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    激活中...
+                  </span>
+                ) : (
+                  `⚡ 消耗 ${parsedActivate || 0} 游戏豆激活水晶石`
+                )}
+              </button>
+
+              {/* 去消费补充 */}
+              <a
+                href="/store-services"
+                className="block w-full text-center py-2.5 rounded-[12px] text-[11px] font-medium bg-gray-50 text-gray-500 active:scale-[0.98] transition-transform"
+              >
+                游戏豆不够？去消费赚豆 🛒
+              </a>
+
               {/* 过期提醒 */}
               <div className="bg-red-50 border border-red-200 rounded-[12px] px-4 py-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-red-700">⏰ 过期提醒</span>
-                  <span className="text-[10px] text-red-600 font-medium">最早冻结: 还剩 78 天</span>
+                  <span className="text-[10px] text-red-600 font-medium">冻结后 90 天未激活将自动过期</span>
                 </div>
                 <p className="text-[10px] text-red-500 mt-1">
                   冻结水晶石 90 天内未激活将自动过期清零，请及时消费激活。
                 </p>
               </div>
-
-              {/* CTA */}
-              <a
-                href="/store-services"
-                className="block w-full text-center py-3 rounded-[14px] text-sm font-semibold bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-[0_4px_16px_rgba(69,204,213,0.3)] active:scale-[0.98] transition-all"
-              >
-                🛒 去消费赚豆
-              </a>
             </>
           ) : (
           <>

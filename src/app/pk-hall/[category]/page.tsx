@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { CATEGORY_CONFIG, PKTopic, APIResponse, PKFormData, VoteConfirmData } from "../types";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
@@ -214,14 +215,12 @@ export default function CategoryPKHall() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
           <button onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
-            className="flex-1 bg-gradient-to-r from-amber-400 to-amber-500 text-white py-3.5 rounded-[20px] text-sm font-semibold shadow-sm active:scale-[0.97] transition-transform">
+            className="flex-1 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white py-3.5 rounded-[20px] text-sm font-semibold shadow-sm active:scale-[0.97] transition-transform">
             💰 发起PK
           </button>
           <button onClick={() => {
-            const text = `⚔️ ${cfg.name} PK厅\n${activeCount}场进行中 · 💰总奖池${totalPool}豆\nhttps://h5.ws.hi.cn/pk-hall/${category}`;
-            navigator.clipboard.writeText(text);
-            setVoteMsg("✅ 分享链接已复制！");
-            setTimeout(() => setVoteMsg(""), 2000);
+            const text = buildShareText(`${cfg.name} PK厅`, `${activeCount}场进行中 · 💰总奖池${totalPool}豆`);
+            shareToWeChat(text);
           }} className="w-[52px] h-[52px] rounded-full bg-gray-100 flex items-center justify-center text-lg active:scale-90 transition-transform shrink-0">↗</button>
         </div>
       </div>
@@ -272,7 +271,7 @@ export default function CategoryPKHall() {
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[12px] text-xs font-medium">取消</button>
-              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-medium">
+              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-medium">
                 确认投注 {confirmVote.betAmount} 豆
               </button>
             </div>
@@ -318,7 +317,7 @@ export default function CategoryPKHall() {
                 </div>
               </div>
               <button onClick={handleCreatePK} disabled={!pkForm.title || !pkForm.option_a || !pkForm.option_b}
-                className="w-full py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 text-white rounded-[12px] text-xs font-medium disabled:opacity-50">
+                className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-medium disabled:opacity-50">
                 发起PK
               </button>
             </div>
@@ -341,7 +340,7 @@ export default function CategoryPKHall() {
               <div className="text-[10px] text-gray-400 mt-2">💰 当前奖池：{shareTopic.total_pool}豆</div>
             </div>
             <button onClick={copyShareLink}
-              className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-[14px] text-sm font-medium">
+              className="w-full py-3 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white rounded-[14px] text-sm font-medium">
               📋 复制分享文本
             </button>
           </div>

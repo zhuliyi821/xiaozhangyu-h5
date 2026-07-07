@@ -140,11 +140,11 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
         <h3 className="text-xs font-semibold">📋 每日挖豆任务</h3>
       </div>
 
-      {/* 签到卡片 */}
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[16px] p-4 border border-emerald-100/50 mb-2.5">
+      {/* 签到卡片 — 品牌色 */}
+      <div className="bg-gradient-to-br from-brand-teal-light/20 to-brand-teal/5 rounded-[16px] p-4 border border-brand-teal/20 mb-2.5">
         <div className="flex items-center gap-2 mb-3">
-          <CalendarCheck className="w-4 h-4 text-emerald-600" />
-          <span className="text-xs font-semibold text-emerald-800">📅 每日签到</span>
+          <CalendarCheck className="w-4 h-4 text-brand-teal-dark" />
+          <span className="text-xs font-semibold text-brand-teal-dark">📅 每日签到</span>
         </div>
 
         {/* 7天签到表 */}
@@ -161,11 +161,11 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
                 key={i}
                 className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-[10px] transition-all ${
                   isActive
-                    ? "bg-emerald-500 text-white shadow-sm"
+                    ? "bg-brand-teal-dark text-white shadow-sm"
                     : isToday && !signedToday
-                    ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300"
+                    ? "bg-brand-gold-light/60 text-brand-gold-dark ring-2 ring-brand-gold"
                     : isPast
-                    ? "bg-emerald-100 text-emerald-600"
+                    ? "bg-brand-teal-light/30 text-brand-teal-dark"
                     : "bg-white/60 text-gray-400"
                 }`}
               >
@@ -183,7 +183,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
         {signLoading ? (
           <div className="h-9 bg-white/60 rounded-[10px] animate-pulse" />
         ) : signResult ? (
-          <div className="text-center py-2 text-[11px] font-medium text-emerald-700 bg-emerald-100 rounded-[10px] animate-fade-in">
+          <div className="text-center py-2 text-[11px] font-medium text-brand-teal-dark bg-brand-teal-light/30 rounded-[10px] animate-fade-in">
             {signResult}
           </div>
         ) : (
@@ -193,7 +193,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
             className={`w-full py-2 rounded-[10px] text-xs font-semibold transition-all active:scale-[0.97] ${
               signedToday
                 ? "bg-gray-200 text-gray-400 cursor-default"
-                : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.25)]"
+                : "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-[0_2px_8px_rgba(69,204,213,0.25)]"
             }`}
           >
             {signing ? (
