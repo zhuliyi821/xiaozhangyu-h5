@@ -688,19 +688,29 @@ export default function DailyFortunePage() {
 
         {/* ═══════ 运势助手 — 白底卡片 ═══════ */}
         <div className="mb-5">
-          <Link href="/ai?tab=chat" className="block bg-white rounded-[20px] p-8 border border-gray-100 shadow-sm">
+          <Link href="/ai?tab=chat" className="block bg-white rounded-[20px] p-8 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
             <div className="flex flex-col items-center gap-3">
               <div className="w-20 h-20 flex items-center justify-center text-4xl">
-                🐙
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D85A30] to-[#F27152] flex items-center justify-center shadow-md">
+                  <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="24" cy="30" rx="6" ry="9" fill="#fff" opacity="0.9"/>
+                    <ellipse cx="24" cy="20" rx="5.5" ry="4.5" fill="#fff" opacity="0.9"/>
+                    <circle cx="24" cy="14" r="6" fill="none" stroke="#fff" strokeWidth="1.5"/>
+                    <path d="M13 19L6 15M35 19L42 15M10 28L3 32M38 28L45 32" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                  </svg>
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-sm font-bold text-brand-teal-dark">小章鱼-小龙虾</div>
+                <div className="text-sm font-bold text-brand-teal-dark">小龙虾</div>
                 <div className="text-[11px] text-gray-400 mt-1">我是你跟班，有事找我聊。</div>
               </div>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] bg-brand-teal-light/20 text-brand-teal-dark rounded-[6px] px-2.5 py-1 font-medium">💰 财运推演</span>
                 <span className="text-[10px] bg-brand-teal-light/20 text-brand-teal-dark rounded-[6px] px-2.5 py-1 font-medium">❤️ 情感分析</span>
                 <span className="text-[10px] bg-brand-teal-light/20 text-brand-teal-dark rounded-[6px] px-2.5 py-1 font-medium">💼 事业指引</span>
+              </div>
+              <div className="text-[10px] text-brand-teal font-medium flex items-center gap-1 mt-1">
+                去问问AI <span className="text-xs">→</span>
               </div>
             </div>
           </Link>

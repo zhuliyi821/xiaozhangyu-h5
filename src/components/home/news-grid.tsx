@@ -119,6 +119,30 @@ export function NewsGrid() {
         </div>
       </Link>
 
+      {/* ── 小龙虾问AI按钮 ── */}
+      <Link
+        href="/ai?tab=chat"
+        className="flex items-center justify-between bg-gradient-to-r from-brand-teal/5 to-brand-gold/5 border border-brand-teal/20 rounded-xl px-4 py-3 -mt-3 mb-5 active:scale-[0.98] transition-transform group"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D85A30] to-[#F27152] flex items-center justify-center shadow-sm">
+            <svg viewBox="0 0 48 48" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="24" cy="30" rx="6" ry="9" fill="#fff" opacity="0.9"/>
+              <ellipse cx="24" cy="20" rx="5.5" ry="4.5" fill="#fff" opacity="0.9"/>
+              <circle cx="24" cy="14" r="6" fill="none" stroke="#fff" strokeWidth="1.5"/>
+              <path d="M13 19L6 15M35 19L42 15M10 28L3 32M38 28L45 32" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-text-primary">小龙虾 问AI</div>
+            <div className="text-[10px] text-text-tertiary">跟你的AI助理聊聊今日运势</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-[10px] text-brand-teal font-medium group-hover:gap-1.5 transition-all">
+          去问问 <span className="text-xs">→</span>
+        </div>
+      </Link>
+
       {/* ════════ 2. 彩票工具 ════════ */}
       <div className="flex items-center justify-between mb-3 px-0.5">
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-gold to-brand-gold-dark">
