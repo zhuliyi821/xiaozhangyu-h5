@@ -345,17 +345,17 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {swapProducts.map((p) => (
                 <div key={p.id} onClick={() => setSwapBuyProduct(p)}
-                  className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-sm py-3.5 px-3 text-center shadow-sm border border-amber-200/50 active:scale-96 transition-transform cursor-pointer relative">
+                  className="bg-gradient-to-br from-brand-gold-light/30 to-brand-coral-light/30 rounded-sm py-3.5 px-3 text-center shadow-sm border border-brand-gold/20 active:scale-96 transition-transform cursor-pointer relative">
                   <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: "https://h5.ws.hi.cn/store" }); }}>
-                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.ws.hi.cn/store` }} className="bg-amber-100 text-amber-600 hover:bg-amber-500 hover:text-white" />
+                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.ws.hi.cn/store` }} className="bg-brand-gold-light/20 text-brand-gold-dark hover:bg-brand-gold hover:text-white" />
                   </div>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-2"
                     style={{ background: "linear-gradient(135deg,#fef3c7,#fde68a)" }}>
                     🫘
                   </div>
                   <div className="text-xs font-semibold mb-1 line-clamp-2">{p.product_name}</div>
-                  <div className="text-base font-bold text-amber-600">¥{p.price}</div>
-                  <div className="text-[10px] text-amber-500 mt-1 bg-amber-50 px-2 py-0.5 rounded-[4px] inline-block">
+                  <div className="text-base font-bold text-brand-gold-dark">¥{p.price}</div>
+                  <div className="text-[10px] text-brand-gold mt-1 bg-brand-gold-light/20 px-2 py-0.5 rounded-[4px] inline-block">
                     闲豆抵扣 {p.max_idle_bean_ratio}x
                   </div>
                   {Number(p.bonus_sim_coin) > 0 && (

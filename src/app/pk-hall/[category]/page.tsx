@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { CATEGORY_CONFIG, PKTopic, APIResponse, PKFormData, VoteConfirmData } from "../types";
+import { CATEGORY_CONFIG, PKTopic, APIResponse, PKFormData, VoteConfirmData, DEFAULT_PK_FORM } from "../types";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
@@ -29,7 +29,7 @@ export default function CategoryPKHall() {
 
   // 发起PK弹窗
   const [showCreate, setShowCreate] = useState(false);
-  const [pkForm, setPkForm] = useState<PKFormData>({ title: "", option_a: "", option_b: "", end_time: "tomorrow", min_bet: "10" });
+  const [pkForm, setPkForm] = useState<PKFormData>({ ...DEFAULT_PK_FORM });
 
   // 投注确认弹窗
   const [confirmVote, setConfirmVote] = useState<VoteConfirmData | null>(null);
@@ -67,7 +67,7 @@ export default function CategoryPKHall() {
   const handleOptionClick = (pk: PKTopic, choice: string) => {
     if (!uid) { setShowLogin(true); return; }
     if (pk.status !== 1) { setVoteMsg("❌ 话题已结束"); setTimeout(() => setVoteMsg(""), 2000); return; }
-    setConfirmVote({ pk, choice, betAmount: pk.min_bet, estimatedReward: choice === 'A' ? pk.estimated_reward_a : pk.estimated_reward_b });
+    setConfirmVote({ pk, choice, betAmount: pk.min_bet, estimatedReward: choice === 'A' ? (pk.estimated_reward_a ?? 0) : (pk.estimated_reward_b ?? 0) });
   };
 
   const executeVote = async () => {
@@ -89,7 +89,8 @@ export default function CategoryPKHall() {
   // ── 发起PK ──
   const handleCreatePK = async () => {
     if (!uid) return;
-    if (!pkForm.title || !pkForm.option_a || !pkForm.option_b) return;
+    const validOptions = pkForm.options.filter(o => o.trim());
+    if (!pkForm.title || validOptions.length < 2) return;
     const endTime = pkForm.end_time === "1h" ? Math.floor(Date.now()/1000) + 3600
       : pkForm.end_time === "3h" ? Math.floor(Date.now()/1000) + 10800
       : pkForm.end_time === "tomorrow" ? Math.floor(Date.now()/1000) + 86400
@@ -97,12 +98,12 @@ export default function CategoryPKHall() {
     try {
       const res = await fetch(`${API_BASE}/api/pk?action=create`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid, title: pkForm.title, option_a: pkForm.option_a, option_b: pkForm.option_b, category, mode: "1v1", end_time: endTime, min_bet: parseInt(pkForm.min_bet) || 10 }),
+        body: JSON.stringify({ uid, title: pkForm.title, options: validOptions, mode: pkForm.mode, category, charity: pkForm.charity, pool_distribution: pkForm.pool_distribution, end_time: endTime, min_bet: parseInt(pkForm.min_bet) || 10 }),
       });
       const j: APIResponse = await res.json();
       if (j.code === 0) {
         setShowCreate(false);
-        setPkForm({ title: "", option_a: "", option_b: "", end_time: "tomorrow", min_bet: "10" });
+        setPkForm({ ...DEFAULT_PK_FORM });
         loadTopics();
         setVoteMsg("✅ PK话题发起成功！");
       } else { setVoteMsg(`❌ ${j.msg}`); }
@@ -114,13 +115,9 @@ export default function CategoryPKHall() {
   const handleShare = (topic: PKTopic) => { setShareTopic(topic); setShowShare(true); };
   const copyShareLink = () => {
     if (!shareTopic) return;
-    navigator.clipboard.writeText(
-      `⚔️ PK挑战：${shareTopic.title}\n选【${shareTopic.option_a}】VS【${shareTopic.option_b}】\n💰当前奖池：${shareTopic.total_pool}豆\n来小章鱼AI趣预测参与PK！\nhttps://h5.ws.hi.cn/pk-hall/${category}/${shareTopic.id}`
-    ).then(() => {
-      setVoteMsg("✅ 分享链接已复制！");
-      setShowShare(false);
-      setTimeout(() => setVoteMsg(""), 2000);
-    }).catch(() => setVoteMsg("❌ 复制失败"));
+    const text = `⚔️ PK挑战：${shareTopic.title} 选【${shareTopic.option_a || shareTopic.options?.[0]}】VS【${shareTopic.option_b || shareTopic.options?.[1]}】💰奖池${shareTopic.total_pool}豆`;
+    shareToWeChat(text);
+    setShowShare(false);
   };
 
   // ── 统计 ──
@@ -179,7 +176,7 @@ export default function CategoryPKHall() {
               <div key={p.id} onClick={() => router.push(`/pk-hall/${category}/${p.id}`)}
                 className={`bg-white rounded-[20px] p-4 shadow-sm border cursor-pointer active:scale-[0.98] transition-transform ${isSettled ? 'border-amber-200' : 'border-gray-100'}`}>
                 <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-2">
-                  <span className={isSettled ? 'text-amber-600 font-medium' : p.status === 2 ? 'text-red-400' : 'text-teal-600'}>{p.status_label}</span>
+                  <span className={isSettled ? 'text-amber-600 font-medium' : p.status === 2 ? 'text-red-400' : 'text-brand-teal-dark'}>{p.status_label}</span>
                   <span className="w-[3px] h-[3px] rounded-full bg-gray-300" />
                   <span>{p.time_label}</span>
                   <span className="w-[3px] h-[3px] rounded-full bg-gray-300" />
@@ -188,9 +185,9 @@ export default function CategoryPKHall() {
                 </div>
                 <div className="text-[13px] font-semibold mb-1.5">{p.title}</div>
                 <div className="flex gap-2 text-[10px] text-gray-400 mb-1.5">
-                  <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-teal-600 font-medium">{p.option_a}</span>
+                  <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">{p.option_a || (p.options?.[0])}</span>
                   <span>VS</span>
-                  <span className="px-2 py-0.5 rounded-[6px] bg-orange-50 text-orange-600 font-medium">{p.option_b}</span>
+                  <span className="px-2 py-0.5 rounded-[6px] bg-brand-coral/10 text-brand-coral-dark font-medium">{p.option_b || (p.options?.[1])}</span>
                 </div>
                 <div className="flex justify-between items-center text-[9px] text-gray-400">
                   <span>{p.creator_name} 发起 · 👁 {p.spectator_count}围观 · 💬 {p.comment_count}评论</span>
@@ -233,15 +230,15 @@ export default function CategoryPKHall() {
             <div className="space-y-2.5 text-xs">
               <div className="bg-gray-50 rounded-[12px] p-3">
                 <div className="font-medium mb-1">{confirmVote.pk.title}</div>
-                <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-teal-600 font-medium">
-                  {confirmVote.choice === 'A' ? confirmVote.pk.option_a : confirmVote.pk.option_b}
+                <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">
+                  {confirmVote.choice === 'A' ? (confirmVote.pk.option_a || confirmVote.pk.options?.[0]) : (confirmVote.pk.option_b || confirmVote.pk.options?.[1])}
                 </span>
               </div>
               <div className="text-gray-500">选择投注数量</div>
               <div className="flex gap-2">
                 {[10, 50, 100, 200].map(amt => (
                   <button key={amt} onClick={() => setConfirmVote(v => v ? {...v, betAmount: amt} : null)}
-                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-teal-500 text-white shadow-sm' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}>
+                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-brand-teal/100 text-white shadow-sm' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}>
                     {amt}豆
                   </button>
                 ))}
@@ -250,7 +247,7 @@ export default function CategoryPKHall() {
                 <input type="number" min={confirmVote.pk.min_bet} max={10000}
                   value={confirmVote.betAmount}
                   onChange={e => setConfirmVote(v => v ? {...v, betAmount: Math.max(v.pk.min_bet, parseInt(e.target.value) || v.pk.min_bet)} : null)}
-                  className="flex-1 px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none focus:ring-2 focus:ring-teal-500/30" placeholder="自定义" />
+                  className="flex-1 px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" placeholder="自定义" />
                 <span className="text-[10px] text-gray-400 whitespace-nowrap">游戏豆</span>
               </div>
               <div className="bg-amber-50 rounded-[12px] p-3 text-center">
@@ -258,8 +255,8 @@ export default function CategoryPKHall() {
                 <div className="text-lg font-bold text-amber-600">
                   +{(() => {
                     const pk = confirmVote.pk; const bet = confirmVote.betAmount; const choice = confirmVote.choice;
-                    const myPool = choice === 'A' ? pk.pool_a : pk.pool_b;
-                    const oppPool = choice === 'A' ? pk.pool_b : pk.pool_a;
+                    const myPool = choice === 'A' ? (pk.pool_a ?? 0) : (pk.pool_b ?? 0);
+                    const oppPool = choice === 'A' ? (pk.pool_b ?? 0) : (pk.pool_a ?? 0);
                     if (oppPool <= 0) return bet;
                     const fee = Math.floor(oppPool * pk.platform_fee_ratio / 100);
                     const rp = oppPool - fee;
@@ -286,20 +283,20 @@ export default function CategoryPKHall() {
             <h3 className="text-sm font-semibold mb-4">💰 发起PK · {cfg.name}</h3>
             <div className="space-y-3">
               <input type="text" placeholder="PK话题" value={pkForm.title} onChange={e => setPkForm({...pkForm, title: e.target.value})}
-                className="w-full px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-teal-500/30" />
+                className="w-full px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
               <div className="flex gap-2">
-                <input type="text" placeholder="选项A" value={pkForm.option_a} onChange={e => setPkForm({...pkForm, option_a: e.target.value})}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-teal-500/30" />
+                <input type="text" placeholder="选项A" value={pkForm.options[0] || ""} onChange={e => { const o = [...pkForm.options]; o[0] = e.target.value; setPkForm({...pkForm, options: o}); }}
+                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
                 <span className="self-center text-xs text-gray-400">VS</span>
-                <input type="text" placeholder="选项B" value={pkForm.option_b} onChange={e => setPkForm({...pkForm, option_b: e.target.value})}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-teal-500/30" />
+                <input type="text" placeholder="选项B" value={pkForm.options[1] || ""} onChange={e => { const o = [...pkForm.options]; o[1] = e.target.value; setPkForm({...pkForm, options: o}); }}
+                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[12px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
               </div>
               <div>
                 <div className="text-[10px] text-gray-400 mb-1.5">⏱ 截止时间</div>
                 <div className="flex gap-2">
                   {[{label:"1小时",v:"1h"},{label:"3小时",v:"3h"},{label:"明天",v:"tomorrow"},{label:"7天",v:"7d"}].map(opt => (
                     <button key={opt.v} onClick={() => setPkForm({...pkForm, end_time: opt.v})}
-                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.end_time === opt.v ? 'bg-teal-500 text-white' : 'bg-gray-50 text-gray-500'}`}>
+                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.end_time === opt.v ? 'bg-brand-teal/100 text-white' : 'bg-gray-50 text-gray-500'}`}>
                       {opt.label}
                     </button>
                   ))}
@@ -310,13 +307,13 @@ export default function CategoryPKHall() {
                 <div className="flex gap-2">
                   {[10,50,100].map(amt => (
                     <button key={amt} onClick={() => setPkForm({...pkForm, min_bet: amt.toString()})}
-                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.min_bet === amt.toString() ? 'bg-teal-500 text-white' : 'bg-gray-50 text-gray-500'}`}>
+                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.min_bet === amt.toString() ? 'bg-brand-teal/100 text-white' : 'bg-gray-50 text-gray-500'}`}>
                       {amt}豆
                     </button>
                   ))}
                 </div>
               </div>
-              <button onClick={handleCreatePK} disabled={!pkForm.title || !pkForm.option_a || !pkForm.option_b}
+              <button onClick={handleCreatePK} disabled={!pkForm.title || pkForm.options.filter(o => o.trim()).length < 2}
                 className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-xs font-medium disabled:opacity-50">
                 发起PK
               </button>
@@ -333,9 +330,9 @@ export default function CategoryPKHall() {
             <div className="bg-gray-50 rounded-[14px] p-4 mb-4">
               <div className="text-xs font-medium mb-1">{shareTopic.title}</div>
               <div className="flex gap-2 text-[11px] mt-2">
-                <span className="px-2 py-1 rounded-[6px] bg-teal-50 text-teal-600 font-medium">{shareTopic.option_a}</span>
+                <span className="px-2 py-1 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">{shareTopic.option_a || shareTopic.options?.[0]}</span>
                 <span className="self-center text-gray-400">VS</span>
-                <span className="px-2 py-1 rounded-[6px] bg-orange-50 text-orange-600 font-medium">{shareTopic.option_b}</span>
+                <span className="px-2 py-1 rounded-[6px] bg-brand-coral/10 text-brand-coral-dark font-medium">{shareTopic.option_b || shareTopic.options?.[1]}</span>
               </div>
               <div className="text-[10px] text-gray-400 mt-2">💰 当前奖池：{shareTopic.total_pool}豆</div>
             </div>

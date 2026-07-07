@@ -124,8 +124,9 @@ export default function PKRoomPage() {
 
   const isActive = topic.status === 1;
   const isSettled = topic.status === 3;
-  const aVotes = topic.vote_a || 0;
-  const bVotes = topic.vote_b || 0;
+  const options = topic.options || [topic.option_a || "A", topic.option_b || "B"];
+  const aVotes = topic.vote_a || topic.vote_counts?.[0] || 0;
+  const bVotes = topic.vote_b || topic.vote_counts?.[1] || 0;
   const total = aVotes + bVotes;
   const aPct = total > 0 ? Math.round(aVotes / total * 100) : 50;
   const bPct = total > 0 ? Math.round(bVotes / total * 100) : 50;
@@ -144,20 +145,20 @@ export default function PKRoomPage() {
 
       {/* 状态条 */}
       <div className="mx-4 -mt-3 relative z-20 bg-white rounded-[16px] p-3 shadow-sm border border-gray-100 flex justify-around text-center">
-        <div><div className="text-[10px] text-gray-400">状态</div><div className={`text-[11px] font-medium ${isSettled ? 'text-amber-600' : isActive ? 'text-green-600' : 'text-red-400'}`}>{topic.status_label}</div></div>
+        <div><div className="text-[10px] text-gray-400">状态</div><div className={`text-[11px] font-medium ${isSettled ? 'text-brand-gold-dark' : isActive ? 'text-green-600' : 'text-red-400'}`}>{topic.status_label}</div></div>
         <div className="w-px bg-gray-100" />
         <div><div className="text-[10px] text-gray-400">倒计时</div><div className="text-[11px] font-medium">{topic.time_label}</div></div>
         <div className="w-px bg-gray-100" />
         <div><div className="text-[10px] text-gray-400">围观</div><div className="text-[11px] font-medium">{(topic.spectator_count || 0) + 1}人</div></div>
         <div className="w-px bg-gray-100" />
-        <div><div className="text-[10px] text-gray-400">奖池💰</div><div className="text-[11px] font-bold text-amber-500">{topic.total_pool}</div></div>
+        <div><div className="text-[10px] text-gray-400">奖池💰</div><div className="text-[11px] font-bold text-brand-gold">{topic.total_pool}</div></div>
       </div>
 
       {/* PK对战卡片 */}
       <div className="mx-4 mt-3 bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
-        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-teal-50 border border-teal-100'}`}>
-          <div className={`text-sm font-bold ${isSettled && topic.winner === 'A' ? 'text-amber-600' : 'text-teal-700'}`}>
-            {topic.option_a} {isSettled && topic.winner === 'A' && '🏆'}
+          <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-teal/10 border border-brand-teal/20'}`}>
+          <div className={`text-sm font-bold ${isSettled && topic.winner === 'A' ? 'text-brand-gold-dark' : 'text-brand-teal-dark'}`}>
+            {options[0] || topic.option_a} {isSettled && topic.winner === 'A' && '🏆'}
           </div>
           {isActive && (
             <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
@@ -177,18 +178,18 @@ export default function PKRoomPage() {
           <span className="inline-block w-8 h-8 rounded-full bg-gray-100 text-[11px] font-bold flex items-center justify-center mx-auto">VS</span>
         </div>
 
-        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-orange-50 border border-orange-100'}`}>
-          <div className={`text-sm font-bold ${isSettled && topic.winner === 'B' ? 'text-amber-600' : 'text-orange-600'}`}>
+        <div className={`rounded-[16px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-coral/10 border border-brand-coral/10'}`}>
+          <div className={`text-sm font-bold ${isSettled && topic.winner === 'B' ? 'text-brand-gold-dark' : 'text-brand-coral-dark'}`}>
             {topic.option_b} {isSettled && topic.winner === 'B' && '🏆'}
           </div>
           {isActive && (
-            <button onClick={() => handleOptionClick('B')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
+            <button onClick={() => handleOptionClick('B')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
               投{topic.min_bet}豆支持
             </button>
           )}
           <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all" style={{ width: `${bPct}%` }} />
+              <div className="h-full bg-gradient-to-r from-brand-coral to-brand-coral-dark rounded-full transition-all" style={{ width: `${bPct}%` }} />
             </div>
             <span className="font-medium">{bVotes}票 ({bPct}%)</span>
           </div>
@@ -217,7 +218,7 @@ export default function PKRoomPage() {
           ) : (
             comments.map((c: any) => (
               <div key={c.id} className="flex gap-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-amber-400 flex items-center justify-center text-[10px] text-white shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-[10px] text-white shrink-0">
                   {c.nickname?.charAt(0) || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -236,7 +237,7 @@ export default function PKRoomPage() {
             <input type="text" value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleComment()}
               placeholder="说点什么..."
-              className="flex-1 px-3 py-2 bg-gray-50 rounded-[12px] text-[11px] outline-none focus:ring-2 focus:ring-teal-500/30" />
+              className="flex-1 px-3 py-2 bg-gray-50 rounded-[12px] text-[11px] outline-none focus:ring-2 focus:ring-brand-teal/30" />
             <button onClick={handleComment} disabled={!commentText.trim()}
               className="px-4 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[12px] text-[11px] font-medium disabled:opacity-50">发送</button>
           </div>
@@ -260,7 +261,7 @@ export default function PKRoomPage() {
           <button onClick={handleInvite}
             className="w-[52px] h-[52px] rounded-full bg-gray-100 flex items-center justify-center text-lg active:scale-90 transition-transform shrink-0">↗</button>
           <button onClick={() => handleOptionClick('B')} disabled={!isActive}
-            className="flex-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            className="flex-1 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white py-3.5 rounded-[20px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
             {topic.option_b?.substring(0, 6)}
           </button>
         </div>
@@ -273,25 +274,25 @@ export default function PKRoomPage() {
             <div className="space-y-2.5 text-xs">
               <div className="bg-gray-50 rounded-[12px] p-3">
                 <div className="font-medium mb-1">{topic.title}</div>
-                <span className="px-2 py-0.5 rounded-[6px] bg-teal-50 text-brand-teal-dark font-medium">
+                <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">
                   {confirmVote.choice === 'A' ? topic.option_a : topic.option_b}
                 </span>
               </div>
               <div className="flex gap-2">
                 {[10, 50, 100, 200].map(amt => (
                   <button key={amt} onClick={() => setConfirmVote(v => v ? {...v, betAmount: amt} : null)}
-                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-teal-500 text-white shadow-sm' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}>
+                    className={`flex-1 py-2 rounded-[10px] text-center text-[11px] font-medium transition-all ${confirmVote.betAmount === amt ? 'bg-brand-teal text-white shadow-sm' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}>
                     {amt}豆
                   </button>
                 ))}
               </div>
               <div className="bg-amber-50 rounded-[12px] p-3 text-center">
                 <div className="text-[10px] text-gray-400">预估正确可赢得</div>
-                <div className="text-lg font-bold text-amber-600">
+                <div className="text-lg font-bold text-brand-gold-dark">
                   +{(() => {
                     const bet = confirmVote.betAmount; const ch = confirmVote.choice;
-                    const myP = ch === 'A' ? topic.pool_a : topic.pool_b;
-                    const oppP = ch === 'A' ? topic.pool_b : topic.pool_a;
+                    const myP = ch === 'A' ? (topic.pool_a ?? 0) : (topic.pool_b ?? 0);
+                    const oppP = ch === 'A' ? (topic.pool_b ?? 0) : (topic.pool_a ?? 0);
                     if (oppP <= 0) return bet;
                     const rp = oppP - Math.floor(oppP * topic.platform_fee_ratio / 100);
                     return rp <= 0 ? bet : Math.floor(bet / (myP + bet) * rp) + bet;
@@ -320,9 +321,9 @@ export default function PKRoomPage() {
               <div className="text-sm font-bold">投注成功！</div>
               <div className="text-[11px] text-gray-400 mt-1">结果一出马上通知你</div>
             </div>
-            <div className="bg-teal-50 rounded-[12px] p-3 mb-3 text-center">
+            <div className="bg-brand-teal/10 rounded-[12px] p-3 mb-3 text-center">
               <div className="text-[10px] text-gray-400">当前投注</div>
-              <div className="text-xs font-bold text-teal-700">{confirmVote?.choice === 'A' ? topic?.option_a : topic?.option_b}</div>
+              <div className="text-xs font-bold text-brand-teal-dark">{confirmVote?.choice === 'A' ? topic?.option_a : topic?.option_b}</div>
               <div className="text-[20px] font-bold text-brand-teal-dark">{confirmVote?.betAmount || 0}豆</div>
             </div>
             <div className="flex gap-2">
@@ -352,8 +353,8 @@ export default function PKRoomPage() {
       {topic && (
         <div className="mx-4 mt-3 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
           <div className="text-[11px] font-semibold mb-3">📍 附近门店</div>
-          <div className="bg-gradient-to-r from-teal-50 to-amber-50 rounded-[14px] p-3 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-teal-400 to-amber-400 flex items-center justify-center text-white text-xl shrink-0">
+          <div className="bg-gradient-to-r from-brand-teal-light/30 to-brand-gold-light/30 rounded-[14px] p-3 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-white text-xl shrink-0">
               🏪
             </div>
             <div className="flex-1 min-w-0">

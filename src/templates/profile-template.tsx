@@ -124,7 +124,7 @@ export default function ProfileTemplate() {
       <div className="mx-4 mt-4">
         <div
           onClick={handleInvite}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-[20px] p-4 text-white shadow-md active:scale-[0.98] transition-transform cursor-pointer"
+          className="bg-gradient-to-r from-brand-gold to-brand-gold-dark rounded-[20px] p-4 text-white shadow-md active:scale-[0.98] transition-transform cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">🎁</div>

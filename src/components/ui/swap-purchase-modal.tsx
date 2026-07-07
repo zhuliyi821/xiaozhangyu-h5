@@ -65,7 +65,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
         <div className="text-center mb-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center text-3xl mx-auto mb-2">🫘</div>
           <div className="text-sm font-bold">{product.product_name}</div>
-          <div className="text-xl font-bold text-amber-600 mt-1">¥{product.price}</div>
+          <div className="text-xl font-bold text-brand-gold-dark mt-1">¥{product.price}</div>
           {Number(product.bonus_sim_coin) > 0 && (
             <div className="text-[11px] text-green-600 mt-1">🎮 送 {Number(product.bonus_sim_coin).toLocaleString()} 游戏豆</div>
           )}
@@ -81,7 +81,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
               { key: "mixed" as const, label: "混合支付", desc: "闲豆+现金" },
             ].map(m => (
               <button key={m.key} onClick={() => { setPayMode(m.key); setIdleBeanAmount(Math.min(price, price * Number(product.max_idle_bean_ratio))); }}
-                className={`flex-1 py-2 rounded-[12px] text-xs transition-all ${payMode === m.key ? "bg-amber-500 text-white shadow-sm" : "bg-white text-text-secondary border border-amber-200"}`}>
+                className={`flex-1 py-2 rounded-[12px] text-xs transition-all ${payMode === m.key ? "bg-brand-gold text-white shadow-sm" : "bg-white text-text-secondary border border-amber-200"}`}>
                 <div className="font-semibold">{m.label}</div>
                 <div className="text-[10px] opacity-70 mt-0.5">{m.desc}</div>
               </button>
@@ -98,7 +98,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
             </div>
             <input type="range" min={0} max={price} step={1} value={idleBeanAmount}
               onChange={e => setIdleBeanAmount(Number(e.target.value))}
-              className="w-full accent-amber-500" />
+              className="w-full accent-brand-gold" />
             <div className="flex justify-between text-[10px] text-text-tertiary mt-1">
               <span>现金: ¥{cashAmount.toFixed(2)}</span>
               <span>闲豆: ¥{idleUsed.toFixed(2)}</span>
@@ -109,7 +109,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
         {/* Summary */}
         <div className="bg-bg rounded-[12px] p-3 text-xs text-text-secondary mb-4 space-y-1">
           <div className="flex justify-between"><span>商品金额</span><span className="font-semibold">¥{price.toFixed(2)}</span></div>
-          {idleUsed > 0 && <div className="flex justify-between"><span>闲豆抵扣</span><span className="text-amber-600">-¥{idleUsed.toFixed(2)}</span></div>}
+          {idleUsed > 0 && <div className="flex justify-between"><span>闲豆抵扣</span><span className="text-brand-gold-dark">-¥{idleUsed.toFixed(2)}</span></div>}
           {cashAmount > 0 && <div className="flex justify-between"><span>实付现金</span><span className="font-semibold">¥{cashAmount.toFixed(2)}</span></div>}
         </div>
 
@@ -117,7 +117,7 @@ export default function SwapPurchaseModal({ product, onClose, onSuccess }: SwapP
 
         {/* Buy Button */}
         <button onClick={handleBuy} disabled={buying}
-          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-[16px] text-sm disabled:opacity-50 shadow-lg shadow-amber-500/25 active:scale-[0.98] transition-transform">
+          className="w-full py-3 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white font-semibold rounded-[16px] text-sm disabled:opacity-50 shadow-lg shadow-brand-gold/25 active:scale-[0.98] transition-transform">
           {buying ? "购买中..." : "确认购买"}
         </button>
         <button onClick={onClose} className="w-full py-2 text-text-tertiary text-xs mt-2">取消</button>
