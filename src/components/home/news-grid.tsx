@@ -78,10 +78,10 @@ export function NewsGrid() {
   return (
     <section className="mt-4 px-4">
 
-      {/* ════════ 1. 每日运势 ════════ */}
+      {/* ════════ 1. 每日一卦 ════════ */}
       <div className="flex items-center justify-between mb-3 px-0.5">
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-teal-dark">
-          🐙 每日运势
+          🐙 每日一卦
         </h2>
         <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
       </div>

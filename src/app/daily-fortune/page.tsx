@@ -234,7 +234,7 @@ export default function DailyFortunePage() {
           {!isLoggedIn && !guestMode ? (
             <>
               <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-brand-teal to-brand-coral flex items-center justify-center text-4xl mb-4 shadow-lg">🐙</div>
-              <h2 className="text-lg font-bold text-brand-teal-dark mb-2">每日运势</h2>
+              <h2 className="text-lg font-bold text-brand-teal-dark mb-2">每日一卦</h2>
               <p className="text-xs text-text-tertiary mb-6 leading-relaxed">
                 登录后获取专属于你的今日八字运势<br />
                 包含体用生克、奇门遁甲、六十四卦全方位推演

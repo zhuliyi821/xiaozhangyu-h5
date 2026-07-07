@@ -53,7 +53,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     ctx.font = "bold 28px 'PingFang SC', 'Hiragino Sans GB', sans-serif";
     ctx.fillText("🐙 小章鱼", W / 2, 60);
     ctx.font = "bold 22px 'PingFang SC', 'Hiragino Sans GB', sans-serif";
-    ctx.fillText("每日运势", W / 2, 92);
+    ctx.fillText("每日一卦", W / 2, 92);
 
     // 分隔线
     ctx.strokeStyle = "rgba(255,255,255,0.15)";
@@ -169,7 +169,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     try {
       const blob = await generatePoster();
       const text = buildShareText(
-        "小章鱼每日运势",
+        "小章鱼每日一卦",
         `今日运势 ${score}分 ${tag} · ${Object.entries(dimensions).slice(0,5).map(([k,v]) => `${k}${v.score}`).join(" ")}`
       );
       if (blob) {
