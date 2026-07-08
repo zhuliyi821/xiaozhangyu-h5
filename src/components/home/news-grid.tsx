@@ -2,9 +2,8 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Sparkles, Target, Scan, Calculator, Flame } from "lucide-react";
+import { Sparkles, Target, Scan, Calculator } from "lucide-react";
 import Link from "next/link";
-import { getTrend, TrendData } from "@/lib/api";
 import LotteryHotCard from "@/components/home/lottery-hot-card";
 
 // ── 运势数据 ──
@@ -25,13 +24,6 @@ const TOOLS = [
   { icon: Target, label: "开奖查询", sub: "实时更新", href: "/draw", color: "var(--color-brand-teal)" },
   { icon: Scan, label: "扫码验奖", sub: "秒查结果", href: "/scan", color: "var(--color-brand-coral)" },
   { icon: Calculator, label: "计算器", sub: "复式/胆拖", href: "/calculator", color: "var(--color-brand-gold)" },
-];
-
-const HOT_LOTTERY_TYPES = [
-  { key: "dlt", name: "大乐透" },
-  { key: "ssq", name: "双色球" },
-  { key: "pl3", name: "排列3" },
-  { key: "fc3d", name: "3D" },
 ];
 
 function seededRandom(seed: number): () => number {
@@ -56,8 +48,6 @@ function generateFortune(seed: number) {
 
 export function NewsGrid() {
   const { user } = useAuth();
-  const [trends, setTrends] = useState<Record<string, TrendData>>({});
-  const [loadingHot, setLoadingHot] = useState(true);
   const [hotCardData, setHotCardData] = useState<any>(null);
   const [loadingHotCard, setLoadingHotCard] = useState(true);
 
@@ -68,21 +58,6 @@ export function NewsGrid() {
       .then(d => setHotCardData(d?.data || null))
       .catch(() => setHotCardData(null))
       .finally(() => setLoadingHotCard(false));
-  }, []);
-
-  // 并行拉取各彩种热号
-
-  // 并行拉取各彩种热号
-  useEffect(() => {
-    Promise.all(
-      HOT_LOTTERY_TYPES.map(t => getTrend(t.key).catch(() => null))
-    ).then(results => {
-      const map: Record<string, TrendData> = {};
-      HOT_LOTTERY_TYPES.forEach((t, i) => {
-        if (results[i]) map[t.key] = results[i]!;
-      });
-      setTrends(map);
-    }).finally(() => setLoadingHot(false));
   }, []);
 
   const today = new Date();
@@ -107,12 +82,17 @@ export function NewsGrid() {
               <span className="text-xl">🐙</span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-sm font-bold">{fortune.score}</span>
                 <span className="text-[10px] text-text-tertiary">分</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-brand-teal-light/20 ${fortune.tag.text}`}>
+                <span className="text-[10px] bg-brand-teal-light/30 text-brand-teal-dark px-2 py-0.5 rounded-full font-semibold">
                   {fortune.tag.emoji} {fortune.tag.label}
                 </span>
+                {/* ── 遇事起一卦醒目药丸 ── */}
+                <Link href="/divination"
+                  className="ml-1 text-sm font-bold text-brand-gold-dark bg-brand-gold-light px-3 py-0.5 rounded-full active:scale-95 transition-transform">
+                  遇事起一卦 →
+                </Link>
               </div>
               <div className="flex items-center gap-2 text-[10px] text-text-tertiary mt-0.5">
                 <span>宜 {fortune.do}</span>
@@ -133,50 +113,56 @@ export function NewsGrid() {
             </div>
           </div>
         </Link>
-        {/* ── 嵌入遇事起一卦 ── */}
-        <Link
-          href="/divination"
-          className="mt-2.5 pt-2.5 border-t border-dashed border-amber-200 flex items-center justify-between active:scale-[0.98] transition-transform"
-        >
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-amber-600 font-medium">遇事起一卦</span>
-            <span className="text-[9px] text-amber-400">{fortune.score >= 70 ? "今日运势佳，宜决策" : fortune.score >= 50 ? "运势平稳，宜观望" : "运势偏弱，宜静不宜动"}</span>
-          </div>
-          <span className="text-[10px] text-amber-500">去起卦 →</span>
-        </Link>
       </div>
 
       {/* ════════ 热号推荐卡片 ════════ */}
       <LotteryHotCard data={hotCardData} loading={loadingHotCard} />
 
-      {/* ── 小龙虾问AI按钮 ── */}
+      {/* ── AI小龙虾 ── */}
       <Link
         href="/ai?tab=chat"
-        className="flex items-center justify-between bg-gradient-to-r from-brand-teal/5 to-brand-gold/5 border border-brand-teal/20 rounded-xl px-4 py-3 -mt-3 mb-5 active:scale-[0.98] transition-transform group"
+        className="flex items-center justify-between bg-brand-teal-light/30 border border-brand-teal/20 rounded-xl px-4 py-3 -mt-3 mb-5 active:scale-[0.98] transition-transform group"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-coral-dark to-brand-coral flex items-center justify-center shadow-sm">
-            <svg viewBox="0 0 48 48" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="24" cy="30" rx="6" ry="9" fill="#fff" opacity="0.9"/>
-              <ellipse cx="24" cy="20" rx="5.5" ry="4.5" fill="#fff" opacity="0.9"/>
-              <circle cx="24" cy="14" r="6" fill="none" stroke="#fff" strokeWidth="1.5"/>
-              <path d="M13 19L6 15M35 19L42 15M10 28L3 32M38 28L45 32" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-coral-dark to-brand-coral flex items-center justify-center shadow-sm shrink-0">
+            <svg viewBox="0 0 48 48" fill="none" className="w-6 h-6" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="24" cy="30" rx="8" ry="12" fill="#fff" opacity="0.9"/>
+              <path d="M18 38C18 38 16 44 14 46" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M20 40C20 40 18.5 45 17 47" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+              <path d="M22 41C22 41 21 45.5 20 47.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+              <ellipse cx="24" cy="20" rx="7" ry="6" fill="#fff" opacity="0.9"/>
+              <circle cx="21" cy="18" r="2" fill="white"/>
+              <circle cx="27" cy="18" r="2" fill="white"/>
+              <circle cx="21" cy="18" r="1" fill="#333"/>
+              <circle cx="27" cy="18" r="1" fill="#333"/>
+              <path d="M19 15C17 10 15 8 10 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M20 14C18 9 17 6 13 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M29 15C31 10 33 8 38 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M28 14C30 9 31 6 35 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M16 24C12 22 8 20 6 16C5 14 5 12 7 11C9 10 11 11 12 13C13 15 14 18 16 22" fill="#fff" opacity="0.8"/>
+              <path d="M32 24C36 22 40 20 42 16C43 14 43 12 41 11C39 10 37 11 36 13C35 15 34 18 32 22" fill="#fff" opacity="0.8"/>
+              <path d="M17 32H14" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M17 35H13" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M17 38H14" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M31 32H34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M31 35H35" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+              <path d="M31 38H34" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
             </svg>
           </div>
           <div>
-            <div className="text-xs font-semibold text-text-primary">小龙虾 问AI</div>
+            <div className="text-xs font-semibold text-text-primary">AI小龙虾</div>
             <div className="text-[10px] text-text-tertiary">跟你的AI助理聊聊今日运势</div>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-brand-teal font-medium group-hover:gap-1.5 transition-all">
-          去问问 <span className="text-xs">→</span>
+        <div className="flex items-center gap-1 text-[11px] text-brand-teal font-semibold group-hover:gap-1.5 transition-all">
+          有事问AI <span className="text-xs">→</span>
         </div>
       </Link>
 
-      {/* ════════ 2. 彩票工具 ════════ */}
+      {/* ════════ 2. 工具与服务 ════════ */}
       <div className="flex items-center justify-between mb-3 px-0.5">
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-gold to-brand-gold-dark">
-          彩票工具 💰
+          工具与服务
         </h2>
         <span className="text-xs text-brand-teal font-medium">更多</span>
       </div>
@@ -194,65 +180,7 @@ export function NewsGrid() {
         ))}
       </div>
 
-      {/* ════════ 3. 热号预测 ════════ */}
-      <div className="flex items-center justify-between mb-3 px-0.5">
-        <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-coral to-brand-coral-dark">
-          🔥 热号预测
-        </h2>
-      </div>
-
-      {loadingHot ? (
-        <div className="space-y-2 mb-5">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-[60px] bg-gray-100 rounded-[14px] animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2 mb-5">
-          {Object.entries(trends).map(([key, data]) => {
-            const info = HOT_LOTTERY_TYPES.find(t => t.key === key);
-            if (!info || data.hot_front.length === 0) return null;
-            return (
-              <Link key={key} href={`/lottery/${key}/chart`}
-                className="block bg-white rounded-[14px] p-3 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold">{info.name}</span>
-                    <Flame className="w-3 h-3 text-brand-coral" />
-                  </div>
-                  <span className="text-[9px] text-text-tertiary">近{data.periods}期热号</span>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {data.hot_front.map((n, i) => (
-                    <span key={i}
-                      className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-                      {String(n).padStart(2, '0')}
-                    </span>
-                  ))}
-                  {data.hot_back.length > 0 && (
-                    <>
-                      <span className="text-text-tertiary text-[10px] mx-0.5">+</span>
-                      {data.hot_back.map((n, i) => (
-                        <span key={i}
-                          className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-                          {String(n).padStart(2, '0')}
-                        </span>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-          {Object.keys(trends).length === 0 && !loadingHot && (
-            <div className="text-center py-6 text-[11px] text-text-tertiary bg-white rounded-[14px] border border-dashed border-gray-200">
-              暂无数据，请稍后再试
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ════════ 4. AI瞎猜 ════════ */}
+      {/* ════════ 3. AI瞎猜 ════════ */}
       <div className="flex items-center justify-between mb-3 px-0.5">
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-coral">
           🤖 AI瞎猜
