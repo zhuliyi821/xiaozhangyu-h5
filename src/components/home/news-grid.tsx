@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Sparkles, Target, Scan, Calculator, Flame } from "lucide-react";
 import Link from "next/link";
 import { getTrend, TrendData } from "@/lib/api";
+import LotteryHotCard from "@/components/home/lottery-hot-card";
 
 // ── 运势数据 ──
 const SCORE_TAGS = [
@@ -57,6 +58,19 @@ export function NewsGrid() {
   const { user } = useAuth();
   const [trends, setTrends] = useState<Record<string, TrendData>>({});
   const [loadingHot, setLoadingHot] = useState(true);
+  const [hotCardData, setHotCardData] = useState<any>(null);
+  const [loadingHotCard, setLoadingHotCard] = useState(true);
+
+  // 拉取热号推荐卡片
+  useEffect(() => {
+    fetch("/api/lottery/hot-card")
+      .then(r => r.json())
+      .then(d => setHotCardData(d?.data || null))
+      .catch(() => setHotCardData(null))
+      .finally(() => setLoadingHotCard(false));
+  }, []);
+
+  // 并行拉取各彩种热号
 
   // 并行拉取各彩种热号
   useEffect(() => {
@@ -118,6 +132,9 @@ export function NewsGrid() {
           </div>
         </div>
       </Link>
+
+      {/* ════════ 热号推荐卡片 ════════ */}
+      <LotteryHotCard data={hotCardData} loading={loadingHotCard} />
 
       {/* ── 小龙虾问AI按钮 ── */}
       <Link
