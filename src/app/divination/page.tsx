@@ -87,6 +87,20 @@ export default function DivinationPage() {
     </div>
   );
 
+  // 标签页
+  const [activeTab, setActiveTab] = useState<"method" | "report" | "history" | "aichat">("method");
+  // 报告生成后自动切换到报告标签
+  useEffect(() => {
+    if (report && activeTab === "method") setActiveTab("report");
+  }, [report]);
+
+  const TABS = [
+    { id: "method", label: "选方法" },
+    { id: "report", label: "看报告" },
+    { id: "history", label: "查历史" },
+    { id: "aichat", label: "AI聊" },
+  ];
+
   // 返回起卦页
   if (step === "choose") {
     return (
@@ -97,66 +111,89 @@ export default function DivinationPage() {
               <ArrowLeft className="w-5 h-5" />
               <span className="text-sm font-bold">🐙 遇事随卦</span>
             </Link>
+            <div className="flex-1 mx-3">
+              <div className="flex bg-gray-100 rounded-full p-0.5">
+                {TABS.map(tab => (
+                  <button key={tab.id}
+                    onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                    className={`flex-1 text-[10px] py-1.5 rounded-full font-medium transition-all ${
+                      activeTab === tab.id ? "bg-white text-text-primary shadow-sm" : "text-text-tertiary"
+                    } ${tab.id === "report" && !report ? "opacity-40" : ""}`}
+                    disabled={tab.id === "report" && !report}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button onClick={() => setShowHistory(!showHistory)} className="text-[10px] text-brand-teal flex items-center gap-1">
-              <BookOpen className="w-3 h-3" /> 历史{history.length}卦
+              <BookOpen className="w-3 h-3" /> {history.length}卦
             </button>
           </div>
         </div>
 
         <div className="px-4 py-6">
-          {/* 问题输入 */}
-          <div className="mb-6">
-            <label className="text-xs text-text-secondary mb-2 block">默念你的问题（选填）：</label>
-            <input
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              placeholder="如：是否适合换工作？"
-              className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-gray-200 focus:outline-none focus:border-brand-teal"
-            />
-          </div>
-
-          {/* 三种起卦方式 */}
-          <div className="space-y-3">
-            <button onClick={() => doDivination("shake")} disabled={loading}
-              className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl">📳</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold">摇一摇起卦</div>
-                  <div className="text-[10px] text-text-tertiary mt-0.5">手持手机，心中默念问题，点击摇动起卦</div>
-                </div>
-                <RefreshCw className={`w-5 h-5 text-purple-400 ${loading && method === "shake" ? "animate-spin" : ""}`} />
+          {/* 根据标签显示不同内容 */}
+          {activeTab === "method" && (
+            <>
+              {/* 问题输入 — 跨标签持久化 */}
+              <div className="mb-6">
+                <label className="text-xs text-text-secondary mb-2 block">默念你的问题（选填）：</label>
+                <input
+                  value={question}
+                  onChange={e => setQuestion(e.target.value)}
+                  placeholder="如：是否适合换工作？"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-gray-200 focus:outline-none focus:border-brand-teal"
+                />
               </div>
-            </button>
 
-            <button onClick={() => doDivination("manual")} disabled={loading}
-              className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-2xl">🪙</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold">手动摇卦</div>
-                  <div className="text-[10px] text-text-tertiary mt-0.5">模拟三枚铜钱，逐爻摇动六次成卦</div>
-                </div>
-                <span className="text-amber-500 text-sm">→</span>
+              {/* 三种起卦方式 */}
+              <div className="space-y-3">
+                <button onClick={() => doDivination("shake")} disabled={loading}
+                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl">📳</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-bold">摇一摇起卦</div>
+                      <div className="text-[10px] text-text-tertiary mt-0.5">手持手机，心中默念问题，点击摇动起卦</div>
+                    </div>
+                    <RefreshCw className={`w-5 h-5 text-purple-400 ${loading && method === "shake" ? "animate-spin" : ""}`} />
+                  </div>
+                </button>
+
+                <button onClick={() => doDivination("manual")} disabled={loading}
+                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-2xl">🪙</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-bold">手动摇卦</div>
+                      <div className="text-[10px] text-text-tertiary mt-0.5">模拟三枚铜钱，逐爻摇动六次成卦</div>
+                    </div>
+                    <span className="text-amber-500 text-sm">→</span>
+                  </div>
+                </button>
+
+                <button onClick={() => doDivination("time")} disabled={loading}
+                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-2xl">⚡</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-bold">时间起卦</div>
+                      <div className="text-[10px] text-text-tertiary mt-0.5">以当前时间自动起卦</div>
+                    </div>
+                    <span className="text-brand-teal text-sm">→</span>
+                  </div>
+                </button>
               </div>
-            </button>
 
-            <button onClick={() => doDivination("time")} disabled={loading}
-              className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-2xl">⚡</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold">时间起卦</div>
-                  <div className="text-[10px] text-text-tertiary mt-0.5">以当前时间自动起卦</div>
-                </div>
-                <span className="text-brand-teal text-sm">→</span>
+              <div className="text-[9px] text-text-tertiary text-center mt-6">
+                每日免费 6 次 · 超出消耗 1000 游戏豆
               </div>
-            </button>
-          </div>
+            </>
+          )}
 
-          {/* 历史 */}
-          {showHistory && (
-            <div className="mt-6 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+          {activeTab === "history" && (
+            <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
               <div className="text-xs font-bold mb-3">📜 我的卦象（{history.length}卦）</div>
               {history.length === 0 ? (
                 <div className="text-[10px] text-text-tertiary text-center py-4">暂无卦象记录</div>
@@ -179,9 +216,25 @@ export default function DivinationPage() {
             </div>
           )}
 
-          <div className="text-[9px] text-text-tertiary text-center mt-6">
-            每日免费 6 次 · 超出消耗 1000 游戏豆
-          </div>
+          {activeTab === "aichat" && (
+            <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+              <div className="text-xs font-bold mb-3">💬 问AI · 解卦</div>
+              <div className="text-[10px] text-text-tertiary text-center py-8">
+                {report
+                  ? "对当前卦象有疑问？点击下方术语可直接提问。"
+                  : "先起一卦，再来问AI解卦。"}
+              </div>
+              {report && (
+                <div className="flex gap-2 flex-wrap">
+                  {["本卦是什么意思", "动爻代表什么", "体用生克怎么看", "这个卦吉凶如何"].map(q => (
+                    <button key={q} className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-full px-3 py-1.5 active:scale-95">
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
     );

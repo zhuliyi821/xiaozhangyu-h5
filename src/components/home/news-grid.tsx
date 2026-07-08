@@ -97,45 +97,54 @@ export function NewsGrid() {
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-teal-dark">
           🐙 每日一卦
         </h2>
-        <div className="flex items-center gap-1.5">
-          <Link href="/divination" className="text-xs text-amber-500 font-medium">遇事起一卦</Link>
-          <span className="text-[10px] text-gray-300">·</span>
-          <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
-        </div>
+        <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
       </div>
 
-      <Link href="/daily-fortune" className="block bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-5 active:scale-[0.98] transition-transform">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-gold flex items-center justify-center shrink-0 shadow-sm">
-            <span className="text-xl">🐙</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold">{fortune.score}</span>
-              <span className="text-[10px] text-text-tertiary">分</span>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-brand-teal-light/20 ${fortune.tag.text}`}>
-                {fortune.tag.emoji} {fortune.tag.label}
-              </span>
+      <div className="block bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-5">
+        <Link href="/daily-fortune" className="block active:scale-[0.98] transition-transform">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-gold flex items-center justify-center shrink-0 shadow-sm">
+              <span className="text-xl">🐙</span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-text-tertiary mt-0.5">
-              <span>宜 {fortune.do}</span>
-              <span className="w-1 h-1 rounded-full bg-gray-300" />
-              <span>忌 {fortune.dont}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-bold">{fortune.score}</span>
+                <span className="text-[10px] text-text-tertiary">分</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-brand-teal-light/20 ${fortune.tag.text}`}>
+                  {fortune.tag.emoji} {fortune.tag.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-text-tertiary mt-0.5">
+                <span>宜 {fortune.do}</span>
+                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span>忌 {fortune.dont}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="mt-2.5 pt-2.5 border-t border-gray-100 space-y-1.5">
-          <div className="flex gap-3 text-[10px] text-text-secondary">
-            <span>🎨 幸运色 <strong className="text-text-primary">{fortune.luckyColor}</strong></span>
-            <span>🔢 数字 <strong className="text-text-primary">{fortune.luckyNumbers.join(" ")}</strong></span>
-            <span>📍 方位 <strong className="text-text-primary">{fortune.luckyDirection}</strong></span>
+          <div className="mt-2.5 pt-2.5 border-t border-gray-100 space-y-1.5">
+            <div className="flex gap-3 text-[10px] text-text-secondary">
+              <span>🎨 幸运色 <strong className="text-text-primary">{fortune.luckyColor}</strong></span>
+              <span>🔢 数字 <strong className="text-text-primary">{fortune.luckyNumbers.join(" ")}</strong></span>
+              <span>📍 方位 <strong className="text-text-primary">{fortune.luckyDirection}</strong></span>
+            </div>
+            <div className="flex items-start gap-1.5 text-[10px] text-text-secondary">
+              <Sparkles className="w-3 h-3 text-brand-teal mt-0.5 shrink-0" />
+              <span className="line-clamp-1">{fortune.tip} —— 小章鱼</span>
+            </div>
           </div>
-          <div className="flex items-start gap-1.5 text-[10px] text-text-secondary">
-            <Sparkles className="w-3 h-3 text-brand-teal mt-0.5 shrink-0" />
-            <span className="line-clamp-1">{fortune.tip} —— 小章鱼</span>
+        </Link>
+        {/* ── 嵌入遇事起一卦 ── */}
+        <Link
+          href="/divination"
+          className="mt-2.5 pt-2.5 border-t border-dashed border-amber-200 flex items-center justify-between active:scale-[0.98] transition-transform"
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-amber-600 font-medium">遇事起一卦</span>
+            <span className="text-[9px] text-amber-400">{fortune.score >= 70 ? "今日运势佳，宜决策" : fortune.score >= 50 ? "运势平稳，宜观望" : "运势偏弱，宜静不宜动"}</span>
           </div>
-        </div>
-      </Link>
+          <span className="text-[10px] text-amber-500">去起卦 →</span>
+        </Link>
+      </div>
 
       {/* ════════ 热号推荐卡片 ════════ */}
       <LotteryHotCard data={hotCardData} loading={loadingHotCard} />
