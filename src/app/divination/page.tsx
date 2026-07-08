@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Sparkles, RefreshCw, Share2, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { TentacleLoader, RevealContainer, Confetti, ScoreCelebration, AnimatedNumber, GoldRipple, EmptyState, useDelight } from "@/lib/delight";
 
 type Yaoyi = { position: number; name: string; value: number; changing: boolean; line_type: string; stem: string; branch: string; element: string; relation: string; ri_chen: string };
 
@@ -28,6 +29,9 @@ export default function DivinationPage() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const { celebration, celebrate } = useDelight();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showRipple, setShowRipple] = useState(false);
 
   // 加载历史
   useEffect(() => {
@@ -46,6 +50,11 @@ export default function DivinationPage() {
       if (d.code === 0 && d.data) {
         setReport(d.data);
         setStep("result");
+        // 喜悦效果
+        const score = d.data.conclusion.score;
+        if (score >= 80) { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 2500); }
+        else if (score >= 50) { setShowRipple(true); setTimeout(() => setShowRipple(false), 1500); }
+        celebrate(score >= 60 ? "good" : "info", score >= 80 ? "✨ 大吉之象！" : "卦象已现，请细细品读");
         // 存历史
         const entry = {
           id: Date.now(),
@@ -105,6 +114,8 @@ export default function DivinationPage() {
   if (step === "choose") {
     return (
       <main className="min-h-screen bg-bg pb-20">
+        <Confetti active={showConfetti} />
+        <GoldRipple active={showRipple} />
         <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-border-tertiary">
           <div className="flex items-center justify-between px-4 py-3">
             <Link href="/" className="flex items-center gap-2">
@@ -157,9 +168,11 @@ export default function DivinationPage() {
                       <div className="text-sm font-bold">摇一摇起卦</div>
                       <div className="text-[10px] text-text-tertiary mt-0.5">手持手机，心中默念问题，点击摇动起卦</div>
                     </div>
-                    <RefreshCw className={`w-5 h-5 text-purple-400 ${loading && method === "shake" ? "animate-spin" : ""}`} />
-                  </div>
-                </button>
+                <RefreshCw className={`w-5 h-5 text-purple-400 ${loading && method === "shake" ? "animate-spin" : ""}`} />
+              </div>
+            </button>
+
+            {loading && <TentacleLoader text="章鱼正在为你起卦…" />}
 
                 <button onClick={() => doDivination("manual")} disabled={loading}
                   className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
@@ -196,7 +209,9 @@ export default function DivinationPage() {
             <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
               <div className="text-xs font-bold mb-3">📜 我的卦象（{history.length}卦）</div>
               {history.length === 0 ? (
-                <div className="text-[10px] text-text-tertiary text-center py-4">暂无卦象记录</div>
+                <EmptyState icon="🐙" title="还没有卦象记录"
+                  subtitle="右上角点起卦，章鱼会为你推演"
+                  action={{ label: "去起一卦", onClick: () => setActiveTab("method") }} />
               ) : (
                 <div className="space-y-2">
                   {history.map((entry: any) => (
@@ -218,20 +233,32 @@ export default function DivinationPage() {
 
           {activeTab === "aichat" && (
             <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
-              <div className="text-xs font-bold mb-3">💬 问AI · 解卦</div>
-              <div className="text-[10px] text-text-tertiary text-center py-8">
-                {report
-                  ? "对当前卦象有疑问？点击下方术语可直接提问。"
-                  : "先起一卦，再来问AI解卦。"}
-              </div>
-              {report && (
-                <div className="flex gap-2 flex-wrap">
-                  {["本卦是什么意思", "动爻代表什么", "体用生克怎么看", "这个卦吉凶如何"].map(q => (
-                    <button key={q} className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-full px-3 py-1.5 active:scale-95">
-                      {q}
-                    </button>
-                  ))}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center text-xs text-white">🦐</span>
+                <div>
+                  <div className="text-xs font-bold text-text-primary">小龙虾解卦</div>
+                  <div className="text-[9px] text-text-tertiary">问吧，我帮你问章鱼老师</div>
                 </div>
+              </div>
+              {report ? (
+                <>
+                  <div className="text-[10px] text-text-tertiary text-center py-6 leading-relaxed">
+                    当前卦象：{report.overview.ben_gua.name} → {report.overview.bian_gua.name}
+                    <br />点击下方问题直接问
+                  </div>
+                  <div className="flex gap-2 flex-wrap justify-center">
+                    {[["这卦什么意思", "本卦"],["动爻代表什么","动爻"],["吉凶如何","吉凶"],["体用怎么看","体用"],["纳甲是什么","纳甲"]].map(([q, tag]) => (
+                      <button key={q}
+                        className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-full px-3 py-1.5 active:scale-90 transition-transform hover:bg-brand-teal/20">
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <EmptyState icon="🦐" title="先起一卦，再来问"
+                  subtitle="小龙虾还没拿到章鱼的推算结果呢"
+                  action={{ label: "去起一卦", onClick: () => setActiveTab("method") }} />
               )}
             </div>
           )}
@@ -400,10 +427,11 @@ export default function DivinationPage() {
           <div className="text-xs font-bold text-[#c69838] mb-3">九、综合论断</div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm">综合评分</span>
+            <ScoreCelebration score={r.conclusion.score} />
             <span className={`text-lg font-bold ${
               r.conclusion.score >= 60 ? "text-[#5a8a6a]" : r.conclusion.score >= 40 ? "text-[#c69838]" : "text-[#b8341e]"
             }`}>
-              {r.conclusion.score}
+              <AnimatedNumber value={r.conclusion.score} />
             </span>
             <span className="text-[10px] text-[#8a6c3a]">/ 100</span>
           </div>

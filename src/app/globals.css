@@ -39,6 +39,12 @@
   /* Animations */
   --animate-slide-up: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-bounce-in: bounce-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-sparkle: sparkle 0.8s ease-in-out;
+  --animate-tentacle-wave: tentacle-wave 1.5s ease-in-out infinite;
+  --animate-glowing: glowing 2s ease-in-out infinite;
+  --animate-confetti-fall: confetti-fall 1.5s linear forwards;
+  --animate-float-up: float-up 1s ease-out forwards;
 }
 
 @keyframes slide-up {
@@ -49,6 +55,41 @@
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-in {
+  0% { opacity: 0; transform: scale(0.3) translateY(20px); }
+  50% { transform: scale(1.05) translateY(-5px); }
+  70% { transform: scale(0.95) translateY(2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes sparkle {
+  0% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0) rotate(360deg); }
+}
+
+@keyframes tentacle-wave {
+  0%, 100% { transform: rotate(-3deg) scaleY(1); }
+  25% { transform: rotate(3deg) scaleY(1.02); }
+  50% { transform: rotate(-2deg) scaleY(0.98); }
+  75% { transform: rotate(4deg) scaleY(1.01); }
+}
+
+@keyframes glowing {
+  0%, 100% { box-shadow: 0 0 5px rgba(242,182,49,0.3); }
+  50% { box-shadow: 0 0 20px rgba(242,182,49,0.6), 0 0 40px rgba(242,182,49,0.2); }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes float-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(-30px); }
 }
 
 @layer base {
