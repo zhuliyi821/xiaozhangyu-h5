@@ -12,6 +12,8 @@ const CATEGORIES = [
   { key: "",      label: "全部" },
   { key: "sports", label: "⚽ 体育" },
   { key: "social", label: "🌐 社会" },
+  { key: "event", label: "⚡ 突发" },
+  { key: "general", label: "💬 一言不合" },
 ];
 
 const MODES = [
@@ -110,12 +112,13 @@ export default function PKHallPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 筛选逻辑：只显示 sports/social 品类
-  const ALLOWED_CATS = ["sports", "social"];
-  let filtered = topics.filter(t => ALLOWED_CATS.includes(t.category));
+  // 筛选逻辑：4品类全支持
+  let filtered = [...topics];
   if (activeCat) filtered = filtered.filter(t => t.category === activeCat);
   if (activeMode) filtered = filtered.filter(t => t.mode === activeMode);
-  if (activeSort === "hot") filtered = [...filtered].sort((a, b) => b.total_votes - a.total_votes);
+  if (activeSort === "hot") filtered = [...filtered].sort((a, b) => (b.total_votes * 5 + b.total_pool * 3) - (a.total_votes * 5 + a.total_pool * 3));
+  if (activeSort === "local") filtered = [...filtered].sort((a, b) => (b.total_votes - a.total_votes) * 0.5 + (Math.random() - 0.5) * 10);
+  if (activeSort === "follow") filtered = [...filtered].sort((a, b) => b.total_pool - a.total_pool);
 
   const stats = {
     active: topics.filter(t => t.status === 1).length,
@@ -127,29 +130,25 @@ export default function PKHallPage() {
     <div className="w-full max-w-[420px] mx-auto bg-white min-h-screen relative">
 
       {/* ─── Header ─── */}
-      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[20px] px-4 pt-5 pb-4 text-white relative overflow-hidden">
-        <div className="absolute -top-7 -right-7 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_70%)]" />
-        <div className="relative z-10 flex justify-between items-center">
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[24px] px-4 pt-5 pb-5 text-white">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="text-xl font-bold">PK 大厅</div>
-            <div className="text-xs opacity-85 mt-0.5">选择方向，发起PK对战</div>
+            <div className="text-lg font-bold">⚔️ PK大厅</div>
+            <div className="text-[10px] text-white/70 mt-0.5">选择方向，发起对战</div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">⚔</div>
         </div>
-        <div className="flex gap-2 mt-3.5 bg-white/12 backdrop-blur-sm rounded-[12px] p-2 relative z-10">
-          <div className="flex-1 text-center">
-            <div className="text-base font-bold">{stats.active}</div>
-            <div className="text-[9px] opacity-75">进行中</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[12px] py-2.5 text-center">
+            <div className="text-sm font-bold">{stats.active}</div>
+            <div className="text-[9px] text-white/70">进行中</div>
           </div>
-          <div className="w-px bg-white/20" />
-          <div className="flex-1 text-center">
-            <div className="text-base font-bold">{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
-            <div className="text-[9px] opacity-75">总奖池 💰</div>
+          <div className="bg-white/12 backdrop-blur-sm rounded-[12px] py-2.5 text-center">
+            <div className="text-sm font-bold">{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
+            <div className="text-[9px] text-white/70">总奖池</div>
           </div>
-          <div className="w-px bg-white/20" />
-          <div className="flex-1 text-center">
-            <div className="text-base font-bold">{stats.voters}</div>
-            <div className="text-[9px] opacity-75">总参与</div>
+          <div className="bg-white/12 backdrop-blur-sm rounded-[12px] py-2.5 text-center">
+            <div className="text-sm font-bold">{stats.voters}</div>
+            <div className="text-[9px] text-white/70">参与者</div>
           </div>
         </div>
       </div>
@@ -202,47 +201,34 @@ export default function PKHallPage() {
           </div>
         )}
 
-        {/* ─── 品类 Tabs ─── */}
-        <div className="flex gap-1 p-1 mt-3 bg-white rounded-full shadow-[0_2px_8px_rgba(69,204,213,0.08)] overflow-hidden">
-          {CATEGORIES.map(cat => (
-            <div key={cat.key}
-              onClick={() => setActiveCat(cat.key)}
-              className={`flex-1 py-2 text-center text-xs font-medium rounded-full cursor-pointer transition-all ${
-                activeCat === cat.key
-                  ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-[0_2px_6px_rgba(69,204,213,0.2)]"
-                  : "text-[#9A9A9D] hover:text-gray-600"
-              }`}>
-              {cat.label}
-            </div>
-          ))}
-        </div>
-
-        {/* ─── 模式筛选 ─── */}
-        <div className="flex flex-wrap gap-1.5 mt-3">
-          {MODES.map(mode => (
-            <span key={mode.key} onClick={() => setActiveMode(mode.key)}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
-                activeMode === mode.key
-                  ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white"
-                  : "bg-white text-[#6B6B6E] border border-[#E7E7E8]"
-              }`}>
-              {mode.label}
-            </span>
-          ))}
-        </div>
-
-        {/* ─── 排序筛选 ─── */}
-        <div className="flex gap-1.5 mt-2 mb-3">
-          {SORTS.map(s => (
-            <span key={s.key} onClick={() => setActiveSort(s.key)}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
-                activeSort === s.key
-                  ? "bg-brand-gold-light text-brand-gold-dark"
-                  : "bg-white text-text-secondary border border-gray-200"
-              }`}>
-              {s.label}
-            </span>
-          ))}
+        {/* ─── 双列筛选: 品类 + 排序 ─── */}
+        <div className="mt-3 bg-white rounded-[14px] p-2.5 border border-gray-100 shadow-sm">
+          {/* 品类标签 */}
+          <div className="flex gap-1.5 flex-wrap mb-2">
+            {CATEGORIES.map(cat => (
+              <span key={cat.key} onClick={() => setActiveCat(cat.key)}
+                className={`px-3 py-1 rounded-full text-[10px] font-medium cursor-pointer transition-all ${
+                  activeCat === cat.key
+                    ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white"
+                    : "bg-gray-100 text-text-secondary hover:text-text-primary"
+                }`}>
+                {cat.label}
+              </span>
+            ))}
+          </div>
+          {/* 排序标签 */}
+          <div className="flex gap-1.5 items-center">
+            {SORTS.map(s => (
+              <span key={s.key} onClick={() => setActiveSort(s.key)}
+                className={`px-3 py-1 rounded-full text-[10px] font-medium cursor-pointer transition-all ${
+                  activeSort === s.key
+                    ? "bg-brand-gold-light text-brand-gold-dark"
+                    : "text-text-tertiary"
+                }`}>
+                {s.label}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* ─── 实时动态条 ─── */}
@@ -275,69 +261,79 @@ export default function PKHallPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
-            {filtered.map(pk => (
-              <div key={pk.id} onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
-                className="bg-white rounded-[16px] p-4 cursor-pointer shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-[#E7E7E8] transition-all active:scale-[0.98]">
+            {filtered.map(pk => {
+              const total = pk.total_votes || 1;
+              const pctA = Math.min(100, Math.round(((pk.vote_a || 0) / total) * 100));
+              const pctB = Math.min(100, Math.round(((pk.vote_b || 0) / total) * 100));
+              return (
+              <div key={pk.id}
+                className="bg-white rounded-[16px] overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
 
-                {/* 顶栏标签 */}
-                <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                  <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-semibold ${
-                    pk.category === "sports" ? "bg-[#E8FAFB] text-brand-teal-dark"
-                    : pk.category === "social" ? "bg-[#FFF5E6] text-[#D97706]"
-                    : pk.category === "event" ? "bg-[#FFF0ED] text-brand-coral"
-                    : "bg-[#F5E8F8] text-[#682575]"
+                {/* Card header tags */}
+                <div className="px-3.5 pt-3 flex items-center gap-1.5 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-medium ${
+                    pk.category === "sports" ? "bg-brand-teal/10 text-brand-teal-dark"
+                    : pk.category === "social" ? "bg-brand-gold-light/50 text-brand-gold-dark"
+                    : pk.category === "event" ? "bg-brand-coral/10 text-brand-coral-dark"
+                    : "bg-purple-100 text-purple-700"
                   }`}>
                     {pk.category === "sports" ? "⚽" : pk.category === "social" ? "🌐" : pk.category === "event" ? "⚡" : "💬"} {pk.category === "sports" ? "体育" : pk.category === "social" ? "社会" : pk.category === "event" ? "突发" : "一言"}
                   </span>
-                  {/* PK 形态标签 */}
-                  <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-semibold ${
-                    pk.mode === "1v1" ? "bg-[#E8FAFB] text-brand-teal-dark"
-                    : pk.mode === "1vN" ? "bg-[#FFF5E6] text-[#D97706]"
-                    : "bg-[#F0E8FF] text-[#682575]"
-                  }`}>
-                    {pk.mode === "1v1" ? "⚔️1v1" : pk.mode === "1vN" ? "🥊打擂" : "👥阵营"}
+                  <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-brand-teal/10 text-brand-teal-dark">
+                    ⚔️{pk.mode === "1v1" ? "1v1" : pk.mode === "1vN" ? "打擂" : "阵营"}
                   </span>
-                  {/* 公益标签 */}
-                  {pk.charity && pk.charity !== "none" && (
-                    <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-semibold bg-[#FFF0ED] text-brand-coral">
-                      ❤️公益
+                  {pk.status === 1 ? (
+                    <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-red-50 text-brand-coral-dark">
+                      ⏰ {pk.time_label || "进行中"}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-gray-100 text-text-tertiary">
+                      ✅ 已结算
                     </span>
                   )}
-                  <span className={`ml-auto text-[10px] ${pk.time_remaining < 1800 ? 'text-brand-coral' : 'text-[#6B6B6E]'}`}>
-                    ⏰ {pk.time_label}
-                  </span>
                 </div>
-
-                {/* 标题 */}
-                <div className="text-sm font-semibold text-[#1C1C1D] mb-1.5">
-                  {pk.title}
-                </div>
-                <div className="text-[11px] text-[#9A9A9D] mb-2">
-                  💰 奖池 {pk.total_pool}豆 · 👥 {pk.total_votes}人参与
-                </div>
-
-                {/* 双进度条 */}
-                <div className="mb-2.5">
-                  <div className="flex h-2 rounded-full overflow-hidden mb-1.5">
-                    <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}%`}} className="bg-gradient-to-r from-brand-teal to-brand-teal-dark" />
-                    <div style={{width:`${pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}%`}} className="bg-gradient-to-r from-brand-coral to-[#E05A3D]" />
-                  </div>
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-brand-teal-dark font-medium">{pk.option_a || pk.options?.[0] || "A"} {pk.total_votes > 0 ? Math.round((pk.vote_a ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_a ?? 0)}豆</span>
-                    <span className="text-brand-coral font-medium">{pk.option_b || pk.options?.[1] || "B"} {pk.total_votes > 0 ? Math.round((pk.vote_b ?? 0)/pk.total_votes*100) : 50}% · {(pk.pool_b ?? 0)}豆</span>
+                {/* Title + pool info */}
+                <div className="px-3.5 pt-2 cursor-pointer" onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}>
+                  <div className="text-sm font-semibold text-text-primary leading-snug">{pk.title}</div>
+                  <div className="flex items-center gap-3 text-[10px] text-text-tertiary mt-1">
+                    <span>💰 奖池 {pk.total_pool}豆</span>
+                    <span>👥 {pk.total_votes}人参与</span>
                   </div>
                 </div>
-
-                {/* CTA 行 */}
-                <div className="flex gap-2 items-center mt-1">
-                  <div className="flex-1 text-[10px] text-[#9A9A9D]">起投 {pk.min_bet}豆</div>
-                  <div className="flex gap-1.5">
-                    <div className="px-3.5 py-1.5 rounded-[10px] border border-[#E7E7E8] text-xs text-brand-teal-dark font-medium">👀 围观</div>
-                    <div className="px-4.5 py-1.5 rounded-[10px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-semibold shadow-[0_2px_8px_rgba(69,204,213,0.2)]">💰 下注</div>
+                {/* Dual progress bars */}
+                <div className="px-3.5 pt-2.5 cursor-pointer" onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}>
+                  <div className="mb-1.5">
+                    <div className="flex items-center justify-between text-[10px] mb-0.5">
+                      <span className="font-medium text-brand-teal-dark">{pk.option_a || pk.options?.[0] || "A"}</span>
+                      <span className="text-text-tertiary">{pctA}% · {pk.vote_a || 0}豆</span>
+                    </div>
+                    <div className="h-[18px] bg-brand-teal/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-full transition-all" style={{width: `${pctA}%`}} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-[10px] mb-0.5">
+                      <span className="font-medium text-brand-coral-dark">{pk.option_b || pk.options?.[1] || "B"}</span>
+                      <span className="text-text-tertiary">{pctB}% · {pk.vote_b || 0}豆</span>
+                    </div>
+                    <div className="h-[18px] bg-brand-coral/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-brand-coral to-brand-coral-dark rounded-full transition-all" style={{width: `${pctB}%`}} />
+                    </div>
+                  </div>
+                </div>
+                {/* CTA row */}
+                <div className="px-3.5 py-2.5 flex items-center justify-between border-t border-gray-50 mt-2.5">
+                  <span className="text-[10px] text-text-tertiary">起投 {pk.min_bet}豆</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
+                      className="text-[10px] px-3 py-1.5 rounded-full border border-gray-200 text-text-secondary active:scale-95 transition-transform">👀 围观</button>
+                    <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
+                      className="text-[10px] px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-medium active:scale-95 transition-transform shadow-sm">💰 投注</button>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
