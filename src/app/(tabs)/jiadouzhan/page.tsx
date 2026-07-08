@@ -3,7 +3,7 @@
 /**
  * 🏪 加豆站 — 资产聚合中心
  *
- * 七大模块: 资产卡片(含冻结) | 激活引导 | 邀请好友 | 兑换中心 | 快捷入口 | 日常任务 | 游戏豆流水
+ * 五层递进: 品牌头卡 | 资产概览 | 兑换中心 | 互动赚豆 | 近期流水
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -36,134 +36,130 @@ interface FlowItem {
   created_at: string;
 }
 
-// 冻结比例（后续从后端API获取）
 const CRYSTAL_FROZEN_RATIO = 0.7;
+
+function formatAsset(n: number): string {
+  if (n >= 10000) return (n / 10000).toFixed(1) + "w";
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(Math.floor(n));
+}
 
 // ─── 组件 ───
 
-function AssetCard({ credits, frozenRatio, onExchangeClick }: { credits: WalletBrief; frozenRatio: number; onExchangeClick: () => void }) {
-  const totalCrystal = Math.floor(credits.credit5);
-  // 冻结比例由父组件决定，统一来源
-  const totalBall = Math.floor(credits.credit3);
-  const totalIdle = Math.floor(credits.credit2);
-  const frozen = Math.floor(totalCrystal * frozenRatio);
-  const active = totalCrystal - frozen;
-  const frozenPct = totalCrystal > 0 ? Math.round((frozen / totalCrystal) * 100) : 0;
-  const totalValuation = Math.floor(credits.credit1) + totalCrystal + totalBall + credits.credit4;
+/** 一、品牌头卡 */
+function BrandHeader({ credits, gameBeans }: { credits: WalletBrief; gameBeans: number }) {
+  const totalValuation = Math.floor(credits.credit1) + Math.floor(credits.credit5) + Math.floor(credits.credit3) + credits.credit4;
+  return (
+    <div>
+      <div className="bg-gradient-to-br from-brand-teal to-brand-teal-dark px-4 pt-6 pb-5 relative overflow-hidden">
+        <div className="absolute -top-7 -right-7 w-[120px] h-[120px] rounded-full bg-white/8" />
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-2xl">🐙</div>
+          <div className="flex-1">
+            <div className="text-white text-base font-bold">加豆站</div>
+            <div className="text-white/75 text-[11px] mt-0.5">资产 · 兑换 · 赚豆</div>
+          </div>
+          <span className="text-white text-xs bg-white/15 px-3 py-1.5 rounded-full font-semibold">
+            🎮 {formatAsset(gameBeans)}
+          </span>
+        </div>
+      </div>
+      <div className="bg-brand-teal-light/50 px-4 py-2.5 flex items-center justify-between">
+        <span className="text-[11px] text-brand-teal-dark font-medium">总资产估值</span>
+        <span className="text-sm font-bold text-brand-teal-dark">≈ {formatAsset(totalValuation)} 🎮</span>
+      </div>
+    </div>
+  );
+}
 
+/** 二、资产概览 — 5列灰色格子 */
+function AssetGrid({ credits }: { credits: WalletBrief }) {
+  const totalCrystal = Math.floor(credits.credit5);
+  const frozen = Math.floor(totalCrystal * CRYSTAL_FROZEN_RATIO);
   return (
     <section className="mx-4 mt-4">
-      <div className="bg-white rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-text text-sm font-semibold">💰 我的资产</h2>
-          <span className="text-text-tertiary text-[10px]">总估值 ≈ {totalValuation.toLocaleString()}</span>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3 mt-4">
-          {/* 游戏豆 */}
-          <div className="bg-bg rounded-[12px] p-3 text-center">
-            <div className="text-2xl mb-1">🎮</div>
-            <div className="text-text text-sm font-bold">{credits.credit1.toLocaleString()}</div>
-            <div className="text-text-tertiary text-[10px] mt-0.5">游戏豆</div>
-          </div>
-
-          {/* 水晶石 — 拆分冻结/可用 */}
-          <div className="bg-bg rounded-[12px] p-3 text-center">
-            <div className="text-2xl mb-1">⛏️</div>
-            <div className="text-text text-sm font-bold">{totalCrystal.toLocaleString()}</div>
-            <div className="text-text-tertiary text-[10px] mt-0.5">水晶石</div>
-            {frozen > 0 && (
-              <div className="mt-1.5 space-y-0.5">
-                <div className="flex justify-center gap-2 text-[9px]">
-                  <span className="text-brand-coral">🔒 {frozen}冻结</span>
-                  <span className="text-brand-teal">✅ {active}可用</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden mx-2">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-brand-coral to-brand-gold"
-                    style={{ width: `${totalCrystal > 0 ? (active / totalCrystal) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 水晶球 */}
-          <div className="bg-bg rounded-[12px] p-3 text-center">
-            <div className="text-2xl mb-1">🔮</div>
-            <div className="text-text text-sm font-bold">{totalBall.toLocaleString()}</div>
-            <div className="text-text-tertiary text-[10px] mt-0.5">水晶球</div>
-            <div className="text-[8px] text-text-tertiary mt-0.5">享分红</div>
-          </div>
-        </div>
-
-        {/* 第二行: 余额 + 闲豆 */}
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          {/* 余额 */}
-          <div className="bg-bg rounded-[12px] p-3 text-center">
-            <div className="text-2xl mb-1">💵</div>
-            <div className="text-text text-sm font-bold">¥{credits.credit4.toFixed(2)}</div>
-            <div className="text-text-tertiary text-[10px] mt-0.5">余额</div>
-          </div>
-          {/* 闲豆 */}
-          <div className="bg-bg rounded-[12px] p-3 text-center">
-            <div className="text-2xl mb-1">🫘</div>
-            <div className="text-text text-sm font-bold">{totalIdle.toLocaleString()}</div>
-            <div className="text-text-tertiary text-[10px] mt-0.5">闲豆</div>
-            <div className="text-[8px] text-text-tertiary mt-0.5">商城专用</div>
-          </div>
-        </div>
-
-        {/* 兑换入口按钮 */}
-        <button
-          onClick={onExchangeClick}
-          className="mt-3 w-full bg-surface hover:bg-gray-50 rounded-[12px] px-4 py-2.5 flex items-center justify-between transition-colors active:scale-[0.98] border border-[rgba(69,204,213,0.08)]"
-        >
-          <div className="flex items-center gap-2">
-            <ArrowRightLeft className="w-4 h-4 text-brand-teal-dark" />
-            <span className="text-text text-[11px] font-medium">兑换中心</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-text-tertiary text-[9px]">游戏豆↔水晶石↔余额</span>
-            <ChevronRight className="w-3.5 h-3.5 text-text-tertiary" />
-          </div>
-        </button>
-
-        {/* 兑换参考 */}
-        <div className="mt-2 bg-bg rounded-[10px] px-3 py-2 text-center">
-          <span className="text-text-tertiary text-[10px]">💡 1 游戏豆 ≈ 1 水晶石 · 1 元余额 = 100 游戏豆</span>
+      <div className="bg-white rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+        <div className="grid grid-cols-5 gap-2">
+          <AssetCell icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" />
+          <AssetCell icon="⛏️" value={formatAsset(totalCrystal)} label="水晶石" sub={frozen > 0 ? `🔒${frozen}冻结` : ""} subColor="text-brand-coral" />
+          <AssetCell icon="🔮" value={formatAsset(credits.credit3)} label="水晶球" sub="享分红" subColor="text-brand-teal-dark" />
+          <AssetCell icon="💰" value={`¥${credits.credit4.toFixed(2)}`} label="余额" />
+          <AssetCell icon="🫘" value={formatAsset(credits.credit2)} label="闲豆" sub="商城" subColor="text-brand-gold-dark" />
         </div>
       </div>
     </section>
   );
 }
 
-// ─── 激活引导卡片（新增） ───
+function AssetCell({ icon, value, label, sub, subColor }: { icon: string; value: string; label: string; sub?: string; subColor?: string }) {
+  return (
+    <div className="text-center bg-bg rounded-[10px] py-2.5 px-1">
+      <div className="text-xl mb-1">{icon}</div>
+      <div className="text-sm font-bold text-text">{value}</div>
+      <div className="text-[10px] text-text-tertiary mt-0.5">{label}</div>
+      {sub && <div className={`text-[8px] mt-0.5 ${subColor || "text-text-tertiary"}`}>{sub}</div>}
+    </div>
+  );
+}
+
+/** 三、兑换中心 — 独立青色淡底卡片 */
+function ExchangeHub({ onClick }: { onClick: () => void }) {
+  return (
+    <section className="mx-4 mt-3">
+      <div className="bg-brand-teal-light/30 rounded-[20px] p-4 border border-brand-teal-light/50">
+        <div className="flex items-center gap-2 mb-3">
+          <ArrowRightLeft className="w-4 h-4 text-brand-teal-dark" />
+          <span className="text-sm font-bold text-brand-teal-dark">兑换中心</span>
+          <span className="ml-auto text-[10px] text-brand-teal-dark/70">游戏豆↔水晶石↔余额</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <ExchangeDir icon="⛏️→🎮" label="水晶石" rate="1:1" />
+          <ExchangeDir icon="💰→🎮" label="余额" rate="1:100" />
+          <ExchangeDir icon="🔒→🎮" label="激活冻结" rate="消耗豆" />
+        </div>
+        <button onClick={onClick}
+          className="mt-3 w-full bg-brand-teal text-white rounded-[12px] py-2.5 text-xs font-bold active:scale-[0.98] transition-transform">
+          去兑换 →
+        </button>
+        <div className="mt-2 text-center">
+          <span className="text-[10px] text-brand-teal-dark/70">1 游戏豆 ≈ 1 水晶石 · 1 元余额 = 100 游戏豆</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExchangeDir({ icon, label, rate }: { icon: string; label: string; rate: string }) {
+  return (
+    <div className="bg-white rounded-[12px] py-2.5 px-2 text-center border border-gray-100">
+      <div className="text-base mb-1">{icon}</div>
+      <div className="text-[11px] font-medium text-text">{label}</div>
+      <div className="text-[10px] text-text-tertiary mt-0.5">{rate}</div>
+    </div>
+  );
+}
+
+/** 激活引导 — 珊瑚色 */
 function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number; onExchangeClick: () => void }) {
   if (frozenCount <= 0) return null;
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[20px] p-5 shadow-sm relative overflow-hidden">
-        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
-        <div className="relative z-10 flex items-start gap-3">
-          <div className="text-3xl leading-none mt-1">💎</div>
+      <div className="bg-brand-coral-light/60 rounded-[20px] p-4 border border-brand-coral/30">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl leading-none mt-0.5">💎</span>
           <div className="flex-1">
-            <div className="text-white text-sm font-semibold">{frozenCount} 颗水晶石待激活</div>
-            <div className="text-white/80 text-[11px] mt-1 leading-relaxed">
+            <div className="text-sm font-bold text-brand-coral-dark">{frozenCount} 颗水晶石待激活</div>
+            <div className="text-[11px] text-brand-coral-dark/80 mt-1 leading-relaxed">
               消费获得 100 游戏豆即可激活 100 颗水晶石<br/>
               激活后可兑换余额或继续下注
             </div>
             <div className="flex gap-2 mt-3">
-              <a
-                href="/store-services"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-gold text-white text-[11px] font-medium rounded-[10px] active:scale-95 transition-transform"
-              >
+              <a href="/store-services"
+                className="inline-flex items-center gap-1 px-4 py-2 bg-brand-gold text-white text-[11px] font-medium rounded-[10px] active:scale-95 transition-transform">
                 🛒 去消费赚豆
               </a>
-              <button
-                onClick={onExchangeClick}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-[11px] rounded-[10px] active:scale-95 transition-transform"
-              >
+              <button onClick={onExchangeClick}
+                className="inline-flex items-center gap-1 px-4 py-2 bg-white text-brand-coral text-[11px] font-medium rounded-[10px] border border-brand-coral/30 active:scale-95 transition-transform">
                 🔄 去兑换
               </button>
             </div>
@@ -174,44 +170,35 @@ function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number;
   );
 }
 
+/** 邀请好友 — 金色主题 */
 function InviteCard() {
   const { user } = useAuth();
-  const inviteUrl = user
-    ? `https://h5.ws.hi.cn?ref=${user.uid}`
-    : "https://h5.ws.hi.cn";
-
-  const handleCopy = () => {
-    shareToWeChat(inviteUrl);
-  };
-
+  const inviteUrl = user ? `https://h5.ws.hi.cn?ref=${user.uid}` : "https://h5.ws.hi.cn";
+  const handleCopy = () => shareToWeChat(inviteUrl);
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-gradient-to-r from-brand-gold to-brand-gold-dark rounded-[20px] p-5 shadow-lg relative overflow-hidden">
-        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-1">
-            <Gift className="w-4 h-4 text-white" />
-            <span className="text-white text-sm font-semibold">邀请好友</span>
-          </div>
-          <p className="text-white/80 text-[10px] mb-1">好友注册立得 <strong className="text-white">150,000 游戏豆</strong></p>
-          <p className="text-white/80 text-[10px] mb-3">你同时获得 <strong className="text-white">1,000 游戏豆</strong></p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              className="flex-1 bg-white/20 backdrop-blur-sm rounded-[10px] py-2.5 text-white text-xs font-medium active:scale-95 transition-transform"
-            >
-              🔗 复制链接
-            </button>
-            <button
-              onClick={() => {
+      <div className="bg-brand-gold-light/80 rounded-[20px] p-4 border border-brand-gold/30">
+        <div className="flex items-start gap-3">
+          <Gift className="w-5 h-5 text-brand-gold-dark mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <div className="text-sm font-bold text-brand-gold-dark">邀请好友</div>
+            <p className="text-[11px] text-brand-gold-dark/80 mt-1">
+              好友注册立得 <strong>150,000</strong> 游戏豆<br/>
+              你同时获得 <strong>1,000</strong> 游戏豆
+            </p>
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <button onClick={handleCopy}
+                className="bg-white/60 rounded-[10px] py-2 text-[11px] text-brand-gold-dark font-medium active:scale-95 transition-transform">
+                🔗 复制链接
+              </button>
+              <button onClick={() => {
                 const text = buildShareText("小章鱼", "邀请你一起玩！注册即送 150,000 游戏豆 🎉", inviteUrl);
                 shareToWeChat(text);
               }}
-              className="flex-1 bg-white/20 backdrop-blur-sm rounded-[10px] py-2.5 text-white text-xs font-medium active:scale-95 transition-transform"
-            >
-              📤 分享好友
-            </button>
+                className="bg-white/60 rounded-[10px] py-2 text-[11px] text-brand-gold-dark font-medium active:scale-95 transition-transform">
+                📤 分享好友
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -219,31 +206,33 @@ function InviteCard() {
   );
 }
 
+/** 快捷入口 — 横排带色块图标 */
 function QuickLinks() {
   return (
     <section className="mx-4 mt-3">
       <div className="grid grid-cols-2 gap-2.5">
-        <a
-          href="/store-services"
-          className="bg-surface rounded-[16px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-95 transition-transform block"
-        >
-          <ShoppingBag className="w-6 h-6 text-brand-teal-dark mb-2" />
-          <div className="text-xs font-semibold">购物商城</div>
-          <div className="text-[10px] text-text-tertiary mt-0.5">现金/余额支付 · 购物即送豆</div>
+        <a href="/store-services"
+          className="bg-surface rounded-[16px] p-3.5 shadow-sm border border-[rgba(69,204,213,0.08)] flex items-center gap-3 active:scale-[0.98] transition-transform">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-teal-light/60 flex items-center justify-center shrink-0 text-base">🛒</div>
+          <div>
+            <div className="text-xs font-semibold text-text">购物商城</div>
+            <div className="text-[10px] text-text-tertiary mt-0.5">现金余额支付</div>
+          </div>
         </a>
-        <a
-          href="/store"
-          className="bg-surface rounded-[16px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-95 transition-transform block"
-        >
-          <MapPin className="w-6 h-6 text-brand-coral mb-2" />
-          <div className="text-xs font-semibold">附近消费</div>
-          <div className="text-[10px] text-text-tertiary mt-0.5">到店消费送豆 · 扫码领豆</div>
+        <a href="/store"
+          className="bg-surface rounded-[16px] p-3.5 shadow-sm border border-[rgba(69,204,213,0.08)] flex items-center gap-3 active:scale-[0.98] transition-transform">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-coral-light/60 flex items-center justify-center shrink-0 text-base">📍</div>
+          <div>
+            <div className="text-xs font-semibold text-text">附近消费</div>
+            <div className="text-[10px] text-text-tertiary mt-0.5">到店送豆</div>
+          </div>
         </a>
       </div>
     </section>
   );
 }
 
+/** 近期流水 */
 function RecentFlow({ uid }: { uid: number }) {
   const [flows, setFlows] = useState<FlowItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -261,28 +250,20 @@ function RecentFlow({ uid }: { uid: number }) {
   useEffect(() => { loadFlows(); }, [loadFlows]);
 
   const flowIcon: Record<string, string> = {
-    exchange: "🔄",
-    exchange_beans_to: "🔄",
-    exchange_to_game: "🔄",
-    register: "🎁",
-    bet: "⚽",
-    settle: "⚽",
-    invite: "🎁",
-    shop: "🛒",
-    sign: "📋",
-    swap_bonus: "🫘",
+    exchange: "🔄", exchange_beans_to: "🔄", exchange_to_game: "🔄",
+    register: "🎁", bet: "⚽", settle: "⚽", invite: "🎁", shop: "🛒", sign: "📋", swap_bonus: "🫘",
   };
 
   return (
-    <section className="mx-4 mt-3 mb-4">
+    <section className="mx-4 mt-3 mb-6">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-semibold flex items-center gap-1">
-          <ArrowDownUp className="w-3.5 h-3.5" />
+        <h3 className="text-xs font-semibold flex items-center gap-1 text-text">
+          <ArrowDownUp className="w-3.5 h-3.5 text-text-tertiary" />
           近期流水
         </h3>
         <div className="flex items-center gap-2">
           <button onClick={loadFlows} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-            <RefreshCw className="w-3 h-3 text-gray-400" />
+            <RefreshCw className="w-3 h-3 text-text-tertiary" />
           </button>
           <a href="/orders" className="text-[10px] text-brand-teal-dark flex items-center gap-0.5">
             查看全部 <ChevronRight className="w-3 h-3" />
@@ -311,10 +292,10 @@ function RecentFlow({ uid }: { uid: number }) {
               <div key={f.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="text-lg">{flowIcon[f.biz_type] || "💎"}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-medium truncate">{f.remark || f.biz_type}</div>
+                  <div className="text-[11px] font-medium text-text truncate">{f.remark || f.biz_type}</div>
                   <div className="text-[9px] text-text-tertiary">{f.created_at}</div>
                 </div>
-                <span className={`text-xs font-bold ${f.amount >= 0 ? "text-green-600" : "text-red-500"}`}>
+                <span className={`text-xs font-bold ${f.amount >= 0 ? "text-brand-teal" : "text-brand-coral"}`}>
                   {f.amount >= 0 ? "+" : ""}{f.amount.toLocaleString()}
                 </span>
               </div>
@@ -335,20 +316,17 @@ export default function JiadouzhanPage() {
   const [credits, setCredits] = useState<WalletBrief>({
     credit1: 0, credit5: 0, credit3: 0, credit4: 0, credit2: 0,
   });
-  // 水晶石冻结 — 统一使用全局变量 CRYSTAL_FROZEN_RATIO
+
   const totalCrystal = Math.floor(credits.credit5);
   const frozenCrystal = Math.floor(totalCrystal * CRYSTAL_FROZEN_RATIO);
-  const activeCrystal = totalCrystal - frozenCrystal;
 
   useEffect(() => {
     if (!user) return;
     const b = user.balance;
     if (b) {
       setCredits({
-        credit1: b.credit1 ?? 0,
-        credit5: b.credit5 ?? 0,
-        credit3: b.credit3 ?? 0,
-        credit4: b.credit4 ?? 0,
+        credit1: b.credit1 ?? 0, credit5: b.credit5 ?? 0,
+        credit3: b.credit3 ?? 0, credit4: b.credit4 ?? 0,
         credit2: b.credit2 ?? 0,
       });
     }
@@ -357,10 +335,8 @@ export default function JiadouzhanPage() {
   const handleExchangeSuccess = useCallback(() => {
     if (user?.balance) {
       setCredits({
-        credit1: user.balance.credit1 ?? 0,
-        credit5: user.balance.credit5 ?? 0,
-        credit3: user.balance.credit3 ?? 0,
-        credit4: user.balance.credit4 ?? 0,
+        credit1: user.balance.credit1 ?? 0, credit5: user.balance.credit5 ?? 0,
+        credit3: user.balance.credit3 ?? 0, credit4: user.balance.credit4 ?? 0,
         credit2: user.balance.credit2 ?? 0,
       });
     }
@@ -368,19 +344,9 @@ export default function JiadouzhanPage() {
 
   return (
     <main className="min-h-screen bg-bg pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
-        <div className="flex items-center justify-between px-4 h-12">
-          <h1 className="text-base font-semibold">➕ 加豆站</h1>
-          <a href="/rules" className="text-[10px] text-text-tertiary flex items-center gap-0.5">
-            📋 规则说明 <ChevronRight className="w-3 h-3" />
-          </a>
-        </div>
-      </div>
-
-      {/* 未登录提示 */}
+      {/* ─── 已登录 ─── */}
       {authLoading ? (
-        <div className="mx-4 mt-8 p-8 text-center animate-pulse">
+        <div className="p-8 text-center animate-pulse">
           <div className="h-6 w-24 bg-gray-200 rounded mx-auto mb-3" />
           <div className="h-4 w-40 bg-gray-100 rounded mx-auto" />
         </div>
@@ -389,26 +355,39 @@ export default function JiadouzhanPage() {
           <div className="text-4xl mb-3">🐙</div>
           <p className="text-sm text-text-secondary mb-1">来啦! 先登录解锁全部玩法</p>
           <p className="text-[11px] text-text-tertiary mb-4">游戏豆送新用户哦</p>
-          <button
-            onClick={() => setShowLogin(true)}
-            className="px-6 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-medium rounded-[12px] active:scale-95 transition-transform"
-          >
+          <button onClick={() => setShowLogin(true)}
+            className="px-6 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-medium rounded-[12px] active:scale-95 transition-transform">
             登录 / 注册
           </button>
           {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
         </div>
       ) : (
         <>
-          {/* 模块一: 资产卡片(含冻结+水晶球+闲豆) + 兑换入口 */}
-          <AssetCard credits={credits} frozenRatio={CRYSTAL_FROZEN_RATIO} onExchangeClick={() => setShowExchange(true)} />
+          {/* 一、品牌头卡 */}
+          <BrandHeader credits={credits} gameBeans={credits.credit1} />
 
-          {/* 模块二: 激活引导（新增） */}
+          {/* 二、资产概览 — 5列 */}
+          <AssetGrid credits={credits} />
+
+          {/* 三、兑换中心 — 独立青色卡片 */}
+          <ExchangeHub onClick={() => setShowExchange(true)} />
+
+          {/* 四、激活引导 — 珊瑚色 */}
           <ActivationCard frozenCount={frozenCrystal} onExchangeClick={() => setShowExchange(true)} />
 
-          {/* 模块三: 邀请好友 */}
+          {/* 五、邀请好友 — 金色 */}
           <InviteCard />
 
-          {/* 模块三: 兑换中心 (弹窗) */}
+          {/* 六、快捷入口 */}
+          <QuickLinks />
+
+          {/* 七、日常任务 */}
+          <DailyTasks uid={user.uid} onBalanceRefresh={() => refreshBalance()} />
+
+          {/* 八、近期流水 */}
+          <RecentFlow uid={user.uid} />
+
+          {/* 兑换弹窗 */}
           {showExchange && (
             <ExchangeModal
               open={showExchange}
@@ -416,15 +395,6 @@ export default function JiadouzhanPage() {
               onSuccess={handleExchangeSuccess}
             />
           )}
-
-          {/* 模块四: 快捷入口 */}
-          <QuickLinks />
-
-          {/* 模块五: 日常任务 */}
-          <DailyTasks uid={user.uid} onBalanceRefresh={() => refreshBalance()} />
-
-          {/* 模块六: 游戏豆流水 */}
-          <RecentFlow uid={user.uid} />
         </>
       )}
     </main>
