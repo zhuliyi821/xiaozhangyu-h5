@@ -272,7 +272,7 @@ export default function DivinationPage() {
   const r = report;
 
   return (
-    <main className="min-h-screen bg-bg text-text-primary pb-20">
+    <main className="min-h-screen bg-gradient-to-b from-brand-teal/5 via-bg to-brand-coral/5 text-text-primary pb-20">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-3">
@@ -280,26 +280,33 @@ export default function DivinationPage() {
             <ArrowLeft className="w-4 h-4" />
             <span className="text-xs">返回</span>
           </button>
-          <span className="text-xs font-bold text-brand-gold">卦象报告</span>
+          <span className="text-xs font-bold bg-gradient-to-r from-brand-gold to-brand-coral bg-clip-text text-transparent">卦象报告</span>
           <button className="text-text-secondary"><Share2 className="w-4 h-4" /></button>
         </div>
       </div>
 
       <div className="px-4 py-4 space-y-4 max-w-2xl mx-auto">
         {/* 起卦信息 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-gold to-brand-coral" />
+            <span className="text-[11px] font-bold text-text-primary">起卦信息</span>
+          </div>
           <div className="grid grid-cols-2 gap-3 text-[10px]">
-            <div><span className="text-text-secondary">时间</span><br/>{r.basic.time}</div>
+            <div><span className="text-text-tertiary">时间</span><br/>{r.basic.time}</div>
             <div><span className="text-text-secondary">方式</span><br/>{r.basic.method === "time" ? "时间起卦" : r.basic.method === "shake" ? "摇一摇" : "手动摇卦"}</div>
             <div className="col-span-2"><span className="text-text-secondary">所问</span><br/>{r.basic.question || "未指定"}</div>
           </div>
         </div>
 
         {/* 一、卦象总览 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-          <div className="text-xs font-bold text-brand-gold mb-3">一、卦象总览</div>
+        <div className="bg-gradient-to-br from-brand-gold/5 to-brand-coral/5 border border-brand-gold/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-gold to-brand-coral" />
+            <span className="text-xs font-bold text-brand-gold">一、卦象总览</span>
+          </div>
           <div className="grid grid-cols-2 gap-4 text-center">
-            <div className="border border-gray-200/20 rounded-lg p-3">
+            <div className="bg-white/80 backdrop-blur-sm border border-brand-gold/20 rounded-lg p-3">
               <div className="text-lg font-mono mb-1">{r.overview.ben_gua.upper_symbol}{r.overview.ben_gua.lower_symbol}</div>
               <div className="text-sm font-bold text-brand-coral">{r.overview.ben_gua.name}</div>
               <div className="text-[9px] text-text-secondary">本卦</div>
@@ -319,8 +326,11 @@ export default function DivinationPage() {
         </div>
 
         {/* 二、六爻排盘 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-          <div className="text-xs font-bold text-brand-gold mb-3">二、六爻排盘</div>
+        <div className="bg-gradient-to-br from-brand-teal/5 to-white border border-brand-teal/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-teal to-brand-gold" />
+            <span className="text-xs font-bold text-brand-teal-dark">二、六爻排盘</span>
+          </div>
           <div className="space-y-0.5">
             {[...r.yao_pan].reverse().map((y: Yaoyi, i: number) => (
               <YaoLine key={i} y={y} idx={5-i} />
@@ -330,9 +340,12 @@ export default function DivinationPage() {
 
         {/* 三、本卦解读 */}
         {r.ben_reading.gua_ci && (
-          <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-            <div className="text-xs font-bold text-brand-gold mb-3">三、本卦解读 · {r.overview.ben_gua.name}</div>
-            <div className="space-y-3 text-[11px] leading-relaxed">
+          <div className="bg-gradient-to-br from-brand-gold-light/30 to-white border border-brand-gold/20 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-gold to-brand-teal" />
+              <span className="text-xs font-bold text-brand-gold-dark">三、本卦解读 · {r.overview.ben_gua.name}</span>
+            </div>
+            <div className="space-y-3 text-[11px] leading-relaxed text-text-primary">
               <div><span className="text-text-secondary">📜 卦辞</span><br/>{r.ben_reading.gua_ci}</div>
               {r.ben_reading.da_xiang && <div><span className="text-text-secondary">📜 大象传</span><br/>{r.ben_reading.da_xiang}</div>}
               {r.ben_reading.tuan && <div><span className="text-text-secondary">📜 彖传</span><br/>{r.ben_reading.tuan}</div>}
@@ -342,9 +355,12 @@ export default function DivinationPage() {
 
         {/* 四、变卦解读 */}
         {r.bian_reading.gua_ci && (
-          <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-            <div className="text-xs font-bold text-brand-gold mb-3">四、变卦解读 · {r.overview.bian_gua.name}</div>
-            <div className="text-[11px] leading-relaxed">
+          <div className="bg-gradient-to-br from-brand-teal/5 to-white border border-brand-teal/20 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-teal to-brand-coral" />
+              <span className="text-xs font-bold text-brand-teal-dark">四、变卦解读 · {r.overview.bian_gua.name}</span>
+            </div>
+            <div className="text-[11px] leading-relaxed text-text-primary">
               <span className="text-text-secondary">📜 卦辞</span><br/>{r.bian_reading.gua_ci}
               {r.bian_reading.da_xiang && <><br/><br/><span className="text-text-secondary">📜 大象传</span><br/>{r.bian_reading.da_xiang}</>}
             </div>
@@ -353,8 +369,11 @@ export default function DivinationPage() {
 
         {/* 五、动爻详解 */}
         {r.yao_details.length > 0 && (
-          <div className="bg-white border border-brand-coral/30 rounded-xl p-4">
-            <div className="text-xs font-bold text-brand-coral mb-3">五、动爻详解</div>
+          <div className="bg-gradient-to-br from-brand-coral/5 to-white border border-brand-coral/30 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-coral to-brand-gold" />
+              <span className="text-xs font-bold text-brand-coral">五、动爻详解</span>
+            </div>
             {r.yao_details.map((yd: any, i: number) => (
               <div key={i} className="text-[11px] leading-relaxed space-y-1">
                 <div className="text-brand-gold">● {yd.name}爻动</div>
@@ -365,8 +384,11 @@ export default function DivinationPage() {
         )}
 
         {/* 六、体用生克 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-          <div className="text-xs font-bold text-brand-gold mb-3">六、体用生克</div>
+        <div className="bg-gradient-to-br from-brand-gold/5 to-brand-coral/5 border border-brand-gold/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-gold to-brand-teal" />
+            <span className="text-xs font-bold text-brand-gold-dark">六、体用生克</span>
+          </div>
           <div className="grid grid-cols-2 gap-3 text-[11px]">
             <div>
               <div className="text-text-secondary">体卦（你）</div>
@@ -388,7 +410,11 @@ export default function DivinationPage() {
         </div>
 
         {/* 七、五行六亲 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-brand-teal/5 to-white border border-brand-teal/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-teal to-brand-gold" />
+            <span className="text-xs font-bold text-brand-teal-dark">七、五行六亲</span>
+          </div>
           <div className="text-xs font-bold text-brand-gold mb-3">七、五行六亲</div>
           <div className="text-[10px] text-text-secondary mb-2">卦宫：{r.six_relations.palace_name}{r.six_relations.palace_element}</div>
           {r.six_relations.lines.map((l: any, i: number) => (
@@ -404,8 +430,11 @@ export default function DivinationPage() {
         </div>
 
         {/* 八、纳甲分析 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-          <div className="text-xs font-bold text-brand-gold mb-3">八、纳甲分析</div>
+        <div className="bg-gradient-to-br from-brand-coral/5 to-white border border-brand-coral/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-coral to-brand-teal" />
+            <span className="text-xs font-bold text-brand-coral">八、纳甲分析</span>
+          </div>
           <div className="space-y-1 text-[10px]">
             {[...r.nayin.lines].reverse().map((l: any, i: number) => (
               <div key={i} className="flex items-center gap-2">
@@ -421,10 +450,13 @@ export default function DivinationPage() {
         </div>
 
         {/* 九、综合论断 */}
-        <div className={`bg-white border rounded-xl p-4 ${
+        <div className={`bg-gradient-to-br from-brand-gold-light/20 to-brand-teal/5 border rounded-xl p-4 shadow-sm ${
           r.conclusion.score >= 60 ? "border-brand-teal/30" : r.conclusion.score >= 40 ? "border-brand-gold/30" : "border-brand-coral/30"
         }`}>
-          <div className="text-xs font-bold text-brand-gold mb-3">九、综合论断</div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-gold to-brand-coral" />
+            <span className="text-xs font-bold text-brand-gold-dark">九、综合论断</span>
+          </div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm">综合评分</span>
             <ScoreCelebration score={r.conclusion.score} />
@@ -443,29 +475,32 @@ export default function DivinationPage() {
         </div>
 
         {/* 十、互错综卦 */}
-        <div className="bg-white border border-gray-200/20 rounded-xl p-4">
-          <div className="text-xs font-bold text-brand-gold mb-3">十、互卦 · 错卦 · 综卦</div>
+        <div className="bg-gradient-to-br from-brand-teal/5 to-brand-gold/5 border border-brand-teal/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-brand-teal to-brand-coral" />
+            <span className="text-xs font-bold text-brand-teal-dark">十、互卦 · 错卦 · 综卦</span>
+          </div>
           <div className="space-y-3 text-[11px]">
-            <div><span className="text-text-secondary">互卦 {r.cross_ref.hu.upper}{r.cross_ref.hu.lower} · {r.cross_ref.hu.name}</span><br/>{r.cross_ref.hu.gua_ci}</div>
-            <div><span className="text-text-secondary">错卦 {r.cross_ref.cuo.upper}{r.cross_ref.cuo.lower} · {r.cross_ref.cuo.name}</span><br/>{r.cross_ref.cuo.gua_ci}</div>
-            <div><span className="text-text-secondary">综卦 {r.cross_ref.zong.upper}{r.cross_ref.zong.lower} · {r.cross_ref.zong.name}</span><br/>{r.cross_ref.zong.gua_ci}</div>
+            <div className="bg-white/50 rounded-lg p-2.5"><span className="text-text-secondary">互卦 {r.cross_ref.hu.upper}{r.cross_ref.hu.lower} · {r.cross_ref.hu.name}</span><br/>{r.cross_ref.hu.gua_ci}</div>
+            <div className="bg-white/50 rounded-lg p-2.5"><span className="text-text-secondary">错卦 {r.cross_ref.cuo.upper}{r.cross_ref.cuo.lower} · {r.cross_ref.cuo.name}</span><br/>{r.cross_ref.cuo.gua_ci}</div>
+            <div className="bg-white/50 rounded-lg p-2.5"><span className="text-text-secondary">综卦 {r.cross_ref.zong.upper}{r.cross_ref.zong.lower} · {r.cross_ref.zong.name}</span><br/>{r.cross_ref.zong.gua_ci}</div>
           </div>
         </div>
 
         {/* 操作区 */}
         <div className="flex gap-3 pt-2">
           <button onClick={() => doDivination(method)}
-            className="flex-1 bg-brand-coral text-white rounded-xl py-3 text-xs font-bold active:scale-[0.98]">
+            className="flex-1 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white rounded-xl py-3 text-xs font-bold active:scale-[0.98] shadow-sm">
             🔄 重新起卦
           </button>
           <button onClick={() => { setStep("choose"); setReport(null); }}
-            className="flex-1 bg-brand-gold/10 text-brand-gold border border-gray-200 rounded-xl py-3 text-xs font-bold active:scale-[0.98]">
+            className="flex-1 bg-gradient-to-r from-brand-gold/10 to-brand-teal/10 text-brand-gold-dark border border-brand-gold/20 rounded-xl py-3 text-xs font-bold active:scale-[0.98] shadow-sm">
             📋 返回列表
           </button>
         </div>
 
         {/* 免责 */}
-        <div className="text-[9px] text-text-secondary/60 text-center leading-relaxed mt-4 border border-gray-200/10 rounded-xl p-3">
+        <div className="text-[9px] text-text-tertiary text-center leading-relaxed mt-4 bg-gradient-to-r from-brand-teal/5 to-brand-coral/5 border border-brand-teal/10 rounded-xl p-3">
           ⚠️ 本报告由小章鱼AI基于周易六十四卦全量推演生成，仅供解惑参考。
         </div>
       </div>
