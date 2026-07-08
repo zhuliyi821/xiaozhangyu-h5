@@ -81,7 +81,7 @@ export default function StoreServicesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#F5F5F5] pb-24">
+    <main className="min-h-screen bg-bg pb-24">
       {/* 顶部定位栏 */}
       <div className="sticky top-0 z-30 bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2.5">

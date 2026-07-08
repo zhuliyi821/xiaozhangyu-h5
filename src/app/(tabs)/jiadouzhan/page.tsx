@@ -76,7 +76,7 @@ function AssetCard({ credits, frozenRatio, onExchangeClick }: { credits: WalletB
               <div className="mt-1.5 space-y-0.5">
                 <div className="flex justify-center gap-2 text-[9px]">
                   <span className="text-brand-coral">🔒 {frozen}冻结</span>
-                  <span className="text-[#45CCD5]">✅ {active}可用</span>
+                  <span className="text-brand-teal">✅ {active}可用</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden mx-2">
                   <div

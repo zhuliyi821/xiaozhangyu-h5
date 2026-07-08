@@ -39,7 +39,7 @@ export default async function StoreLayout({
 
   return (
     <StoreProvider value={contextValue}>
-      <div className="max-w-[430px] mx-auto min-h-screen bg-[#F0F6F7]">
+      <div className="max-w-[430px] mx-auto min-h-screen bg-bg">
         {children}
       </div>
     </StoreProvider>

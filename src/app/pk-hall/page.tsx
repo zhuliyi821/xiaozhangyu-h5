@@ -237,8 +237,8 @@ export default function PKHallPage() {
             <span key={s.key} onClick={() => setActiveSort(s.key)}
               className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                 activeSort === s.key
-                  ? "bg-[#FFF5E6] text-[#D97706]"
-                  : "bg-white text-[#6B6B6E] border border-[#E7E7E8]"
+                  ? "bg-brand-gold-light text-brand-gold-dark"
+                  : "bg-white text-text-secondary border border-gray-200"
               }`}>
               {s.label}
             </span>
@@ -260,10 +260,10 @@ export default function PKHallPage() {
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {[1,2,3].map(i => (
-              <div key={i} className="bg-white rounded-[16px] p-4 shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-[#E7E7E8] animate-pulse">
-                <div className="h-3.5 w-3/5 bg-[#E7E7E8] rounded mb-3" />
-                <div className="h-2.5 w-full bg-[#E7E7E8] rounded mb-2" />
-                <div className="h-2 w-full bg-[#E7E7E8] rounded" />
+              <div key={i} className="bg-white rounded-[16px] p-4 shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-gray-200 animate-pulse">
+                <div className="h-3.5 w-3/5 bg-gray-200 rounded mb-3" />
+                <div className="h-2.5 w-full bg-gray-200 rounded mb-2" />
+                <div className="h-2 w-full bg-gray-200 rounded" />
               </div>
             ))}
           </div>
