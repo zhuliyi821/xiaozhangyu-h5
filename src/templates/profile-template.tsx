@@ -103,20 +103,24 @@ export default function ProfileTemplate() {
             </button>
           )}
         </div>
+      </div>
 
-        {/* Assets - each clickable */}
-        <div className="grid grid-cols-5 gap-1.5">
-          <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="游戏豆" href="/assets?tab=credit1" />
-          <AssetTile icon="⛏️" value={String(Math.floor(credits.credit5))} label="水晶石" href="/assets?tab=credit5" />
-          <AssetTile icon="🔮" value={String(Math.floor(credits.credit3))} label="水晶球" href="/assets?tab=credit3" />
-          <AssetTile icon="¥" value={credits.credit4.toFixed(2)} label="余额" href="/assets?tab=credit4" />
-          <AssetTile icon="🏪" value={String(Math.floor(credits.credit2))} label="闲豆" href="/assets?tab=credit2" />
+      {/* Assets 4格 (替换原来的5列) */}
+      <div className="mx-4 -mt-4">
+        <div className="grid grid-cols-4 gap-2">
+          <AssetTile icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" href="/assets?tab=credit1" action="充值" />
+          <AssetTile icon="⛏️" value={formatAsset(credits.credit5)} label="水晶石" href="/assets?tab=credit5" />
+          <AssetTile icon="🔮" value={formatAsset(credits.credit3)} label="水晶球" href="/assets?tab=credit3" />
+          <AssetTile icon="💰" value={credits.credit4.toFixed(2)} label="余额" href="/assets?tab=credit4" action="充值" />
         </div>
-        {user && (
-          <div className="mt-2 flex justify-end">
-            <span className="text-[10px] opacity-60">资产同步 · 实时更新</span>
-          </div>
-        )}
+      </div>
+
+      {/* Quick Actions 4格 */}
+      <div className="mx-4 mt-4 grid grid-cols-4 gap-2">
+        <QuickAction icon="📥" label="充值" color="bg-brand-teal/15" />
+        <QuickAction icon="🎁" label="邀请" color="bg-brand-gold/15" />
+        <QuickAction icon="📋" label="订单" color="bg-blue-100" />
+        <QuickAction icon="💬" label="消息" color="bg-brand-coral/15" />
       </div>
 
       {/* Invite Card */}
@@ -181,13 +185,33 @@ export default function ProfileTemplate() {
   );
 }
 
-function AssetTile({ icon, value, label, href }: { icon: string; value: string; label: string; href?: string }) {
+/** 资产格式化: >=1000 显示 k */
+function formatAsset(n: number): string {
+  if (n >= 100000) return (n / 10000).toFixed(1) + 'w';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(Math.floor(n));
+}
+
+function AssetTile({ icon, value, label, href, action }: { icon: string; value: string; label: string; href?: string; action?: string }) {
   return (
-    <div className="bg-white/15 rounded-[12px] py-2 px-1 text-center backdrop-blur-sm active:scale-95 transition-transform cursor-pointer"
+    <div className="bg-white rounded-[14px] py-3 px-1 text-center shadow-sm border border-gray-100 active:scale-95 transition-transform cursor-pointer"
       onClick={() => { if (href) window.location.href = href; }}>
-      <div className="text-xs mb-0.5">{icon}</div>
-      <div className="text-[13px] font-bold leading-tight">{value}</div>
-      <div className="text-[9px] opacity-80 mt-0.5 leading-tight">{label}</div>
+      <div className="text-base mb-0.5">{icon}</div>
+      <div className="text-sm font-bold text-text-primary leading-tight">{value}</div>
+      <div className="text-[10px] text-text-tertiary mt-0.5">{label}</div>
+      {action && (
+        <div className="text-[9px] text-brand-gold-dark mt-1.5 bg-brand-gold-light/40 rounded-full py-0.5 px-2 inline-block font-medium">{action}</div>
+      )}
+    </div>
+  );
+}
+
+/** 快捷操作 */
+function QuickAction({ icon, label, color }: { icon: string; label: string; color: string }) {
+  return (
+    <div className="bg-white rounded-[14px] py-3 text-center shadow-sm border border-gray-100 active:scale-95 transition-transform cursor-pointer">
+      <div className={`w-9 h-9 rounded-full ${color} flex items-center justify-center mx-auto mb-1 text-base`}>{icon}</div>
+      <div className="text-[11px] text-text-primary font-medium">{label}</div>
     </div>
   );
 }
