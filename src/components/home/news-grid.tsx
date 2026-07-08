@@ -97,7 +97,11 @@ export function NewsGrid() {
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-sm before:bg-gradient-to-b from-brand-teal to-brand-teal-dark">
           🐙 每日一卦
         </h2>
-        <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
+        <div className="flex items-center gap-1.5">
+          <Link href="/divination" className="text-xs text-amber-500 font-medium">遇事起一卦</Link>
+          <span className="text-[10px] text-gray-300">·</span>
+          <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
+        </div>
       </div>
 
       <Link href="/daily-fortune" className="block bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-5 active:scale-[0.98] transition-transform">
