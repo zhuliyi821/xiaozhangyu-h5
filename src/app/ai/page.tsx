@@ -51,6 +51,19 @@ interface Message { role: "user" | "assistant"; content: string; }
 
 const TAB_CONFIG = [
   {
+    id: "zodiac", label: "周易", cost: 0, icon: "🔮",
+    subtitle: "卦象仅供自我梳理，事在人为，保持积极心态方能顺势而行",
+    disclaimer: "",
+    subs: [], cost_map: [
+      { label: "随心快速起卦", cost: 10 },
+      { label: "日常琐事（考试/出行/寻物/纠纷/健康）", cost: 20 },
+      { label: "情感婚姻 / 职场事业", cost: 30 },
+      { label: "实业投资（开店/合伙/房产/回款）", cost: 60 },
+      { label: "终身深度运势（八字流年/大运/风水）", cost: 150 },
+    ],
+    questions: [],
+  },
+  {
     id: "lottery", label: "彩运", cost: 5, icon: "🎱",
     subtitle: "仅传统文化娱乐推演，不作为购彩依据，网络售彩均违法，理性娱乐勿沉迷",
     disclaimer: "本服务仅传统文化娱乐推演，不作为购彩依据。网络售彩均违法，请理性娱乐勿沉迷。",
@@ -70,19 +83,6 @@ const TAB_CONFIG = [
     disclaimer: "虚拟货币交易属于非法金融活动，本内容仅传统文化娱乐解读，请勿参与任何币圈交易。",
     subs: ["短期投机气场", "偏财风险预警", "心态疏导参考"],
     questions: ["短期行情怎么看", "有什么风险需要注意", "如何调整投资心态"],
-  },
-  {
-    id: "zodiac", label: "周易", cost: 0, icon: "🔮",
-    subtitle: "卦象仅供自我梳理，事在人为，保持积极心态方能顺势而行",
-    disclaimer: "",
-    subs: [], cost_map: [
-      { label: "随心快速起卦", cost: 10 },
-      { label: "日常琐事（考试/出行/寻物/纠纷/健康）", cost: 20 },
-      { label: "情感婚姻 / 职场事业", cost: 30 },
-      { label: "实业投资（开店/合伙/房产/回款）", cost: 60 },
-      { label: "终身深度运势（八字流年/大运/风水）", cost: 150 },
-    ],
-    questions: [],
   },
 ];
 
@@ -261,18 +261,22 @@ export default function AIChatPage() {
 
   return (
     <main className="min-h-screen bg-bg flex flex-col pb-[calc(env(safe-area-inset-bottom,0px)+64px)]">
-      {/* ── Top Bar: Logo + Balance ── */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-border-tertiary">
-        <div className="flex items-center justify-between px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <LobsterIcon className="w-6 h-6" />
-            <span className="text-sm font-bold text-text-primary">小龙虾</span>
-          </div>
-          <button onClick={() => { if (!user) setShowLogin(true); }} className="flex items-center gap-1.5 bg-bg rounded-full px-3 py-1.5 border border-border-tertiary active:scale-95 transition-transform">
-            <span className="w-2 h-2 rounded-full bg-brand-gold" />
-            <span className="text-xs font-semibold">{user ? balance.toLocaleString() : "未登录"} 🎮</span>
-          </button>
+      {/* ── Header: Logo + Status + Balance ── */}
+      <div className="sticky top-0 z-30 bg-gradient-to-r from-brand-teal to-brand-teal-dark px-4 py-3 flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center shrink-0 shadow-sm">
+          <LobsterIcon className="w-5 h-5" />
         </div>
+        <div className="flex-1">
+          <div className="text-sm font-bold text-white">小龙虾</div>
+          <div className="text-[10px] text-white/60">在线 · AI运势顾问</div>
+        </div>
+        <button onClick={() => { if (!user) setShowLogin(true); }} className="bg-white/15 rounded-full px-3 py-1 flex items-center gap-1.5 active:scale-95 transition-transform">
+          <span className="text-[11px]">🎮</span>
+          <span className="text-[11px] text-white font-medium">{user ? (balance >= 1000 ? (balance/1000).toFixed(1)+'k' : balance) : "未登录"}</span>
+        </button>
+        {!user && (
+          <button onClick={() => setShowLogin(true)} className="text-[10px] bg-white/20 text-white px-2.5 py-1 rounded-full">登录</button>
+        )}
       </div>
 
       {/* ── Category Tabs + Subtitle (merged) ── */}
@@ -334,23 +338,36 @@ export default function AIChatPage() {
       {/* ── Chat Messages ── */}
       <div className="flex-1 px-4 py-4 space-y-3 overflow-y-auto">
         {messages.length === 1 && (
-          <div className="mb-3">
-            {/* Quick questions */}
+          <div className="mb-3 bg-white rounded-[16px] border border-gray-100 shadow-sm p-4">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center shrink-0">
+                <LobsterIcon className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <div className="text-[13px] font-medium text-text-primary">早上好！☀️</div>
+                <div className="text-[10px] text-text-tertiary">今天有什么想了解的？</div>
+              </div>
+            </div>
+            {/* Quick questions as chips */}
             {tab !== "zodiac" && (
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="flex flex-wrap gap-2">
                 {cfg.questions.map((q, i) => (
                   <button key={i} onClick={() => handleQuickQuestion(q, cfg.cost)}
-                    className="text-[10px] bg-surface rounded-xl px-2.5 py-2.5 text-left border border-brand-teal-light/30 shadow-sm active:scale-[0.97] transition-transform hover:border-brand-teal/40">
+                    className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-[14px] px-3 py-1.5 active:scale-95 transition-transform hover:bg-brand-teal/20">
                     {q}
-                    <span className="block text-[8px] text-brand-teal mt-1">{cfg.cost}🎮</span>
                   </button>
                 ))}
               </div>
             )}
             {tab === "zodiac" && !subCategory && (
-              <div className="text-center py-6">
-                <Sparkles className="w-8 h-8 text-brand-teal mx-auto mb-2" />
-                <p className="text-xs text-text-tertiary">请先选择咨询类型</p>
+              <div className="flex flex-wrap gap-2">
+                {cfg.cost_map?.slice(0, 4).map((item: {label: string; cost: number}) => (
+                  <button key={item.label} onClick={() => { setSubCategory(item.label); setZodiacCost(item.cost); }}
+                    className="text-[10px] bg-brand-gold-light/30 text-brand-gold-dark rounded-[14px] px-3 py-1.5 active:scale-95 transition-transform">
+                    {item.label.split("（")[0] || item.label}
+                  </button>
+                ))}
+                <div className="text-[9px] text-text-tertiary w-full mt-1">💰 费用: 10~150 🎮</div>
               </div>
             )}
           </div>
@@ -372,11 +389,13 @@ export default function AIChatPage() {
                 {msg.content}
               </div>
               {msg.role === "assistant" && msg.content !== getGreeting() && i > 0 && (
-                <div className="flex gap-2 mt-1 ml-1">
+                <div className="flex gap-3 mt-1.5 ml-1">
                   <button onClick={() => handleFeedback(i, 1)}
-                    className="text-[9px] text-text-tertiary hover:text-green-500 transition-colors">👍 准</button>
+                    className="text-[9px] text-text-tertiary hover:text-brand-teal transition-colors">👍 准</button>
                   <button onClick={() => handleFeedback(i, 0)}
-                    className="text-[9px] text-text-tertiary hover:text-red-400 transition-colors">👎 不准</button>
+                    className="text-[9px] text-text-tertiary hover:text-brand-coral transition-colors">👎 不准</button>
+                  <button onClick={() => { navigator.clipboard.writeText(msg.content); showToast("已复制到剪贴板"); }}
+                    className="text-[9px] text-text-tertiary hover:text-text-primary transition-colors">📋 复制</button>
                 </div>
               )}
             </div>
@@ -384,16 +403,17 @@ export default function AIChatPage() {
         ))}
 
         {loading && (
-          <div className="flex justify-start">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center mr-2 shrink-0">
+          <div className="flex justify-start items-end gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center shrink-0">
               <LobsterIcon className="w-4 h-4" />
             </div>
-            <div className="bg-surface border border-border-tertiary shadow-sm rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="bg-surface border border-border-tertiary shadow-sm rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
               <div className="flex gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-bounce" style={{animationDelay:"0ms"}} />
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-bounce" style={{animationDelay:"150ms"}} />
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-bounce" style={{animationDelay:"300ms"}} />
               </div>
+              <span className="text-[10px] text-text-tertiary">小龙虾正在思考...</span>
             </div>
           </div>
         )}
@@ -406,6 +426,11 @@ export default function AIChatPage() {
           {toast}
         </div>
       )}
+
+      {/* ── Cost indicator ── */}
+      <div className="flex items-center justify-center gap-1 py-1 bg-bg shrink-0">
+        <span className="text-[9px] text-text-tertiary">本次咨询消耗 {tab === "zodiac" ? zodiacCost : cfg.cost} 🎮</span>
+      </div>
 
       {/* ── Input ── */}
       <div className="sticky bottom-[64px] bg-white border-t border-border-tertiary px-4 py-3"
