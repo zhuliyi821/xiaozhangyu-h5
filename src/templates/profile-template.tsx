@@ -105,22 +105,27 @@ export default function ProfileTemplate() {
         </div>
       </div>
 
-      {/* Assets 4格 (替换原来的5列) */}
+      {/* Assets 4格 */}
       <div className="mx-4 -mt-4">
         <div className="grid grid-cols-4 gap-2">
-          <AssetTile icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" href="/assets?tab=credit1" action="充值" />
+          <AssetTile icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" href="/assets?tab=credit1" />
           <AssetTile icon="⛏️" value={formatAsset(credits.credit5)} label="水晶石" href="/assets?tab=credit5" />
           <AssetTile icon="🔮" value={formatAsset(credits.credit3)} label="水晶球" href="/assets?tab=credit3" />
-          <AssetTile icon="💰" value={credits.credit4.toFixed(2)} label="余额" href="/assets?tab=credit4" action="充值" />
+          <AssetTile icon="💰" value={credits.credit4.toFixed(2)} label="余额" href="/assets?tab=credit4" />
         </div>
       </div>
 
-      {/* Quick Actions 4格 */}
-      <div className="mx-4 mt-4 grid grid-cols-4 gap-2">
-        <QuickAction icon="📥" label="充值" color="bg-brand-teal/15" />
-        <QuickAction icon="🎁" label="邀请" color="bg-brand-gold/15" />
-        <QuickAction icon="📋" label="订单" color="bg-blue-100" />
-        <QuickAction icon="💬" label="消息" color="bg-brand-coral/15" />
+      {/* 消息卡片 */}
+      <div className="mx-4 mt-4">
+        <div className="bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 rounded-[14px] px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer shadow-sm"
+          onClick={() => window.location.href = "/messages"}>
+          <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-sm">💬</div>
+          <div className="flex-1">
+            <div className="text-xs font-medium text-blue-800">消息中心</div>
+            <div className="text-[10px] text-blue-500/70">查看系统通知与活动消息</div>
+          </div>
+          <span className="text-blue-400 text-xs">→</span>
+        </div>
       </div>
 
       {/* Invite Card */}
@@ -202,16 +207,6 @@ function AssetTile({ icon, value, label, href, action }: { icon: string; value: 
       {action && (
         <div className="text-[9px] text-brand-gold-dark mt-1.5 bg-brand-gold-light/40 rounded-full py-0.5 px-2 inline-block font-medium">{action}</div>
       )}
-    </div>
-  );
-}
-
-/** 快捷操作 */
-function QuickAction({ icon, label, color }: { icon: string; label: string; color: string }) {
-  return (
-    <div className="bg-white rounded-[14px] py-3 text-center shadow-sm border border-gray-100 active:scale-95 transition-transform cursor-pointer">
-      <div className={`w-9 h-9 rounded-full ${color} flex items-center justify-center mx-auto mb-1 text-base`}>{icon}</div>
-      <div className="text-[11px] text-text-primary font-medium">{label}</div>
     </div>
   );
 }
