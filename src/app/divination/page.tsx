@@ -161,7 +161,7 @@ export default function DivinationPage() {
               {/* 三种起卦方式 */}
               <div className="space-y-3">
                 <button onClick={() => doDivination("shake")} disabled={loading}
-                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  className="w-full bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center text-2xl">📳</div>
                     <div className="flex-1">
@@ -175,7 +175,7 @@ export default function DivinationPage() {
             {loading && <TentacleLoader text="章鱼正在为你起卦…" />}
 
                 <button onClick={() => doDivination("manual")} disabled={loading}
-                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  className="w-full bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-gold to-brand-gold-dark flex items-center justify-center text-2xl">🪙</div>
                     <div className="flex-1">
@@ -187,7 +187,7 @@ export default function DivinationPage() {
                 </button>
 
                 <button onClick={() => doDivination("time")} disabled={loading}
-                  className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
+                  className="w-full bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-2xl">⚡</div>
                     <div className="flex-1">
@@ -206,7 +206,7 @@ export default function DivinationPage() {
           )}
 
           {activeTab === "history" && (
-            <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
               <div className="text-xs font-bold mb-3">📜 我的卦象（{history.length}卦）</div>
               {history.length === 0 ? (
                 <EmptyState icon="🐙" title="还没有卦象记录"
@@ -232,7 +232,7 @@ export default function DivinationPage() {
           )}
 
           {activeTab === "aichat" && (
-            <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center text-xs text-white">🦐</span>
                 <div>

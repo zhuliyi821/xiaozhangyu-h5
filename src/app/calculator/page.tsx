@@ -94,7 +94,7 @@ export default function CalculatorPage() {
         <div className="flex gap-1 px-3 pb-2 overflow-x-auto scrollbar-none">
           {Object.entries(LOTTERY_TYPES).map(([k, v]) => (
             <button key={k} onClick={() => { setType(k); resetSelection(); }}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-[12px] text-xs font-medium transition-colors ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-[4px] text-xs font-medium transition-colors ${
                 type === k ? "bg-brand-teal text-white shadow-sm" : "bg-surface text-text-secondary border border-[rgba(69,204,213,0.08)]"
               }`}>{v.name}</button>
           ))}
@@ -103,7 +103,7 @@ export default function CalculatorPage() {
 
       <div className="px-4 mt-3 space-y-3">
         {/* Mode selector */}
-        <div className="flex bg-surface rounded-[14px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
+        <div className="flex bg-surface rounded-[4px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
           {[
             { key: "compound" as CalcMode, label: "复式投注", desc: "多选号码" },
             { key: "bold" as CalcMode, label: "胆拖投注", desc: "胆码+拖码" },
@@ -120,7 +120,7 @@ export default function CalculatorPage() {
 
         {/* Compound mode */}
         {mode === "compound" && (
-          <div className="bg-surface rounded-[24px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
             <div className="text-xs font-semibold mb-3">📊 复式投注参数</div>
             {/* Front */}
             <div className="mb-4">
@@ -154,7 +154,7 @@ export default function CalculatorPage() {
             )}
 
             {/* Quick preview: combinations */}
-            <div className="bg-bg rounded-[14px] p-3 mb-3">
+            <div className="bg-bg rounded-[4px] p-3 mb-3">
               <div className="text-[10px] text-text-tertiary">组合预览</div>
               <div className="text-base font-bold mt-0.5">
                 {calcCombos(frontCount, cfg.frontPick, cfg.backPick > 0 ? backCount : 0, cfg.backPick > 0 ? cfg.backPick : 0)} 注
@@ -168,7 +168,7 @@ export default function CalculatorPage() {
 
         {/* Bold-Drag mode */}
         {mode === "bold" && (
-          <div className="bg-surface rounded-[24px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
             <div className="text-xs font-semibold mb-3">🎯 胆拖投注参数</div>
             <div className="text-[10px] text-text-tertiary mb-3">胆码：每注必选的号码 / 拖码：与胆码组合的号码</div>
 
@@ -214,7 +214,7 @@ export default function CalculatorPage() {
             )}
 
             {/* Preview */}
-            <div className="bg-bg rounded-[14px] p-3">
+            <div className="bg-bg rounded-[4px] p-3">
               <div className="text-[10px] text-text-tertiary">胆拖组合</div>
               <div className="text-sm font-bold mt-0.5">
                 胆码 {boldFront}{boldBack > 0 ? `+${boldBack}` : ""} /
@@ -226,7 +226,7 @@ export default function CalculatorPage() {
         )}
 
         {/* Bets */}
-        <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+        <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold">💰 倍数设置</span>
             <span className="text-sm font-bold text-brand-coral">{bets} 倍</span>
@@ -240,13 +240,13 @@ export default function CalculatorPage() {
 
         {/* Calculate button */}
         <button onClick={handleCalc} disabled={loading}
-          className="w-full py-3.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[16px] text-sm font-semibold disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 shadow-lg shadow-brand-teal/20">
+          className="w-full py-3.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-semibold disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 shadow-lg shadow-brand-teal/20">
           <Calculator className="w-4 h-4" /> {loading ? "计算中..." : "计算投注金额"}
         </button>
 
         {/* Result */}
         {result && (
-          <div className="bg-surface rounded-[24px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold">✅ 计算结果</span>
               <button onClick={() => setShowDetail(!showDetail)} className="text-[10px] text-brand-teal flex items-center gap-1">
@@ -256,22 +256,22 @@ export default function CalculatorPage() {
 
             {/* Main stats */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-bg rounded-[14px] p-3 text-center">
+              <div className="bg-bg rounded-[4px] p-3 text-center">
                 <div className="text-[10px] text-text-tertiary">组合数</div>
                 <div className="text-lg font-bold">{result.total_notes} 注</div>
               </div>
-              <div className="bg-bg rounded-[14px] p-3 text-center">
+              <div className="bg-bg rounded-[4px] p-3 text-center">
                 <div className="text-[10px] text-text-tertiary">投注倍数</div>
                 <div className="text-lg font-bold">{bets}x</div>
               </div>
-              <div className="bg-gradient-to-br from-brand-coral/10 to-brand-gold/10 rounded-[14px] p-3 text-center border border-brand-coral/20">
+              <div className="bg-gradient-to-br from-brand-coral/10 to-brand-gold/10 rounded-[4px] p-3 text-center border border-brand-coral/20">
                 <div className="text-[10px] text-text-tertiary">总金额</div>
                 <div className="text-xl font-bold text-brand-coral">¥{result.total_amount.toFixed(2)}</div>
               </div>
             </div>
 
             {/* Formulas */}
-            <details className="bg-bg rounded-[14px] p-3">
+            <details className="bg-bg rounded-[4px] p-3">
               <summary className="text-[11px] font-medium cursor-pointer">投注方案公式</summary>
               <div className="mt-2 text-[10px] text-text-tertiary space-y-1">
                 <p>前区选 {frontCount} 个 → C({frontCount},{cfg.frontPick}) = {combFormula(frontCount, cfg.frontPick)}</p>
@@ -284,7 +284,7 @@ export default function CalculatorPage() {
         )}
 
         {/* Probability info */}
-        <details className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+        <details className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
           <summary className="text-[11px] font-semibold cursor-pointer">📖 中奖概率参考</summary>
           <div className="mt-3 text-[10px] text-text-tertiary space-y-1.5 leading-relaxed">
             <p>• 大乐透头奖概率: 1/21,425,712</p>

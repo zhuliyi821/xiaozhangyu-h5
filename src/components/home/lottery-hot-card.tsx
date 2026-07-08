@@ -17,7 +17,7 @@ export default function LotteryHotCard({ data, loading }: HotCardMiniProps) {
   if (loading) {
     return (
       <section className="mt-4 px-4 animate-pulse">
-        <div className="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
           <div className="h-4 bg-gray-200 rounded w-32 mb-3" />
           <div className="h-8 bg-gray-200 rounded w-full" />
         </div>
@@ -33,7 +33,7 @@ export default function LotteryHotCard({ data, loading }: HotCardMiniProps) {
     <section className="mt-4 px-4">
       <Link
         href="/lottery"
-        className="block bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+        className="block bg-white rounded-[4px] p-4 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">

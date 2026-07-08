@@ -83,7 +83,7 @@ export default function AssetsPage() {
           <button onClick={() => window.history.back()} className="text-text-secondary text-lg mr-3">‹</button>
           <h1 className="text-base font-semibold">我的资产</h1>
         </div>
-        <div className="mx-4 mt-8 p-6 bg-surface rounded-[20px] text-center">
+        <div className="mx-4 mt-8 p-6 bg-surface rounded-[4px] text-center">
           <div className="text-3xl mb-3">😅</div>
           <p className="text-sm text-text-secondary">加载失败</p>
           <p className="text-xs text-text-tertiary mt-1">{error}</p>
@@ -108,7 +108,7 @@ export default function AssetsPage() {
       </div>
 
       {!loading && w && (
-        <div className="mx-4 mt-4 bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[20px] p-5 text-white">
+        <div className="mx-4 mt-4 bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[4px] p-5 text-white">
           <div className="text-[11px] opacity-80">总览</div>
           <div className="text-2xl font-bold mt-1">
             🎮 {Math.floor(w.credit1).toLocaleString()} 游戏豆
@@ -121,7 +121,7 @@ export default function AssetsPage() {
 
       {loading ? (
         <div className="px-4 mt-4 space-y-3">
-          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-surface rounded-[16px] animate-pulse" />)}
+          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-surface rounded-[4px] animate-pulse" />)}
         </div>
       ) : (
         <div className="px-4 mt-4 space-y-3">
@@ -130,8 +130,8 @@ export default function AssetsPage() {
             const label = getLabel(a.key);
             const desc = getDesc(a.key);
             return (
-              <div key={a.key} className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)] flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-[14px] bg-gradient-to-r ${a.color} flex items-center justify-center text-lg text-white shadow-sm shrink-0`}>
+              <div key={a.key} className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)] flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-[4px] bg-gradient-to-r ${a.color} flex items-center justify-center text-lg text-white shadow-sm shrink-0`}>
                   {a.icon}
                 </div>
                 <div className="flex-1 min-w-0">

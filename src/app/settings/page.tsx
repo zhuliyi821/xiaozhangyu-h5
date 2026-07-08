@@ -55,14 +55,14 @@ export default function SettingsPage() {
 
       {loading && (
         <div className="px-4 mt-6 space-y-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-12 bg-surface rounded-[16px] animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-12 bg-surface rounded-[4px] animate-pulse" />)}
         </div>
       )}
 
       {profile && (
         <div className="px-4 mt-6 space-y-4">
           {/* 个人资料 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <h2 className="text-sm font-semibold mb-4">个人资料</h2>
             {/* 头像 */}
             <div className="flex items-center gap-4 mb-4">
@@ -80,9 +80,9 @@ export default function SettingsPage() {
               <label className="text-[11px] text-text-secondary block mb-1">昵称</label>
               <div className="flex gap-2">
                 <input type="text" value={nickname} onChange={e => setNickname(e.target.value)}
-                  className="flex-1 bg-bg rounded-[12px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  className="flex-1 bg-bg rounded-[4px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
                 <button onClick={handleSave} disabled={saving || !nickname.trim()}
-                  className="px-4 py-2 bg-brand-teal text-white text-xs rounded-[12px] disabled:opacity-50">
+                  className="px-4 py-2 bg-brand-teal text-white text-xs rounded-[4px] disabled:opacity-50">
                   {saving ? "保存中..." : "保存"}
                 </button>
               </div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 修改密码 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">安全设置</h2>
               <button onClick={() => setShowPwd(!showPwd)}
@@ -104,11 +104,11 @@ export default function SettingsPage() {
             {showPwd && (
               <div className="space-y-3">
                 <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)}
-                  placeholder="原密码" className="w-full bg-bg rounded-[12px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  placeholder="原密码" className="w-full bg-bg rounded-[4px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
                 <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)}
-                  placeholder="新密码（至少6位）" className="w-full bg-bg rounded-[12px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  placeholder="新密码（至少6位）" className="w-full bg-bg rounded-[4px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
                 <button onClick={handleChangePwd} disabled={pwdSaving || !oldPwd || newPwd.length < 6}
-                  className="w-full py-2 bg-amber-500 text-white text-xs rounded-[12px] disabled:opacity-50">
+                  className="w-full py-2 bg-amber-500 text-white text-xs rounded-[4px] disabled:opacity-50">
                   {pwdSaving ? "修改中..." : "确认修改"}
                 </button>
               </div>
@@ -116,22 +116,22 @@ export default function SettingsPage() {
           </div>
 
           {/* 账户信息 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <h2 className="text-sm font-semibold mb-3">账户信息</h2>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="bg-bg rounded-[12px] p-3">
+              <div className="bg-bg rounded-[4px] p-3">
                 <div className="text-text-tertiary mb-1">🎮 游戏豆</div>
                 <div className="font-bold">{profile.assets.credit1 || 0}</div>
               </div>
-              <div className="bg-bg rounded-[12px] p-3">
+              <div className="bg-bg rounded-[4px] p-3">
                 <div className="text-text-tertiary mb-1">⛏️ 水晶石</div>
                 <div className="font-bold">{profile.assets.credit5 || 0}</div>
               </div>
-              <div className="bg-bg rounded-[12px] p-3">
+              <div className="bg-bg rounded-[4px] p-3">
                 <div className="text-text-tertiary mb-1">🔮 水晶球</div>
                 <div className="font-bold">{profile.assets.credit3 || 0}</div>
               </div>
-              <div className="bg-bg rounded-[12px] p-3">
+              <div className="bg-bg rounded-[4px] p-3">
                 <div className="text-text-tertiary mb-1">🏪 闲豆</div>
                 <div className="font-bold">{profile.assets.credit2 || 0}</div>
               </div>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
           {/* 提示消息 */}
           {msg && (
-            <div className={`text-center text-xs py-2 rounded-[12px] ${msg.startsWith("✅") ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+            <div className={`text-center text-xs py-2 rounded-[4px] ${msg.startsWith("✅") ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
               {msg}
             </div>
           )}

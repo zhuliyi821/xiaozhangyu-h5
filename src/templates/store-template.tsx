@@ -243,7 +243,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
   return (
     <main className="pb-20">
       {/* Carousel */}
-      <div className="mx-4 mt-2 rounded-[28px] overflow-hidden shadow-soft" onClick={() => setCarouselIdx((carouselIdx + 1) % cfg.carousels.length)}>
+      <div className="mx-4 mt-2 rounded-[4px] overflow-hidden shadow-soft" onClick={() => setCarouselIdx((carouselIdx + 1) % cfg.carousels.length)}>
         <div className={`bg-gradient-to-r ${carouselBg[carouselIdx]} p-5 relative cursor-pointer active:scale-[0.98] transition-transform`}>
           <div className="relative z-10">
             <div className="text-[11px] text-white/80 mb-1">{cfg.carousels[carouselIdx].subtitle}</div>
@@ -267,7 +267,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             if (i === 1) { window.location.href = "/store-services"; return; }
             setActiveTab(i);
           }}
-            className={`flex-1 py-2 text-center rounded-[12px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>
+            className={`flex-1 py-2 text-center rounded-[4px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>
             {tab}
           </button>
         ))}
@@ -384,7 +384,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
 
       {/* Success toast */}
       {swapBuyMsg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-green-600 text-white px-5 py-2.5 rounded-[16px] text-xs shadow-lg animate-bounce">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-green-600 text-white px-5 py-2.5 rounded-[4px] text-xs shadow-lg animate-bounce">
           {swapBuyMsg}
         </div>
       )}

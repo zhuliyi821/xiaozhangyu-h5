@@ -141,7 +141,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
       </div>
 
       {/* 签到卡片 — 品牌色 */}
-      <div className="bg-gradient-to-br from-brand-teal-light/20 to-brand-teal/5 rounded-[16px] p-4 border border-brand-teal/20 mb-2.5">
+      <div className="bg-gradient-to-br from-brand-teal-light/20 to-brand-teal/5 rounded-[4px] p-4 border border-brand-teal/20 mb-2.5">
         <div className="flex items-center gap-2 mb-3">
           <CalendarCheck className="w-4 h-4 text-brand-teal-dark" />
           <span className="text-xs font-semibold text-brand-teal-dark">📅 每日签到</span>
@@ -210,7 +210,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
       </div>
 
       {/* 任务列表 */}
-      <div className="bg-white rounded-[16px] border border-gray-100 divide-y divide-gray-50 overflow-hidden">
+      <div className="bg-white rounded-[4px] border border-gray-100 divide-y divide-gray-50 overflow-hidden">
         {tasks.map((task, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <div className="w-8 h-8 rounded-[10px] bg-gray-50 flex items-center justify-center">

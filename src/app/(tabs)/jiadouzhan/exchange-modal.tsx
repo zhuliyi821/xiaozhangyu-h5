@@ -207,22 +207,22 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
             <>
               {/* 冻结状态总览 */}
               <div className="flex gap-3">
-                <div className="flex-1 bg-gray-50 rounded-[12px] px-4 py-3 text-center">
+                <div className="flex-1 bg-gray-50 rounded-[4px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">冻结</div>
                   <div className="text-lg font-bold text-brand-coral mt-1">{frozenCrystal}</div>
                 </div>
-                <div className="flex-1 bg-gray-50 rounded-[12px] px-4 py-3 text-center">
+                <div className="flex-1 bg-gray-50 rounded-[4px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">可用</div>
                   <div className="text-lg font-bold text-brand-teal mt-1">{totalCrystal - frozenCrystal}</div>
                 </div>
-                <div className="flex-1 bg-gray-50 rounded-[12px] px-4 py-3 text-center">
+                <div className="flex-1 bg-gray-50 rounded-[4px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">总计</div>
                   <div className="text-lg font-bold mt-1">{totalCrystal}</div>
                 </div>
               </div>
 
               {/* 激活操作 */}
-              <div className="bg-gradient-to-r from-amber-50 to-brand-gold-light/20 rounded-[12px] p-4 border border-brand-gold/20">
+              <div className="bg-gradient-to-r from-amber-50 to-brand-gold-light/20 rounded-[4px] p-4 border border-brand-gold/20">
                 <div className="flex items-center gap-1.5 mb-3">
                   <Zap className="w-4 h-4 text-brand-gold-dark" />
                   <span className="text-[11px] font-semibold text-amber-800">消耗游戏豆激活水晶石</span>
@@ -233,7 +233,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                     value={activateAmount}
                     onChange={(e) => setActivateAmount(e.target.value)}
                     placeholder="输入游戏豆数量"
-                    className="flex-1 px-4 py-3 bg-white rounded-[12px] text-sm font-medium outline-none focus:ring-2 focus:ring-brand-teal/30 transition-all"
+                    className="flex-1 px-4 py-3 bg-white rounded-[4px] text-sm font-medium outline-none focus:ring-2 focus:ring-brand-teal/30 transition-all"
                     min="0"
                     max={user?.balance?.credit1 ?? 0}
                   />
@@ -291,7 +291,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
               <button
                 onClick={handleActivate}
                 disabled={!canActivate || submitting}
-                className={`w-full py-3 rounded-[14px] text-sm font-semibold transition-all active:scale-[0.98] ${
+                className={`w-full py-3 rounded-[4px] text-sm font-semibold transition-all active:scale-[0.98] ${
                   canActivate
                     ? "bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white shadow-[0_4px_16px_rgba(242,182,49,0.3)]"
                     : "bg-gray-100 text-gray-300 cursor-not-allowed"
@@ -310,13 +310,13 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
               {/* 去消费补充 */}
               <a
                 href="/store-services"
-                className="block w-full text-center py-2.5 rounded-[12px] text-[11px] font-medium bg-gray-50 text-gray-500 active:scale-[0.98] transition-transform"
+                className="block w-full text-center py-2.5 rounded-[4px] text-[11px] font-medium bg-gray-50 text-gray-500 active:scale-[0.98] transition-transform"
               >
                 游戏豆不够？去消费赚豆 🛒
               </a>
 
               {/* 过期提醒 */}
-              <div className="bg-red-50 border border-red-200 rounded-[12px] px-4 py-3">
+              <div className="bg-red-50 border border-red-200 rounded-[4px] px-4 py-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-red-700">⏰ 过期提醒</span>
                   <span className="text-[10px] text-red-600 font-medium">冻结后 90 天未激活将自动过期</span>
@@ -329,7 +329,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
           ) : (
           <>
           {/* 当前余额 */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-[12px] px-4 py-3">
+          <div className="flex items-center justify-between bg-gray-50 rounded-[4px] px-4 py-3">
             <span className="text-[11px] text-gray-500">
               当前 {tab.fromLabel}
             </span>
@@ -358,7 +358,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="输入兑换数量"
-                className="flex-1 px-4 py-3 bg-gray-50 rounded-[12px] text-sm font-medium outline-none focus:ring-2 focus:ring-brand-teal/30 transition-all"
+                className="flex-1 px-4 py-3 bg-gray-50 rounded-[4px] text-sm font-medium outline-none focus:ring-2 focus:ring-brand-teal/30 transition-all"
                 min="0"
                 max={balance}
               />
@@ -390,7 +390,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
 
           {/* 兑换结果预览 */}
           {exchangeResult && (
-            <div className="bg-gradient-to-r from-brand-teal/5 to-brand-teal-dark/5 rounded-[12px] px-4 py-3 border border-brand-teal/10">
+            <div className="bg-gradient-to-r from-brand-teal/5 to-brand-teal-dark/5 rounded-[4px] px-4 py-3 border border-brand-teal/10">
               <div className="text-[11px] text-gray-500 mb-1">兑换预览</div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium">
@@ -417,7 +417,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
           <button
             onClick={handleExchange}
             disabled={!canSubmit}
-            className={`w-full py-3 rounded-[14px] text-sm font-semibold transition-all active:scale-[0.98] ${
+            className={`w-full py-3 rounded-[4px] text-sm font-semibold transition-all active:scale-[0.98] ${
               canSubmit
                 ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-[0_4px_16px_rgba(69,204,213,0.3)]"
                 : "bg-gray-100 text-gray-300 cursor-not-allowed"
@@ -434,7 +434,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
           </button>
 
           {/* 规则说明 */}
-          <div className="bg-gray-50 rounded-[12px] px-4 py-3">
+          <div className="bg-gray-50 rounded-[4px] px-4 py-3">
             <div className="text-[10px] text-gray-400 font-medium mb-1">📌 兑换规则</div>
             <ul className="text-[10px] text-gray-400 space-y-0.5">
               <li>· 所有兑换即时生效，不可撤销</li>

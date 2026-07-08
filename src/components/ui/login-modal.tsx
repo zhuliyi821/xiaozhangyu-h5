@@ -139,7 +139,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   return (
     <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-[24px] w-full max-w-[360px] overflow-hidden shadow-2xl"
+        className="bg-white rounded-[4px] w-full max-w-[360px] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -167,7 +167,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             {mode === "forgot" && "输入注册手机号重置密码"}
           </p>
           {referrer && mode === "register" && (
-            <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[20px]">
+            <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[4px]">
               <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你，你们各得 1,000 游戏豆 🎉
             </div>
           )}
@@ -182,7 +182,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                 type="tel" placeholder="手机号" maxLength={11}
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[14px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
               />
             </div>
 
@@ -192,7 +192,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                 type={showPwd ? "text" : "password"} placeholder="密码"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-9 py-3 bg-gray-50 rounded-[14px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                className="w-full pl-9 pr-9 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2">
                 {showPwd ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
@@ -214,7 +214,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             )}
 
             <button type="submit" disabled={submitting}
-              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[14px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {mode === "login" ? "登录" : "注册并登录"}
@@ -241,12 +241,12 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="tel" placeholder="注册手机号" maxLength={11}
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[14px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
 
                 {codeSent && debugCode && (
-                  <div className="bg-amber-50 rounded-[12px] px-4 py-2.5 text-center">
+                  <div className="bg-amber-50 rounded-[4px] px-4 py-2.5 text-center">
                     <p className="text-[10px] text-amber-600">📱 验证码（调试模式）</p>
                     <p className="text-lg font-mono font-bold text-amber-800 tracking-[0.3em]">{debugCode}</p>
                     <p className="text-[9px] text-amber-500 mt-0.5">接入短信后将自动发送到手机</p>
@@ -257,14 +257,14 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
 
                 {!codeSent ? (
                   <button onClick={handleSendCode} disabled={submitting}
-                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[14px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     获取验证码
                   </button>
                 ) : (
                   <button onClick={() => setForgotStep(2)}
-                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[14px] text-sm font-medium"
+                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium"
                   >
                     下一步
                   </button>
@@ -280,7 +280,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="text" placeholder="输入验证码" maxLength={6}
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[14px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
                 <div className="relative">
@@ -288,7 +288,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="password" placeholder="新密码（至少6位）"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[14px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
 
@@ -305,11 +305,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
 
                 <div className="flex gap-2">
                   <button onClick={() => { setForgotStep(1); setCode(""); setNewPassword(""); setError(""); }}
-                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-[14px] text-sm font-medium">
+                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-[4px] text-sm font-medium">
                     返回
                   </button>
                   <button onClick={handleResetPassword} disabled={submitting}
-                    className="flex-[2] py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[14px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="flex-[2] py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     重置密码

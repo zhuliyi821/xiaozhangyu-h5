@@ -260,11 +260,11 @@ function LotterySimContent() {
 
       <div className="px-4 -mt-3 relative z-20">
         {/* Lottery Type Selector */}
-        <div className="bg-surface rounded-[20px] p-3 shadow-sm border border-border-tertiary mb-3">
+        <div className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary mb-3">
           <div className="grid grid-cols-5 gap-1.5">
             {LOTTERY_LIST.map(l => (
               <button key={l.code} onClick={() => { setLotteryCode(l.code); setTickets([]); }}
-                className={`py-2.5 rounded-[12px] text-center active:scale-95 transition-all ${
+                className={`py-2.5 rounded-[4px] text-center active:scale-95 transition-all ${
                   lotteryCode === l.code
                     ? `bg-gradient-to-r ${l.color} text-white shadow-sm`
                     : "bg-bg text-text-secondary border border-border-tertiary"
@@ -280,7 +280,7 @@ function LotterySimContent() {
           <>
             {/* AI Prediction Banner */}
             {aiPrediction && (
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-[16px] p-3 mb-3 border border-indigo-200/50 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-[4px] p-3 mb-3 border border-indigo-200/50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Bot className="w-4 h-4 text-indigo-500" />
                   <div>
@@ -301,7 +301,7 @@ function LotterySimContent() {
             )}
 
             {/* Number Picker */}
-            <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary mb-3">
+            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">{config.front_name}</span>
@@ -349,10 +349,10 @@ function LotterySimContent() {
 
               {/* Quick Pick + Add */}
               <div className="flex gap-2 mt-4">
-                <button onClick={quickPick} className="flex-1 py-2 rounded-[12px] bg-bg text-text-secondary text-xs font-medium border border-border-tertiary flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                <button onClick={quickPick} className="flex-1 py-2 rounded-[4px] bg-bg text-text-secondary text-xs font-medium border border-border-tertiary flex items-center justify-center gap-1 active:scale-95 transition-transform">
                   <Dices className="w-3.5 h-3.5" /> 机选
                 </button>
-                <button onClick={addTicket} className="flex-1 py-2 rounded-[12px] bg-brand-teal/10 text-brand-teal-dark text-xs font-medium border border-brand-teal/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                <button onClick={addTicket} className="flex-1 py-2 rounded-[4px] bg-brand-teal/10 text-brand-teal-dark text-xs font-medium border border-brand-teal/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
                   + 添加选号 ({(config?.price || 2) * betMultiple}🎮)
                 </button>
               </div>
@@ -360,7 +360,7 @@ function LotterySimContent() {
 
             {/* Bet Slip */}
             {tickets.length > 0 && (
-              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary mb-3">
+              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
                 <div className="text-sm font-semibold mb-2">投注清单 ({tickets.length}注)</div>
                 {tickets.map((t, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border-tertiary/40 last:border-0">
@@ -379,7 +379,7 @@ function LotterySimContent() {
             )}
 
             {/* Multiple selector */}
-            <div className="bg-surface rounded-[14px] p-3 shadow-sm border border-border-tertiary mb-3 flex items-center justify-between">
+            <div className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary mb-3 flex items-center justify-between">
               <span className="text-xs text-text-secondary">倍数</span>
               <div className="flex items-center gap-2">
                 {[1, 2, 5, 10].map(m => (
@@ -401,7 +401,7 @@ function LotterySimContent() {
 
             {/* Place Bet */}
             <button onClick={placeBet} disabled={betting || !canBet}
-              className={`w-full py-3 mb-3 rounded-[16px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
+              className={`w-full py-3 mb-3 rounded-[4px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
                 canBet ? "bg-gradient-to-r from-orange-500 to-red-500 shadow-sm" : "bg-gray-200 text-gray-400"
               }`}>
               {betting ? "开奖中..." : !user ? "请先登录" : `投注 ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
@@ -415,7 +415,7 @@ function LotterySimContent() {
 
             {/* Draw Result */}
             {result && showDraw && (
-              <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
+              <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
                 <div className="flex items-center justify-center gap-1 mb-3">
                   <Trophy className="w-5 h-5 text-brand-gold" />
                   <span className="text-sm font-bold">开奖结果</span>
@@ -466,7 +466,7 @@ function LotterySimContent() {
             )}
 
             {/* History Toggle */}
-            <details className="bg-surface rounded-[20px] overflow-hidden shadow-sm border border-border-tertiary mb-3">
+            <details className="bg-surface rounded-[4px] overflow-hidden shadow-sm border border-border-tertiary mb-3">
               <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-semibold">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-text-tertiary" />

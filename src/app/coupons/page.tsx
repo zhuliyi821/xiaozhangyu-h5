@@ -39,7 +39,7 @@ export default function CouponsPage() {
 
       {/* 可用数量 */}
       {!loading && !error && (
-        <div className="mx-4 mt-4 bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[20px] p-5 text-white">
+        <div className="mx-4 mt-4 bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[4px] p-5 text-white">
           <div className="text-[11px] opacity-80">可用卡券</div>
           <div className="text-3xl font-bold mt-1">{available}</div>
           <div className="text-[11px] opacity-70 mt-1">共 {items.length} 张 · 点击使用</div>
@@ -49,13 +49,13 @@ export default function CouponsPage() {
       {loading && (
         <div className="px-4 mt-4 space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 bg-surface rounded-[16px] animate-pulse" />
+            <div key={i} className="h-24 bg-surface rounded-[4px] animate-pulse" />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[20px] text-center">
+        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[4px] text-center">
           <div className="text-red-500 text-sm mb-2">加载失败</div>
           <button onClick={() => { setError(""); setLoading(true); if (user) getCoupons(user.uid).then(r => { setItems(r.list); setAvailable(r.available); }).catch(e => setError(e.message)).finally(() => setLoading(false)); }}
             className="px-4 py-1.5 bg-red-500 text-white text-xs rounded-[10px]">重试</button>
@@ -77,7 +77,7 @@ export default function CouponsPage() {
             const expired = c.expired || isExpired(c.end_at);
             return (
               <div key={c.id}
-                className={`bg-surface rounded-[20px] overflow-hidden shadow-sm border ${c.used ? "opacity-40" : expired ? "opacity-50" : "border-[rgba(69,204,213,0.08)]"}`}>
+                className={`bg-surface rounded-[4px] overflow-hidden shadow-sm border ${c.used ? "opacity-40" : expired ? "opacity-50" : "border-[rgba(69,204,213,0.08)]"}`}>
 
                 {/* 券头 */}
                 <div className={`bg-gradient-to-r ${cfg.color} p-4 text-white flex items-center gap-3`}>

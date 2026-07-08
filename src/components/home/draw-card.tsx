@@ -21,7 +21,7 @@ export function DrawCard() {
   if (loading) {
     return (
       <section className="mt-5 px-4">
-        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-100 animate-pulse">
+        <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 animate-pulse">
           <div className="h-5 w-40 bg-gray-200 rounded mb-3" />
           <div className="flex gap-1 mb-3">
             {[...Array(7)].map((_, i) => (
@@ -30,7 +30,7 @@ export function DrawCard() {
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 bg-gray-100 rounded-[12px]" />
+              <div key={i} className="h-14 bg-gray-100 rounded-[4px]" />
             ))}
           </div>
         </div>
@@ -48,7 +48,7 @@ export function DrawCard() {
       </div>
 
       {draws.slice(0, 3).map((draw) => (
-        <Link key={draw.key} href={`/lottery/${draw.key}/chart`} className="bg-white rounded-[20px] p-4 mb-2.5 shadow-sm border border-gray-100 block active:scale-[0.98] transition-transform">
+        <Link key={draw.key} href={`/lottery/${draw.key}/chart`} className="bg-white rounded-[4px] p-4 mb-2.5 shadow-sm border border-gray-100 block active:scale-[0.98] transition-transform">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-1.5 font-semibold text-sm">
               <span>{draw.name}</span>

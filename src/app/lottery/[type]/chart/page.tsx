@@ -192,7 +192,7 @@ export default function ProChartPage() {
 
       {loading && (
         <div className="p-4 space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-40 bg-surface rounded-[20px] animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-40 bg-surface rounded-[4px] animate-pulse" />)}
         </div>
       )}
 
@@ -208,7 +208,7 @@ export default function ProChartPage() {
           />
 
           {/* 热冷号卡片：实际数据 vs AI 模型 */}
-          <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-semibold">📊 数据对比</span>
               <span className="text-[10px] text-text-tertiary">
@@ -276,7 +276,7 @@ export default function ProChartPage() {
           </div>
 
           {/* Tab Switch */}
-          <div className="flex bg-surface rounded-[16px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="flex bg-surface rounded-[4px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
             {[
               { key: "trend" as const, label: "走势图" },
               { key: "freq" as const, label: "频率分析" },
@@ -284,7 +284,7 @@ export default function ProChartPage() {
               { key: "predict" as const, label: "AI 荐号" },
             ].map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 py-2 text-center rounded-[12px] text-xs font-medium transition-colors ${
+                className={`flex-1 py-2 text-center rounded-[4px] text-xs font-medium transition-colors ${
                   activeTab === tab.key ? "bg-brand-teal text-white shadow-sm" : "text-text-secondary"
                 }`}>
                 {tab.label}
@@ -305,7 +305,7 @@ export default function ProChartPage() {
 
           {/* Chart area for trend/freq/miss */}
           {(activeTab !== "predict") && (
-            <div ref={chartRef} className="bg-surface rounded-[20px] p-3 shadow-sm border border-[rgba(69,204,213,0.06)]" style={{ height: 480 }} />
+            <div ref={chartRef} className="bg-surface rounded-[4px] p-3 shadow-sm border border-[rgba(69,204,213,0.06)]" style={{ height: 480 }} />
           )}
 
           {/* AI Predict — 多模型集成 */}
@@ -313,7 +313,7 @@ export default function ProChartPage() {
             <div className="space-y-3">
 
               {/* 模型贡献度 */}
-              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold">🧠 多模型集成预测</span>
                   <span className="text-[10px] text-text-tertiary">综合置信度 {prediction.stats.weightedAccuracy}%</span>
@@ -335,7 +335,7 @@ export default function ProChartPage() {
               </div>
 
               {/* 前区推荐 */}
-              <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
                 <div className="text-[11px] font-semibold mb-2">前区推荐（按综合得分排序）</div>
                 <div className="flex gap-2 flex-wrap">
                   {prediction.front.slice(0, 10).map(r => (
@@ -365,7 +365,7 @@ export default function ProChartPage() {
 
               {/* 后区推荐 */}
               {cfg.back > 0 && prediction.back.length > 0 && (
-                <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+                <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
                   <div className="text-[11px] font-semibold mb-2">后区推荐</div>
                   <div className="flex gap-2 flex-wrap">
                     {prediction.back.slice(0, 5).map(r => (
@@ -381,7 +381,7 @@ export default function ProChartPage() {
               )}
 
               {/* 推荐组合 */}
-              <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[20px] p-5 text-white shadow-lg">
+              <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[4px] p-5 text-white shadow-lg">
                 <div className="text-[11px] opacity-80 mb-2">🎯 AI 推荐组合</div>
                 <div className="text-base font-bold tracking-wider">
                   {prediction.ensemble.top5.map(n => String(n).padStart(2, "0")).join(" ")}
@@ -396,7 +396,7 @@ export default function ProChartPage() {
               </div>
 
               {/* 各号码详情 */}
-              <details className="bg-surface rounded-[20px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <details className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
                 <summary className="text-[11px] font-semibold cursor-pointer">📊 各模型详细评分</summary>
                 <div className="mt-3 space-y-1 text-[10px]">
                   <div className="grid grid-cols-8 gap-1 text-text-tertiary pb-1 border-b border-[rgba(69,204,213,0.1)]">

@@ -75,7 +75,7 @@ export function NewsGrid() {
         <Link href="/daily-fortune" className="text-xs text-brand-teal font-medium">完整运势 &gt;</Link>
       </div>
 
-      <div className="block bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-5">
+      <div className="block bg-white rounded-[4px] p-4 shadow-sm border border-gray-100 mb-5">
         <Link href="/daily-fortune" className="block active:scale-[0.98] transition-transform">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-gold flex items-center justify-center shrink-0 shadow-sm">
@@ -170,7 +170,7 @@ export function NewsGrid() {
       <div className="grid grid-cols-3 gap-2 mb-5">
         {TOOLS.map((item, i) => (
           <Link key={i} href={item.href}
-            className="bg-white rounded-[20px] px-2 py-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform cursor-pointer block">
+            className="bg-white rounded-[4px] px-2 py-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform cursor-pointer block">
             <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[3px]"
               style={{ background: i % 3 === 0 ? "linear-gradient(90deg, #45CCD5, #2BAAAF)" : i % 3 === 1 ? "linear-gradient(90deg, #F27152, #D45435)" : "linear-gradient(90deg, #F2B631, #D99A0F)" }} />
             <item.icon className="w-6 h-6 mx-auto mb-1.5 text-brand-teal" />
@@ -189,7 +189,7 @@ export function NewsGrid() {
 
       <div className="grid grid-cols-3 gap-2 mb-5">
         <Link href="/lottery/dlt/chart"
-          className="bg-white rounded-[20px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
+          className="bg-white rounded-[4px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-gold rounded-t-[3px]" />
           <div className="text-lg mb-1">🎱</div>
           <div className="text-[13px] font-bold">彩票乱说</div>
@@ -197,7 +197,7 @@ export function NewsGrid() {
         </Link>
 
         <Link href="/stock-analysis"
-          className="bg-white rounded-[20px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
+          className="bg-white rounded-[4px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-gold to-brand-coral rounded-t-[3px]" />
           <div className="text-lg mb-1">📈</div>
           <div className="text-[13px] font-bold">股市瞎猜</div>
@@ -205,7 +205,7 @@ export function NewsGrid() {
         </Link>
 
         <Link href="/btc-predict"
-          className="bg-white rounded-[20px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
+          className="bg-white rounded-[4px] p-3.5 text-center shadow-sm border border-gray-100 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-coral to-brand-teal rounded-t-[3px]" />
           <div className="text-lg mb-1">₿</div>
           <div className="text-[13px] font-bold">BTC胡判</div>

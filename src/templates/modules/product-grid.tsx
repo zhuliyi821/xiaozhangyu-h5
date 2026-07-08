@@ -16,7 +16,7 @@ export default function ProductGridModule({ config }: ModuleProps) {
         style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-[12px] overflow-hidden border border-gray-100">
+          <div key={i} className="bg-white rounded-[4px] overflow-hidden border border-gray-100">
             <div className="aspect-square bg-gray-100 flex items-center justify-center text-gray-300 text-2xl">
               📦
             </div>

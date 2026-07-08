@@ -98,7 +98,7 @@ export default function SimPage() {
       <div className="px-4 pt-4">
         {/* Guide Banner */}
         {showGuide && (
-          <div className="bg-gradient-to-r from-brand-teal/10 to-brand-teal/5 rounded-[16px] border border-brand-teal/20 p-3 mb-3 flex items-start gap-3">
+          <div className="bg-gradient-to-r from-brand-teal/10 to-brand-teal/5 rounded-[4px] border border-brand-teal/20 p-3 mb-3 flex items-start gap-3">
             <span className="text-lg">📖</span>
             <div className="flex-1">
               <p className="text-xs font-semibold text-brand-teal-dark">欢迎使用沪深股指模拟</p>
@@ -114,14 +114,14 @@ export default function SimPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 rounded-[14px] bg-bg p-0.5 mb-4">
+        <div className="flex gap-1 rounded-[4px] bg-bg p-0.5 mb-4">
           {[
             { key: "trade" as const, label: "📊 交易", badge: 0 },
             { key: "positions" as const, label: "📋 持仓", badge: positions.length },
             { key: "history" as const, label: "📜 记录", badge: 0 },
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`relative flex-1 rounded-[12px] px-3 py-2 text-center text-xs font-medium transition ${
+              className={`relative flex-1 rounded-[4px] px-3 py-2 text-center text-xs font-medium transition ${
                 tab === t.key ? "bg-surface text-text-primary shadow-sm" : "text-text-tertiary hover:text-text-secondary"
               }`}>
               {t.label}
@@ -146,7 +146,7 @@ export default function SimPage() {
         {tab === "trade" && (
           <div className="space-y-4">
             {/* Price Chart */}
-            <div className="bg-surface rounded-[20px] p-3 shadow-sm border border-border-tertiary">
+            <div className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[11px] font-medium text-text-primary">沪深300主力 (IF9999)</span>
                 <span className="text-[9px] text-text-tertiary">15秒刷新</span>
@@ -170,7 +170,7 @@ export default function SimPage() {
             </div>
 
             {/* Open Position Form */}
-            <div className="bg-surface rounded-[20px] p-4 shadow-sm border border-border-tertiary">
+            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
               <h2 className="text-sm font-semibold mb-4">开仓</h2>
 
               {/* Direction */}
@@ -178,11 +178,11 @@ export default function SimPage() {
                 <label className="text-[10px] text-text-tertiary">方向</label>
                 <div className="mt-1.5 flex gap-2">
                   <button onClick={() => setDirection(1)}
-                    className={`flex-1 rounded-[14px] py-2.5 text-xs font-medium transition ${
+                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-medium transition ${
                       direction === 1 ? "bg-red-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>📈 看涨</button>
                   <button onClick={() => setDirection(2)}
-                    className={`flex-1 rounded-[14px] py-2.5 text-xs font-medium transition ${
+                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-medium transition ${
                       direction === 2 ? "bg-green-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>📉 看跌</button>
                 </div>
@@ -194,7 +194,7 @@ export default function SimPage() {
                 <div className="mt-1.5 flex gap-2">
                   {[1, 2, 5, 10].map(l => (
                     <button key={l} onClick={() => setLeverage(l)}
-                      className={`flex-1 rounded-[12px] py-2.5 text-xs font-medium transition ${
+                      className={`flex-1 rounded-[4px] py-2.5 text-xs font-medium transition ${
                         leverage === l ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                       }`}>{l}x</button>
                   ))}
@@ -220,11 +220,11 @@ export default function SimPage() {
                   ))}
                 </div>
                 <input type="number" min="10" value={points} onChange={e => setPoints(e.target.value)}
-                  className="w-full rounded-[12px] border border-border-tertiary bg-bg p-2.5 text-sm outline-none focus:border-brand-teal" placeholder="自定义金额" />
+                  className="w-full rounded-[4px] border border-border-tertiary bg-bg p-2.5 text-sm outline-none focus:border-brand-teal" placeholder="自定义金额" />
               </div>
 
               <button onClick={openPosition} disabled={loading}
-                className={`w-full rounded-[14px] py-3 text-sm font-semibold text-white transition active:scale-[0.97] ${
+                className={`w-full rounded-[4px] py-3 text-sm font-semibold text-white transition active:scale-[0.97] ${
                   loading ? "bg-text-tertiary" : "bg-gradient-to-r from-brand-teal to-brand-teal-dark shadow-sm"
                 }`}>
                 {loading ? "⏳ 开仓中..." : "🚀 确认开仓"}
@@ -240,13 +240,13 @@ export default function SimPage() {
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl opacity-50 mb-2">📋</div>
                 <p className="text-xs text-text-tertiary">暂无持仓</p>
-                <button onClick={() => setTab("trade")} className="mt-3 rounded-[12px] bg-gradient-to-r from-brand-teal to-brand-teal-dark px-5 py-2 text-xs font-medium text-white shadow-sm active:scale-95 transition-transform">
+                <button onClick={() => setTab("trade")} className="mt-3 rounded-[4px] bg-gradient-to-r from-brand-teal to-brand-teal-dark px-5 py-2 text-xs font-medium text-white shadow-sm active:scale-95 transition-transform">
                   去开仓
                 </button>
               </div>
             ) : (
               positions.map(p => (
-                <div key={p.id} className="bg-surface rounded-[16px] p-3 shadow-sm border border-border-tertiary">
+                <div key={p.id} className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex w-6 h-6 items-center justify-center rounded-full text-xs ${p.direction_label === "多" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>
@@ -263,7 +263,7 @@ export default function SimPage() {
                     <span className="rounded-full bg-bg px-2 py-0.5">{p.points}🎮</span>
                   </div>
                   <button onClick={() => closePosition(p.id)} disabled={loading}
-                    className="mt-2 w-full rounded-[12px] border border-border-tertiary py-1.5 text-[10px] text-text-secondary transition hover:bg-bg active:scale-[0.98]">
+                    className="mt-2 w-full rounded-[4px] border border-border-tertiary py-1.5 text-[10px] text-text-secondary transition hover:bg-bg active:scale-[0.98]">
                     {loading ? "⏳" : "平仓"}
                   </button>
                 </div>
@@ -282,7 +282,7 @@ export default function SimPage() {
               </div>
             ) : (
               trades.map(t => (
-                <div key={t.id} className="bg-surface rounded-[16px] p-3 shadow-sm border border-border-tertiary">
+                <div key={t.id} className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex w-6 h-6 items-center justify-center rounded-full text-xs ${t.direction_label === "多" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>

@@ -310,7 +310,7 @@ export default function AIChatPage() {
       {tab === "zodiac" && (
         <div className="px-4 py-2 bg-white border-b border-border-tertiary">
           <button onClick={() => setShowSubs(!showSubs)}
-            className="w-full flex items-center justify-between bg-brand-teal-light/10 rounded-[12px] px-3 py-2 text-xs border border-brand-teal-light/20">
+            className="w-full flex items-center justify-between bg-brand-teal-light/10 rounded-[4px] px-3 py-2 text-xs border border-brand-teal-light/20">
             <span className="text-text-primary font-medium">
               {subCategory || "选择咨询类型"}
             </span>
@@ -338,7 +338,7 @@ export default function AIChatPage() {
       {/* ── Chat Messages ── */}
       <div className="flex-1 px-4 py-4 space-y-3 overflow-y-auto">
         {messages.length === 1 && (
-          <div className="mb-3 bg-white rounded-[16px] border border-gray-100 shadow-sm p-4">
+          <div className="mb-3 bg-white rounded-[4px] border border-gray-100 shadow-sm p-4">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center shrink-0">
                 <LobsterIcon className="w-4.5 h-4.5" />
@@ -353,7 +353,7 @@ export default function AIChatPage() {
               <div className="flex flex-wrap gap-2">
                 {cfg.questions.map((q, i) => (
                   <button key={i} onClick={() => handleQuickQuestion(q, cfg.cost)}
-                    className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-[14px] px-3 py-1.5 active:scale-95 transition-transform hover:bg-brand-teal/20">
+                    className="text-[10px] bg-brand-teal/10 text-brand-teal-dark rounded-[4px] px-3 py-1.5 active:scale-95 transition-transform hover:bg-brand-teal/20">
                     {q}
                   </button>
                 ))}
@@ -363,7 +363,7 @@ export default function AIChatPage() {
               <div className="flex flex-wrap gap-2">
                 {cfg.cost_map?.slice(0, 4).map((item: {label: string; cost: number}) => (
                   <button key={item.label} onClick={() => { setSubCategory(item.label); setZodiacCost(item.cost); }}
-                    className="text-[10px] bg-brand-gold-light/30 text-brand-gold-dark rounded-[14px] px-3 py-1.5 active:scale-95 transition-transform">
+                    className="text-[10px] bg-brand-gold-light/30 text-brand-gold-dark rounded-[4px] px-3 py-1.5 active:scale-95 transition-transform">
                     {item.label.split("（")[0] || item.label}
                   </button>
                 ))}
@@ -435,7 +435,7 @@ export default function AIChatPage() {
       {/* ── Input ── */}
       <div className="sticky bottom-[64px] bg-white border-t border-border-tertiary px-4 py-3"
         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))' }}>
-        <div className="flex items-center gap-2 bg-bg rounded-[16px] border border-border-tertiary px-3 py-2">
+        <div className="flex items-center gap-2 bg-bg rounded-[4px] border border-border-tertiary px-3 py-2">
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && sendMessage()}
             placeholder="输入你的问题..." className="flex-1 text-sm outline-none bg-transparent py-1" disabled={loading} />
@@ -449,7 +449,7 @@ export default function AIChatPage() {
       {/* ── Disclaimer Modal ── */}
       {showDisclaimer && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-6">
-          <div className="bg-white rounded-[24px] p-5 max-w-sm w-full shadow-xl">
+          <div className="bg-white rounded-[4px] p-5 max-w-sm w-full shadow-xl">
             <div className="text-center mb-4">
               <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-2" />
               <h3 className="text-sm font-bold">风险提示</h3>
@@ -460,7 +460,7 @@ export default function AIChatPage() {
               <span className="text-[10px] text-text-tertiary leading-relaxed">我已阅读并理解以上提示，确认仅用于传统文化娱乐参考</span>
             </label>
             <button onClick={confirmDisclaimer} disabled={!disclaimerAccepted}
-              className={`w-full rounded-[14px] py-2.5 text-sm font-semibold text-white transition ${
+              className={`w-full rounded-[4px] py-2.5 text-sm font-semibold text-white transition ${
                 disclaimerAccepted ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark" : "bg-gray-200 text-gray-400"
               }`}>确认进入</button>
           </div>
@@ -470,7 +470,7 @@ export default function AIChatPage() {
       {/* ── Confirm Deduct Modal (only for >10豆) ── */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-6">
-          <div className="bg-white rounded-[24px] p-5 max-w-sm w-full shadow-xl">
+          <div className="bg-white rounded-[4px] p-5 max-w-sm w-full shadow-xl">
             <div className="text-center mb-4">
               <Shield className="w-10 h-10 text-brand-teal mx-auto mb-2" />
               <h3 className="text-sm font-bold">确认咨询</h3>
@@ -480,9 +480,9 @@ export default function AIChatPage() {
             </p>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)}
-                className="flex-1 rounded-[14px] py-2.5 text-xs font-medium border border-border-tertiary text-text-secondary active:scale-95 transition-transform">取消</button>
+                className="flex-1 rounded-[4px] py-2.5 text-xs font-medium border border-border-tertiary text-text-secondary active:scale-95 transition-transform">取消</button>
               <button onClick={confirmSend} disabled={balance < deductCost}
-                className={`flex-1 rounded-[14px] py-2.5 text-xs font-semibold text-white active:scale-95 transition-transform ${
+                className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold text-white active:scale-95 transition-transform ${
                   balance >= deductCost ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark" : "bg-gray-200 text-gray-400"
                 }`}>
                 {balance >= deductCost ? "确认发起" : "豆子不足"}

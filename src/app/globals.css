@@ -23,11 +23,11 @@
   --color-ball-front: #F27152;
   --color-ball-back: #45CCD5;
 
-  /* Radius */
-  --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
+  /* Radius — 统一4px卡片圆角 */
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
 
   /* Shadows */
   --shadow-soft: 0 8px 32px rgba(69,204,213,0.12), 0 2px 8px rgba(0,0,0,0.04);

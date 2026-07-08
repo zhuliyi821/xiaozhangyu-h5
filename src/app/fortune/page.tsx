@@ -120,7 +120,7 @@ export default function FortunePage() {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-[4px] bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-lg shadow-sm">
                 🔮
               </div>
               <div>
@@ -142,17 +142,17 @@ export default function FortunePage() {
       {step === "form" && (
         <div className="px-4 -mt-4 relative z-20 space-y-3.5">
           {error && (
-            <div className="p-3 rounded-[20px] bg-red-50 border border-red-200 text-xs text-red-600 flex items-start gap-2">
+            <div className="p-3 rounded-[4px] bg-red-50 border border-red-200 text-xs text-red-600 flex items-start gap-2">
               <Info className="w-4 h-4 mt-0.5 shrink-0" />
               {error}
             </div>
           )}
           {!user && (
-            <div className="p-4 rounded-[20px] bg-white shadow-sm border border-brand-teal/10 text-xs text-center text-text-tertiary">
+            <div className="p-4 rounded-[4px] bg-white shadow-sm border border-brand-teal/10 text-xs text-center text-text-tertiary">
               请先 <button onClick={() => setShowLogin(true)} className="text-brand-teal-dark font-medium">登录</button> 后使用运势分析
             </div>
           )}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] space-y-4">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1 h-4 rounded-sm bg-gradient-to-b from-brand-teal to-brand-gold" />
               <span className="text-xs font-semibold text-text">填写出生信息</span>
@@ -165,7 +165,7 @@ export default function FortunePage() {
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary/60" />
                 <input type="number" value={form.birth_year}
                   onChange={e => setForm(p => ({ ...p, birth_year: Number(e.target.value) }))}
-                  className="w-full bg-bg rounded-[14px] pl-9 pr-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all"
+                  className="w-full bg-bg rounded-[4px] pl-9 pr-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all"
                   placeholder="例如: 1990" />
               </div>
             </div>
@@ -176,13 +176,13 @@ export default function FortunePage() {
                 <label className="text-[11px] text-text-secondary mb-1.5 block">出生月份</label>
                 <input type="number" min={1} max={12} value={form.birth_month}
                   onChange={e => setForm(p => ({ ...p, birth_month: Number(e.target.value) }))}
-                  className="w-full bg-bg rounded-[14px] px-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all" />
+                  className="w-full bg-bg rounded-[4px] px-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all" />
               </div>
               <div>
                 <label className="text-[11px] text-text-secondary mb-1.5 block">出生日期</label>
                 <input type="number" min={1} max={31} value={form.birth_day}
                   onChange={e => setForm(p => ({ ...p, birth_day: Number(e.target.value) }))}
-                  className="w-full bg-bg rounded-[14px] px-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all" />
+                  className="w-full bg-bg rounded-[4px] px-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all" />
               </div>
             </div>
 
@@ -193,7 +193,7 @@ export default function FortunePage() {
                 <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary/60" />
                 <select value={form.birth_hour}
                   onChange={e => setForm(p => ({ ...p, birth_hour: Number(e.target.value) }))}
-                  className="w-full bg-bg rounded-[14px] pl-9 pr-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all appearance-none">
+                  className="w-full bg-bg rounded-[4px] pl-9 pr-4 py-3 text-sm text-text outline-none focus:ring-2 focus:ring-brand-teal/30 border border-transparent focus:border-brand-teal/30 transition-all appearance-none">
                   {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23].map(h => (
                     <option key={h} value={h}>{h.toString().padStart(2,"0")}:00 - {["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"][Math.floor(h/2)]}时</option>
                   ))}
@@ -204,7 +204,7 @@ export default function FortunePage() {
           </div>
 
           <button onClick={saveAndPredict} disabled={loading || !user}
-            className="w-full py-3.5 rounded-[20px] font-semibold text-sm transition-all flex items-center justify-center gap-2
+            className="w-full py-3.5 rounded-[4px] font-semibold text-sm transition-all flex items-center justify-center gap-2
                        bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-md active:scale-[0.98] disabled:opacity-50">
             {loading ? (
               <><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> 推演中...</>
@@ -213,7 +213,7 @@ export default function FortunePage() {
             )}
           </button>
 
-          <div className="p-3.5 rounded-[20px] bg-white shadow-sm border border-[rgba(69,204,213,0.06)] text-[10px] text-text-tertiary/70 leading-relaxed flex items-start gap-2">
+          <div className="p-3.5 rounded-[4px] bg-white shadow-sm border border-[rgba(69,204,213,0.06)] text-[10px] text-text-tertiary/70 leading-relaxed flex items-start gap-2">
             <Info className="w-3 h-3 mt-0.5 shrink-0" />
             <span>八字推演基于传统子平术，号码推荐结合五行生克与数据模型，结果仅供参考，不构成投注建议</span>
           </div>
@@ -225,7 +225,7 @@ export default function FortunePage() {
         <div className="px-4 -mt-4 relative z-20 space-y-3.5">
 
           {/* 综合预测卡 */}
-          <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold-dark rounded-[20px] p-5 shadow-lg text-white overflow-hidden relative">
+          <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold-dark rounded-[4px] p-5 shadow-lg text-white overflow-hidden relative">
             <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-2">
@@ -276,14 +276,14 @@ export default function FortunePage() {
           </div>
 
           {/* 八字排盘 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">📅</span>
               <span className="text-xs font-semibold text-text">八字排盘</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {result.bazi.pillars.map((p, i) => (
-                <div key={i} className="text-center bg-bg rounded-[12px] py-3 px-1">
+                <div key={i} className="text-center bg-bg rounded-[4px] py-3 px-1">
                   <div className="text-[9px] text-text-tertiary mb-1">{["年柱","月柱","日柱","时柱"][i]}</div>
                   <div className="text-base font-bold text-text">{p}</div>
                   <div className="text-[9px] text-text-tertiary/50 mt-0.5">
@@ -300,7 +300,7 @@ export default function FortunePage() {
           </div>
 
           {/* 五行分析 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">🌿</span>
               <span className="text-xs font-semibold text-text">五行分析</span>
@@ -309,14 +309,14 @@ export default function FortunePage() {
               {Object.entries(result.wuxing.counts).map(([wx, count]) => {
                 const colors = WX_COLORS[wx] || { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-200" };
                 return (
-                  <div key={wx} className={`flex-1 text-center py-2.5 rounded-[12px] border ${colors.bg} ${colors.border}`}>
+                  <div key={wx} className={`flex-1 text-center py-2.5 rounded-[4px] border ${colors.bg} ${colors.border}`}>
                     <div className={`text-[11px] font-bold ${colors.text}`}>{wx}</div>
                     <div className="text-lg font-bold text-text mt-0.5">{count}</div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex items-center justify-between text-[11px] bg-brand-teal/5 rounded-[12px] px-3.5 py-2">
+            <div className="flex items-center justify-between text-[11px] bg-brand-teal/5 rounded-[4px] px-3.5 py-2">
               <span className="text-text-secondary">用神: <strong className="text-brand-teal-dark">{result.wuxing.weakest}</strong></span>
               <span className="text-text-tertiary">|</span>
               <span className="text-text-secondary">忌神: <strong className="text-brand-coral">{result.wuxing.strongest}</strong></span>
@@ -324,7 +324,7 @@ export default function FortunePage() {
           </div>
 
           {/* 号码详情 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">🏆</span>
               <span className="text-xs font-semibold text-text">号码评分排行</span>
@@ -355,7 +355,7 @@ export default function FortunePage() {
           </div>
 
           {/* 报告 */}
-          <div className="bg-surface rounded-[20px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">📄</span>
               <span className="text-xs font-semibold text-text">综合报告</span>
@@ -367,13 +367,13 @@ export default function FortunePage() {
 
           {/* 分享 */}
           <button
-            className="w-full py-3 rounded-[20px] text-xs font-medium border border-brand-teal/30 text-brand-teal-dark flex items-center justify-center gap-1.5 bg-white active:scale-[0.98] transition-transform shadow-sm">
+            className="w-full py-3 rounded-[4px] text-xs font-medium border border-brand-teal/30 text-brand-teal-dark flex items-center justify-center gap-1.5 bg-white active:scale-[0.98] transition-transform shadow-sm">
             <Share2 className="w-3.5 h-3.5" />
             分享推演结果
           </button>
 
           {/* 免责 */}
-          <div className="p-3.5 rounded-[20px] bg-red-50/50 border border-red-200/50 text-[9px] text-red-400/70 leading-relaxed">
+          <div className="p-3.5 rounded-[4px] bg-red-50/50 border border-red-200/50 text-[9px] text-red-400/70 leading-relaxed">
             ⚠️ 本推演由 AI 基于传统命理体系生成，仅供娱乐参考。彩票开奖为随机事件，请理性投注，切勿沉迷。
           </div>
         </div>

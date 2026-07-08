@@ -10,7 +10,7 @@ export function HeroSection() {
   const formatAsset = (n: number) => n >= 10000 ? (n/10000).toFixed(1)+"w" : n >= 1000 ? (n/1000).toFixed(1)+"k" : String(Math.floor(n));
 
   return (
-    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-[28px] p-6 shadow-lg shadow-brand-teal/20 overflow-hidden">
+    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-[4px] p-6 shadow-lg shadow-brand-teal/20 overflow-hidden">
       <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[radial-gradient(circle,rgba(242,182,49,0.25)_0%,transparent_70%)]" />
       <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
       <div className="relative z-10">

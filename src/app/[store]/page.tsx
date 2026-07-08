@@ -28,7 +28,7 @@ export default async function StoreHomepage({
       {/* Module area will be rendered client-side */}
       <div id="module-area">
         <div className="px-3 mt-3">
-          <div className="rounded-[12px] border border-dashed border-gray-200 p-6 text-center text-gray-400 text-[12px]">
+          <div className="rounded-[4px] border border-dashed border-gray-200 p-6 text-center text-gray-400 text-[12px]">
             加载模块中...
           </div>
         </div>

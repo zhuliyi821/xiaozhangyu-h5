@@ -25,7 +25,7 @@ export function LotteryScroll() {
           <Link
             key={chip.key}
             href={`/lottery/${chip.key}/chart`}
-            className="flex-shrink-0 px-4 py-2 rounded-[20px] text-xs font-medium transition-all duration-250 whitespace-nowrap bg-white shadow-sm border border-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-gold hover:text-white"
+            className="flex-shrink-0 px-4 py-2 rounded-[4px] text-xs font-medium transition-all duration-250 whitespace-nowrap bg-white shadow-sm border border-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-gold hover:text-white"
           >
             {chip.name}
           </Link>
