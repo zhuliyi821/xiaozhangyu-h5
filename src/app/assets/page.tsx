@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE, apiFetch, ApiError } from "@/config/api";
+import { useAuth } from "@/lib/auth-context";
 
 interface WalletData {
   uid: number; nickname: string;
@@ -21,15 +22,18 @@ const assetList = [
 ];
 
 export default function AssetsPage() {
+  const { user } = useAuth();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const uid = user?.uid || 0;
+    if (!uid) { setLoading(false); return; }
     
     apiFetch<any>("/wallet_api.php", {
-      params: { uid: "1", action: "balance" },
+      params: { uid: String(uid), action: "balance" },
     })
       .then((data) => {
         if (!cancelled) {

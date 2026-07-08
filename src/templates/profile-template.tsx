@@ -21,7 +21,6 @@ const menuItems: ProfileMenuItem[] = [
   { icon: "📋", label: "我的订单" },
   { icon: "🎟️", label: "卡券包" },
   { icon: "❤️", label: "我的收藏" },
-  { icon: "📊", label: "购彩记录" },
   { icon: "⚙️", label: "设置" },
 ];
 
@@ -105,13 +104,13 @@ export default function ProfileTemplate() {
           )}
         </div>
 
-        {/* Assets - click to view all */}
-        <div className="grid grid-cols-5 gap-1.5 cursor-pointer" onClick={() => window.location.href = "/assets"}>
-          <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="游戏豆" />
-          <AssetTile icon="⛏️" value={String(Math.floor(credits.credit5))} label="水晶石" />
-          <AssetTile icon="🔮" value={String(Math.floor(credits.credit3))} label="水晶球" />
-          <AssetTile icon="¥" value={credits.credit4.toFixed(2)} label="余额" />
-          <AssetTile icon="🏪" value={String(Math.floor(credits.credit2))} label="闲豆" />
+        {/* Assets - each clickable */}
+        <div className="grid grid-cols-5 gap-1.5">
+          <AssetTile icon="🎮" value={String(Math.floor(credits.credit1))} label="游戏豆" href="/assets?tab=credit1" />
+          <AssetTile icon="⛏️" value={String(Math.floor(credits.credit5))} label="水晶石" href="/assets?tab=credit5" />
+          <AssetTile icon="🔮" value={String(Math.floor(credits.credit3))} label="水晶球" href="/assets?tab=credit3" />
+          <AssetTile icon="¥" value={credits.credit4.toFixed(2)} label="余额" href="/assets?tab=credit4" />
+          <AssetTile icon="🏪" value={String(Math.floor(credits.credit2))} label="闲豆" href="/assets?tab=credit2" />
         </div>
         {user && (
           <div className="mt-2 flex justify-end">
@@ -145,13 +144,13 @@ export default function ProfileTemplate() {
           <div key={i} onClick={() => {
             const routes: Record<string, string> = {
               "我的资产": "/assets", "社区动态": "/feed", "我的订单": "/orders",
-              "卡券包": "/coupons", "我的收藏": "/favorites", "购彩记录": "/orders",
+              "卡券包": "/coupons", "我的收藏": "/favorites",
               "设置": "/settings",
             };
             window.location.href = routes[m.label] || "/";
           }}
             className="flex items-center gap-3 bg-surface rounded-[20px] py-3.5 px-4 shadow-sm border border-[rgba(69,204,213,0.06)] active:scale-[0.98] transition-transform cursor-pointer">
-            <div className="w-9 h-9 rounded-[10px] bg-bg flex items-center justify-center text-lg">{m.icon}</div>
+            <div className="w-9 h-9 rounded-[10px] bg-brand-teal/10 flex items-center justify-center text-lg">{m.icon}</div>
             <div className="flex-1 text-[13px] font-medium">
               {m.label}
               {m.label === "卡券包" && couponCount > 0 && (
@@ -182,9 +181,10 @@ export default function ProfileTemplate() {
   );
 }
 
-function AssetTile({ icon, value, label }: { icon: string; value: string; label: string }) {
+function AssetTile({ icon, value, label, href }: { icon: string; value: string; label: string; href?: string }) {
   return (
-    <div className="bg-white/15 rounded-[12px] py-2 px-1 text-center backdrop-blur-sm">
+    <div className="bg-white/15 rounded-[12px] py-2 px-1 text-center backdrop-blur-sm active:scale-95 transition-transform cursor-pointer"
+      onClick={() => { if (href) window.location.href = href; }}>
       <div className="text-xs mb-0.5">{icon}</div>
       <div className="text-[13px] font-bold leading-tight">{value}</div>
       <div className="text-[9px] opacity-80 mt-0.5 leading-tight">{label}</div>
