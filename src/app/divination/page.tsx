@@ -163,33 +163,33 @@ export default function DivinationPage() {
                 <button onClick={() => doDivination("shake")} disabled={loading}
                   className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl">📳</div>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center text-2xl">📳</div>
                     <div className="flex-1">
                       <div className="text-sm font-bold">摇一摇起卦</div>
                       <div className="text-[10px] text-text-tertiary mt-0.5">手持手机，心中默念问题，点击摇动起卦</div>
                     </div>
-                <RefreshCw className={`w-5 h-5 text-purple-400 ${loading && method === "shake" ? "animate-spin" : ""}`} />
-              </div>
-            </button>
+                    <RefreshCw className={`w-5 h-5 text-brand-coral ${loading && method === "shake" ? "animate-spin" : ""}`} />
+                  </div>
+                </button>
 
             {loading && <TentacleLoader text="章鱼正在为你起卦…" />}
 
                 <button onClick={() => doDivination("manual")} disabled={loading}
                   className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-2xl">🪙</div>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-gold to-brand-gold-dark flex items-center justify-center text-2xl">🪙</div>
                     <div className="flex-1">
                       <div className="text-sm font-bold">手动摇卦</div>
                       <div className="text-[10px] text-text-tertiary mt-0.5">模拟三枚铜钱，逐爻摇动六次成卦</div>
                     </div>
-                    <span className="text-amber-500 text-sm">→</span>
+                    <span className="text-brand-gold text-sm">→</span>
                   </div>
                 </button>
 
                 <button onClick={() => doDivination("time")} disabled={loading}
                   className="w-full bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform disabled:opacity-50">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-2xl">⚡</div>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-2xl">⚡</div>
                     <div className="flex-1">
                       <div className="text-sm font-bold">时间起卦</div>
                       <div className="text-[10px] text-text-tertiary mt-0.5">以当前时间自动起卦</div>
@@ -221,7 +221,7 @@ export default function DivinationPage() {
                         <div className="text-xs font-medium">{entry.gua}</div>
                         <div className="text-[9px] text-text-tertiary">{entry.time} · {entry.question}</div>
                       </div>
-                      <span className={`text-[10px] font-bold ${entry.score >= 60 ? "text-green-600" : entry.score >= 40 ? "text-amber-600" : "text-red-500"}`}>
+                      <span className={`text-[10px] font-bold ${entry.score >= 60 ? "text-brand-teal-dark" : entry.score >= 40 ? "text-brand-gold-dark" : "text-brand-coral"}`}>
                         {entry.score}分
                       </span>
                     </button>
