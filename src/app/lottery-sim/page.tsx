@@ -435,28 +435,30 @@ function LotterySimContent() {
 
   return (
     <main className="pb-20 min-h-screen bg-bg">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 pt-6 pb-5 relative overflow-hidden">
-        <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.2),transparent_70%)] blur-[16px]" />
+      {/* Header — 金青珊瑚品牌色 */}
+      <div className="bg-gradient-to-r from-[#0F6E56] to-[#04342C] px-5 pt-6 pb-5 relative overflow-hidden">
+        <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(69,204,213,0.15),transparent_70%)] blur-[16px]" />
+        {/* 顶部导航行 */}
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
-            <button onClick={() => window.history.back()} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
+            <button onClick={() => window.history.back()} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition-transform">
               <ArrowLeft className="w-4 h-4 text-white" />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-white">数字碰</h1>
-              <p className="text-[11px] text-white/80">选号碰撞 · 一秒开奖</p>
+              <h1 className="text-base font-bold text-white">数字碰</h1>
+              <p className="text-[10px] text-white/60">选号碰 · 一秒开奖</p>
             </div>
           </div>
           <div className="text-right text-white">
-                    <div className="text-[10px] opacity-75">{user ? "🎮游戏豆" : "未登录"}</div>
-            <div className="text-base font-bold">{user ? balance.toLocaleString() : "—"} 🎮</div>
+            <div className="text-[9px] opacity-50">{user ? "游戏豆" : "未登录"}</div>
+            <div className="text-sm font-bold">{user ? balance.toLocaleString() : "—"} 🎮</div>
           </div>
         </div>
-        {/* 奖池条 */}
-        <div className="mt-3 pt-2 border-t border-white/15 flex items-center justify-between text-[10px]">
-          <span className="text-white/60">当前奖池</span>
-          <span className="text-[#F2B631] font-bold">{Math.floor(jackpot).toLocaleString()} 🎮</span>
+        {/* 奖金池 — 视觉重心 */}
+        <div className="text-center mt-3 pt-2 border-t border-white/10 relative z-10">
+          <div className="text-[9px] text-white/40 tracking-[1px]">当前奖金池</div>
+          <div className="text-[22px] font-bold text-[#F2B631] tracking-[1px] mt-0.5">{Math.floor(jackpot).toLocaleString()} 🎮</div>
+          <div className="text-[9px] text-white/30 mt-0.5">人人可中 · 上不封顶</div>
         </div>
       </div>
 
@@ -606,12 +608,12 @@ function LotterySimContent() {
               </div>
             )}
 
-            {/* Place Bet */}
+            {/* Place Bet — 品牌茶青渐变 */}
             <button onClick={placeBet} disabled={betting || !canBet}
               className={`w-full py-3 mb-3 rounded-[8px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
-                canBet ? "bg-gradient-to-r from-orange-500 to-red-500 shadow-sm" : "bg-gray-200 text-gray-400"
+                canBet ? "bg-gradient-to-r from-[#1D9E75] to-[#0F6E56] shadow-sm" : "bg-gray-200 text-gray-400"
               }`}>
-              {betting ? "开奖中..." : !user ? "请先登录" : `投注 ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
+              {betting ? "开奖中..." : !user ? "请先登录" : `bet ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
             </button>
 
             {!user && (
@@ -689,7 +691,7 @@ function LotterySimContent() {
                 {/* 收银机效果 */}
                 <div className="mt-3 text-sm">
                   {result.net_result > 0 ? (
-                    <span className="text-red-500 font-bold text-lg">+{Number(rollDisplay || result.net_result).toLocaleString()}✨ 🎉</span>
+                    <span className="text-brand-coral font-bold text-lg">+{Number(rollDisplay || result.net_result).toLocaleString()}✨ 🎉</span>
                   ) : result.net_result === 0 ? (
                     <span className="text-text-tertiary">收支平衡</span>
                   ) : (
@@ -726,7 +728,7 @@ function LotterySimContent() {
                     </div>
                     <div className="text-right">
                       <div className="text-[11px] text-text-tertiary">{h.total_bet}🪙</div>
-                      <div className={`text-[11px] font-bold ${h.net_result > 0 ? "text-red-500" : "text-text-tertiary"}`}>
+                      <div className={`text-[11px] font-bold ${h.net_result > 0 ? "text-brand-coral" : "text-text-tertiary"}`}>
                         {h.net_result > 0 ? `+${h.net_result}` : h.net_result === 0 ? "0" : `${h.net_result}`}🪙
                       </div>
                     </div>
