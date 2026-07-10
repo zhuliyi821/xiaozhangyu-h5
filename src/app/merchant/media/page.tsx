@@ -35,6 +35,8 @@ export default function MediaPage() {
   const [editContent, setEditContent] = useState("");
   const [batchMode, setBatchMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [filterPlatform, setFilterPlatform] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -53,7 +55,9 @@ export default function MediaPage() {
   const loadData = (sid: number) => {
     fetch(`${API_BASE}/api/store-media?action=overview&store_id=${sid}`)
       .then(r => r.json()).then(d => { if (d.code === 0) setOverview(d.data); }).catch(() => {});
-    fetch(`${API_BASE}/api/store-media?action=contents&store_id=${sid}&status=${tab}`)
+    const kw = searchKeyword ? `&keyword=${encodeURIComponent(searchKeyword)}` : "";
+    const pf = filterPlatform ? `&platform=${filterPlatform}` : "";
+    fetch(`${API_BASE}/api/store-media?action=contents&store_id=${sid}&status=${tab}${kw}${pf}`)
       .then(r => r.json()).then(d => { if (d.code === 0) setContents(d.data.list || []); }).catch(() => {});
   };
 
@@ -219,6 +223,23 @@ export default function MediaPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* 搜索+平台筛选 */}
+      <div className="mx-4 mt-3 flex items-center gap-2">
+        <div className="flex-1 relative">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-300">🔍</span>
+          <input value={searchKeyword} onChange={e => { setSearchKeyword(e.target.value); }} onKeyDown={e => { if (e.key === "Enter") loadData(storeId); }}
+            placeholder="搜索标题..." className="w-full pl-7 pr-2 py-2 rounded-[8px] border border-gray-200 text-[11px] bg-white outline-none focus:border-brand-teal" />
+        </div>
+        <button onClick={() => { setFilterPlatform(""); loadData(storeId); }}
+          className="text-[9px] px-2 py-1.5 rounded-full whitespace-nowrap active:scale-90 shrink-0"
+          style={{backgroundColor: filterPlatform === "" ? C.teal : "#eee", color: filterPlatform === "" ? "#fff" : "#888"}}>全部</button>
+        {Object.entries(PLATFORMS).map(([k, v]) => (
+          <button key={k} onClick={() => { setFilterPlatform(k); loadData(storeId); }}
+            className="text-[9px] px-2 py-1.5 rounded-full whitespace-nowrap active:scale-90 shrink-0"
+            style={{backgroundColor: filterPlatform === k ? v.color : "#eee", color: filterPlatform === k ? "#fff" : "#888"}}>{v.label}</button>
+        ))}
       </div>
 
       {/* 内容列表 + 批量操作栏 */}
