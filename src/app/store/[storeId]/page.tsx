@@ -43,6 +43,7 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [mediaPosts, setMediaPosts] = useState<any[]>([]);
+  const [detailPost, setDetailPost] = useState<any>(null);
   const [decoration, setDecoration] = useState<{ theme_color: string; modules: any[]; logo: string } | null>(null);
   const [buyProduct, setBuyProduct] = useState<any>(null);
   const [buySuccess, setBuySuccess] = useState<{ product: any; earned: number } | null>(null);
@@ -264,7 +265,8 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
           </div>
           <div className="space-y-2">
             {mediaPosts.map((post: any) => (
-              <div key={post.id} className="bg-white rounded-[10px] p-3 shadow-sm border border-gray-50 flex items-start gap-3">
+              <div key={post.id} onClick={() => setDetailPost(post)}
+                className="bg-white rounded-[10px] p-3 shadow-sm border border-gray-50 flex items-start gap-3 active:scale-[0.98] transition-transform cursor-pointer">
                 <span className="text-lg shrink-0 mt-0.5">
                   {post.platform === "wechat" ? "📰" : post.platform === "xiaohongshu" ? "📕" : post.platform === "douyin" ? "🎬" : "🎙️"}
                 </span>
@@ -282,13 +284,56 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400">
                       {post.platform === "wechat" ? "公众号" : post.platform === "xiaohongshu" ? "小红书" : post.platform === "douyin" ? "抖音" : "数字人"}
                     </span>
-                    <span className="text-[9px] text-gray-300">
+                    <span className="text-[9px] text-gray-300 ml-auto flex items-center gap-0.5">
                       {post.published_at ? new Date(post.published_at).toLocaleDateString("zh-CN") : ""}
+                      <ChevronRight className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 内容详情弹窗 */}
+      {detailPost && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDetailPost(null)}>
+          <div className="bg-white rounded-[16px] w-full max-w-sm max-h-[80vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">
+                  {detailPost.platform === "wechat" ? "📰" : detailPost.platform === "xiaohongshu" ? "📕" : detailPost.platform === "douyin" ? "🎬" : "🎙️"}
+                </span>
+                <div>
+                  <div className="text-[13px] font-bold">{detailPost.title}</div>
+                  <div className="text-[9px] text-gray-400 mt-0.5">
+                    {detailPost.platform === "wechat" ? "公众号" : detailPost.platform === "xiaohongshu" ? "小红书" : detailPost.platform === "douyin" ? "抖音" : "数字人"}
+                    {detailPost.published_at && ` · ${new Date(detailPost.published_at).toLocaleDateString("zh-CN")}`}
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-gray-100 pt-3">
+                {(() => {
+                  try {
+                    const parsed = JSON.parse(detailPost.content);
+                    if (parsed.topics) return <div className="flex flex-wrap gap-1.5 mb-3">{parsed.topics.map((t: string, i: number) => <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-500">{t}</span>)}</div>;
+                    if (parsed.text) return <p className="text-[11px] text-gray-600 leading-relaxed whitespace-pre-line">{parsed.text}</p>;
+                    if (parsed.content) return <p className="text-[11px] text-gray-600 leading-relaxed">{parsed.content}</p>;
+                    return <p className="text-[11px] text-gray-600 leading-relaxed whitespace-pre-line">{detailPost.content.replace(/\\n/g, "\n")}</p>;
+                  } catch {
+                    return <p className="text-[11px] text-gray-600 leading-relaxed whitespace-pre-line">{detailPost.content}</p>;
+                  }
+                })()}
+              </div>
+            </div>
+            <div className="border-t border-gray-100 p-4">
+              <button onClick={() => setDetailPost(null)}
+                className="w-full py-2.5 rounded-[10px] text-xs font-medium text-white active:scale-[0.97] transition-transform"
+                style={{background: primary}}>
+                关闭
+              </button>
+            </div>
           </div>
         </div>
       )}
