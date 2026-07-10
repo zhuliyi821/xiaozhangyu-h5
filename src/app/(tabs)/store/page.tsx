@@ -33,12 +33,12 @@ function StoreCard({ store }: { store: StoreItem }) {
   return (
     <div className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)]">
       <a href={`/store/${store.id}`} className="flex active:scale-[0.98] transition-transform">
-        {/* 左侧缩略图 */}
-        <div className="w-[100px] shrink-0 bg-gradient-to-br from-brand-teal-light/30 to-brand-gold-light/30 flex items-center justify-center overflow-hidden">
+        {/* 左侧缩略图 - 品牌色渐变背景 */}
+        <div className="w-[100px] shrink-0 flex items-center justify-center overflow-hidden" style={{background:`linear-gradient(135deg,${color}22,${color}44)`}}>
           {store.thumb ? (
             <img src={store.thumb} alt={store.store_name} className="w-full h-full object-cover" />
           ) : (
-            <div className="flex flex-col items-center gap-1 text-brand-teal-dark/50">
+            <div className="flex flex-col items-center gap-1" style={{color:`${color}88`}}>
               <Store className="w-8 h-8" />
               <span className="text-[8px] font-medium px-1 text-center leading-tight">{store.store_name}</span>
             </div>
@@ -47,7 +47,10 @@ function StoreCard({ store }: { store: StoreItem }) {
         {/* 右侧信息 */}
         <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
           <div>
-            <h3 className="text-sm font-bold text-text truncate">{store.store_name}</h3>
+            <h3 className="text-sm font-bold text-text truncate flex items-center gap-1.5">
+              {store.store_name}
+              <span className="w-2 h-2 rounded-full shrink-0" style={{backgroundColor: color}} />
+            </h3>
             {store.address && (
               <div className="flex items-start gap-1 mt-1">
                 <MapPin className="w-3 h-3 text-text-tertiary shrink-0 mt-[2px]" />
