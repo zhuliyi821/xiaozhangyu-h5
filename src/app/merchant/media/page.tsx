@@ -53,6 +53,13 @@ export default function MediaPage() {
       .catch(() => {});
   }, [user]);
 
+  // 自动轮询（待审核tab时每15秒刷新）
+  useEffect(() => {
+    if (!storeId || tab !== "pending") return;
+    const timer = setInterval(() => loadData(storeId), 15000);
+    return () => clearInterval(timer);
+  }, [storeId, tab]);
+
   const loadData = (sid: number) => {
     fetch(`${API_BASE}/api/store-media?action=overview&store_id=${sid}`)
       .then(r => r.json()).then(d => { if (d.code === 0) setOverview(d.data); }).catch(() => {});
@@ -238,7 +245,13 @@ export default function MediaPage() {
       </div>
 
       {/* 搜索+平台筛选 */}
-      <div className="mx-4 mt-3 flex items-center gap-2">
+      {tab === "pending" && (
+        <div className="mx-4 mt-1 flex items-center gap-1.5 justify-end">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+          <span className="text-[8px] text-gray-300">自动刷新中</span>
+        </div>
+      )}
+      <div className="mx-4 mt-1 flex items-center gap-2">
         <div className="flex-1 relative">
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-300">🔍</span>
           <input value={searchKeyword} onChange={e => { setSearchKeyword(e.target.value); }} onKeyDown={e => { if (e.key === "Enter") loadData(storeId); }}
