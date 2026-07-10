@@ -42,6 +42,7 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   const [store, setStore] = useState<StoreConfig>(defaultStore(storeId));
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
+  const [mediaPosts, setMediaPosts] = useState<any[]>([]);
   const [decoration, setDecoration] = useState<{ theme_color: string; modules: any[]; logo: string } | null>(null);
   const [buyProduct, setBuyProduct] = useState<any>(null);
   const [buySuccess, setBuySuccess] = useState<{ product: any; earned: number } | null>(null);
@@ -74,6 +75,15 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
         const prodJson = await prodRes.json();
         if (prodJson.code === 0) {
           setProducts(prodJson.data || []);
+        }
+
+        // 3. 获取门店动态（已发布的媒体内容）
+        const mediaRes = await fetch(
+          `${API_BASE}/api/store-media?action=contents&store_id=${storeId}&status=published&limit=10`
+        );
+        const mediaJson = await mediaRes.json();
+        if (mediaJson.code === 0) {
+          setMediaPosts(mediaJson.data.list || []);
         }
 
         // 3. 获取装修配置（覆盖品牌色）
@@ -241,6 +251,47 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
           </div>
         )}
       </div>
+
+      {/* 门店动态 — 已发布的自媒体内容 */}
+      {mediaPosts.length > 0 && (
+        <div className="px-4 mt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold flex items-center gap-1.5">
+              <span className="w-1 h-4 rounded-sm" style={{background:`linear-gradient(to bottom, ${primary}, ${primary}88)`}} />
+              门店动态
+            </h2>
+            <span className="text-[10px] text-text-tertiary">近期 {mediaPosts.length} 条</span>
+          </div>
+          <div className="space-y-2">
+            {mediaPosts.map((post: any) => (
+              <div key={post.id} className="bg-white rounded-[10px] p-3 shadow-sm border border-gray-50 flex items-start gap-3">
+                <span className="text-lg shrink-0 mt-0.5">
+                  {post.platform === "wechat" ? "📰" : post.platform === "xiaohongshu" ? "📕" : post.platform === "douyin" ? "🎬" : "🎙️"}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] font-semibold truncate">{post.title}</div>
+                  {post.content && (
+                    <div className="text-[10px] text-gray-400 mt-1 line-clamp-2">
+                      {(() => {
+                        try { const p = JSON.parse(post.content); return p.topics?.join(", ") || p.text || ""; }
+                        catch { return post.content.slice(0, 100); }
+                      })()}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400">
+                      {post.platform === "wechat" ? "公众号" : post.platform === "xiaohongshu" ? "小红书" : post.platform === "douyin" ? "抖音" : "数字人"}
+                    </span>
+                    <span className="text-[9px] text-gray-300">
+                      {post.published_at ? new Date(post.published_at).toLocaleDateString("zh-CN") : ""}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 底部导航 */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-[12px] border-t border-gray-100 h-14 flex items-center justify-around z-50">
