@@ -445,7 +445,7 @@ function LotterySimContent() {
               <ArrowLeft className="w-4 h-4 text-white" />
             </button>
             <div>
-              <h1 className="text-base font-bold text-white">数字碰</h1>
+              <h1 className="text-[15px] font-medium text-white">数字碰</h1>
               <p className="text-[10px] text-white/60">选号碰 · 一秒开奖</p>
             </div>
           </div>
@@ -508,7 +508,7 @@ function LotterySimContent() {
             <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">{config.front_name}</span>
+                  <span className="text-sm font-medium">{config.front_name}</span>
                   <span className="text-[10px] text-text-tertiary">选 {config.front_pick} 个 (1-{config.front_range})</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -523,12 +523,12 @@ function LotterySimContent() {
                   const trend = trendData[n];
                   return (
                     <button key={n} onClick={() => toggleNumber(n, true)}
-                      className={`relative w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center active:scale-90 transition-all overflow-visible ${
-                        isSelected ? "bg-gradient-to-br from-red-400 to-red-600 text-white shadow-sm scale-110" : "bg-bg text-text-secondary border border-border-tertiary"
+                      className={`relative w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center active:scale-90 transition-all overflow-visible ${
+                        isSelected ? "bg-[#F27152] text-white shadow-sm scale-110" : "bg-bg text-text-secondary border border-border-tertiary"
                       }`}>
                       {String(n).padStart(2, "0")}
-                      {!isSelected && trend === 'hot' && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.6)]" />}
-                      {!isSelected && trend === 'cold' && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_4px_rgba(96,165,250,0.6)]" />}
+                      {!isSelected && trend === 'hot' && <span className="absolute -top-0.5 -right-0.5 w-[5px] h-[5px] rounded-full bg-[#E24B4A]" />}
+                      {!isSelected && trend === 'cold' && <span className="absolute -top-0.5 -right-0.5 w-[5px] h-[5px] rounded-full bg-[#378ADD]" />}
                     </button>
                   );
                 })}
@@ -537,7 +537,7 @@ function LotterySimContent() {
               {config.back_pick > 0 && (
                 <>
                   <div className="flex items-center gap-2 mt-4 mb-3">
-                    <span className="text-sm font-semibold">{config.back_name}</span>
+                    <span className="text-sm font-medium">{config.back_name}</span>
                     <span className="text-[10px] text-text-tertiary">选 {config.back_pick} 个 (1-{config.back_range})</span>
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -545,8 +545,8 @@ function LotterySimContent() {
                       const isSelected = selectedBack.includes(n);
                       return (
                         <button key={n} onClick={() => toggleNumber(n, false)}
-                          className={`w-9 h-9 rounded-full text-sm font-bold flex items-center justify-center active:scale-90 transition-all ${
-                            isSelected ? "bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-sm scale-110" : "bg-bg text-text-secondary border border-border-tertiary"
+                          className={`w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center active:scale-90 transition-all ${
+                            isSelected ? "bg-[#45CCD5] text-white shadow-sm scale-110" : "bg-bg text-text-secondary border border-border-tertiary"
                           }`}>
                           {String(n).padStart(2, "0")}
                         </button>
@@ -561,8 +561,8 @@ function LotterySimContent() {
                 <button onClick={quickPick} className="flex-1 py-2 rounded-[8px] bg-bg text-text-secondary text-xs font-medium border border-border-tertiary flex items-center justify-center gap-1 active:scale-95 transition-transform">
                   <Dices className="w-3.5 h-3.5" /> 机选
                 </button>
-                <button onClick={addTicket} className="flex-1 py-2 rounded-[8px] bg-brand-teal/10 text-brand-teal-dark text-xs font-medium border border-brand-teal/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
-                  + 添加选号 ({(config?.price || 2) * betMultiple}🎮)
+                <button onClick={addTicket} className="flex-1 py-2 rounded-[8px] bg-[#E1F5EE] text-[#0F6E56] text-xs font-medium border border-[#1D9E75]/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+                  + add {(config?.price || 2) * betMultiple}🎮
                 </button>
               </div>
             </div>
@@ -570,7 +570,7 @@ function LotterySimContent() {
             {/* Bet Slip */}
             {tickets.length > 0 && (
               <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
-                <div className="text-sm font-semibold mb-2">投注清单 ({tickets.length}注)</div>
+                <div className="text-sm font-medium mb-2">投注清单 ({tickets.length}注)</div>
                 {tickets.map((t, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border-tertiary/40 last:border-0">
                     <div className="text-xs">
@@ -611,7 +611,7 @@ function LotterySimContent() {
             {/* Place Bet — 品牌茶青渐变 */}
             <button onClick={placeBet} disabled={betting || !canBet}
               className={`w-full py-3 mb-3 rounded-[8px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
-                canBet ? "bg-gradient-to-r from-[#1D9E75] to-[#0F6E56] shadow-sm" : "bg-gray-200 text-gray-400"
+                canBet ? "bg-gradient-to-r from-[#1D9E75] to-[#0F6E56] shadow-sm" : "bg-[#E5E5EA] text-gray-400"
               }`}>
               {betting ? "开奖中..." : !user ? "请先登录" : `bet ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
             </button>
@@ -627,7 +627,7 @@ function LotterySimContent() {
               <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
                 <div className="flex items-center justify-center gap-1 mb-3">
                   <Trophy className="w-5 h-5 text-brand-gold" />
-                  <span className="text-sm font-bold">开奖结果</span>
+                  <span className="text-[14px] font-medium">开奖结果</span>
                   <span className="text-[9px] text-text-tertiary ml-1">{result.bet_id}</span>
                 </div>
                 
