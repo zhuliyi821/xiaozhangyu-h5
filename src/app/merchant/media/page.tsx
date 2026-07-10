@@ -33,6 +33,8 @@ export default function MediaPage() {
   const [preview, setPreview] = useState<any>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [batchMode, setBatchMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -97,6 +99,41 @@ export default function MediaPage() {
     setTimeout(() => setMsg(""), 2000);
   };
 
+  // ─── 批量操作 ───
+  const batchReview = async (status: string) => {
+    if (selectedIds.length === 0) return;
+    try {
+      const r = await fetch(`${API_BASE}/api/store-media?action=batch_review`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds, status }),
+      });
+      const d = await r.json();
+      if (d.code === 0) setMsg(`✅ ${d.msg}`);
+      setSelectedIds([]); setBatchMode(false);
+      loadData(storeId);
+    } catch { setMsg("❌ 操作失败"); }
+    setTimeout(() => setMsg(""), 2000);
+  };
+
+  const batchPublish = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      const r = await fetch(`${API_BASE}/api/store-media?action=batch_publish`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      const d = await r.json();
+      if (d.code === 0) setMsg(`✅ ${d.msg}`);
+      setSelectedIds([]); setBatchMode(false);
+      loadData(storeId);
+    } catch { setMsg("❌ 发布失败"); }
+    setTimeout(() => setMsg(""), 2000);
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><div className="animate-spin w-6 h-6 border-2 border-[#F27152] border-t-transparent rounded-full" /></div>;
   if (!user) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><button onClick={() => setShowLogin(true)} className="px-6 py-2.5 rounded-[10px] text-white text-sm font-medium" style={{background:C.coral}}>登录后查看</button>{showLogin && <LoginModal onClose={() => setShowLogin(false)} />}</div>;
 
@@ -156,6 +193,11 @@ export default function MediaPage() {
           style={{backgroundColor: `${C.gold}12`, color: C.gold}}>
           ⏰ 定时
         </a>
+        <button onClick={() => { setBatchMode(!batchMode); setSelectedIds([]); }}
+          className="py-2.5 px-3 rounded-[10px] text-[11px] font-medium active:scale-[0.97] transition-transform"
+          style={{backgroundColor: batchMode ? `${C.coral}15` : `${C.purple}10`, color: batchMode ? C.coral : C.purple}}>
+          {batchMode ? "取消批量" : "☑️ 批量"}
+        </button>
       </div>
 
       {/* Tab切换 */}
@@ -179,7 +221,16 @@ export default function MediaPage() {
         </div>
       </div>
 
-      {/* 内容列表 */}
+      {/* 内容列表 + 批量操作栏 */}
+      {batchMode && selectedIds.length > 0 && (
+        <div className="fixed bottom-20 left-4 right-4 z-40 bg-white rounded-[12px] shadow-lg border border-gray-100 p-3 flex items-center gap-2 animate-slide-up">
+          <span className="text-[10px] text-gray-500 shrink-0">已选 {selectedIds.length} 条</span>
+          <button onClick={() => batchReview("approved")} className="flex-1 py-2 rounded-[8px] text-[10px] text-white font-medium active:scale-90" style={{background: C.green}}>✅ 通过</button>
+          <button onClick={() => batchReview("rejected")} className="flex-1 py-2 rounded-[8px] text-[10px] text-white font-medium active:scale-90" style={{background: C.coral}}>❌ 驳回</button>
+          <button onClick={batchPublish} className="flex-1 py-2 rounded-[8px] text-[10px] text-white font-medium active:scale-90" style={{background: C.teal}}>🚀 发布</button>
+          <button onClick={() => { setSelectedIds([]); setBatchMode(false); }} className="text-[10px] text-gray-300 p-2">✕</button>
+        </div>
+      )}
       <div className="mx-4 mt-3 space-y-2">
         {contents.length === 0 ? (
           <div className="text-center py-12 text-gray-300 text-xs">
@@ -201,7 +252,13 @@ export default function MediaPage() {
                 <span className="text-[9px] text-gray-300">
                   {c.scheduled_at ? `定时: ${c.scheduled_at.slice(5,16)}` : c.created_at ? `创建: ${new Date(c.created_at*1000).toLocaleString()}` : ""}
                 </span>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5 items-center">
+                  {batchMode && (
+                    <div onClick={() => toggleSelect(c.id)} className={`w-4 h-4 rounded border-2 flex items-center justify-center active:scale-90 shrink-0 ${selectedIds.includes(c.id) ? "border-transparent" : "border-gray-300"}`}
+                      style={selectedIds.includes(c.id) ? {background: C.teal} : {}}>
+                      {selectedIds.includes(c.id) && <span className="text-white text-[8px]">✓</span>}
+                    </div>
+                  )}
                   <button onClick={() => { setPreview(c); setEditTitle(c.title); setEditContent(c.content); }} className="text-[9px] px-2 py-0.5 rounded-full active:scale-90 border" style={{borderColor: C.teal, color: C.teal}}>预览</button>
                   {c.status === "pending" && (
                     <>
