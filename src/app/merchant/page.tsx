@@ -64,6 +64,7 @@ export default function MerchantPage() {
         <MenuItem icon="💰" label="收入统计" desc="查看营收数据与提现" href="/merchant/revenue" color={C.gold} />
         <MenuItem icon="🤖" label="AI员工报告" desc="经营日报 · 财务分析 · 定价建议" href="/merchant/ai-reports" color="#8B5CF6" />
         <MenuItem icon="💬" label="AI员工对话" desc="与AI店长/财务/增长/客服对话" href="/merchant/ai-chat" color="#45CCD5" />
+        <MenuItem icon="📱" label="自媒体运营" desc="AI生成 · 审核 · 发布公众号/小红书/抖音" href="/merchant/media" color="#10B981" />
         <MenuItem icon="⚙️" label="AI订阅配置" desc="订阅管理 · 定时推送 · 功能配置" href="/merchant/ai-config" color="#F2B631" />
         <MenuItem icon="🏪" label="门店设置" desc="营业状态 · 装修配置 · 店员管理" href="/merchant/settings" color="#10B981" />
       </div>
