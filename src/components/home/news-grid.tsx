@@ -216,7 +216,7 @@ export function NewsGrid() {
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-5">
-        <Link href="/lottery-sim"
+        <Link href="/lottery/dlt/chart"
           className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-gold rounded-t-[3px]" />
           <div className="text-lg mb-1">🎱</div>
@@ -252,9 +252,9 @@ export function NewsGrid() {
         <Link href="/lottery-sim"
           className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-gold rounded-t-[3px]" />
-          <div className="text-lg mb-1">🎱</div>
-          <div className="text-[13px] font-bold">彩票试玩</div>
-          <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">模拟投注双色球大乐透<br />看涨跌大小单双</div>
+          <div className="text-lg mb-1">🎯</div>
+          <div className="text-[13px] font-bold">数字碰</div>
+          <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">选号碰撞 · 一秒开奖<br />5种玩法</div>
         </Link>
 
         <Link href="/sim"
