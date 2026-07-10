@@ -111,43 +111,32 @@ export function NewsGrid() {
             </div>
           ) : fortune && (
             <>
-              {/* 今日运势 标题 */}
+              {/* 标题 */}
               <div className="flex items-center gap-1.5 mb-3">
                 <div className="w-1.5 h-4 rounded-[2px] bg-gradient-to-b from-brand-teal to-brand-teal-dark" />
                 <span className="text-xs font-bold text-text">今日运势</span>
-              </div>
-
-              {/* 得分 */}
-              <div className="flex items-end justify-between mb-4">
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-[34px] font-bold leading-none tracking-tight">{fortune.score}</span>
-                  <span className="text-[11px] text-text-tertiary font-medium ml-0.5">分</span>
-                </div>
-                <span className="text-[11px] font-medium text-brand-teal-dark bg-brand-teal-light/20 px-3 py-1 rounded-full">
+                <span className="ml-auto text-[11px] font-medium text-brand-teal-dark bg-brand-teal-light/20 px-3 py-1 rounded-full">
                   {fortune.tag.emoji} {fortune.tag.label}
                 </span>
               </div>
 
-              <div className="h-px bg-gradient-to-r from-brand-teal/20 via-brand-teal/5 to-transparent mb-4" />
-
-              {/* 宜忌 + 方位 */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <div>
-                  <div className="text-[10px] text-text-tertiary font-medium mb-0.5 tracking-wider">宜</div>
-                  <div className="text-[14px] font-semibold text-text">{fortune.do}</div>
+              {/* 得分 + 宜忌 + 方位 一行 */}
+              <div className="flex items-center gap-4 mb-3">
+                <div className="flex items-baseline">
+                  <span className="text-[30px] font-bold leading-none text-brand-teal-dark">{fortune.score}</span>
+                  <span className="text-[10px] text-text-tertiary ml-0.5">分</span>
                 </div>
-                <div>
-                  <div className="text-[10px] text-text-tertiary font-medium mb-0.5 tracking-wider">忌</div>
-                  <div className="text-[14px] font-semibold text-text">{fortune.dont}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] text-text-tertiary font-medium mb-0.5 tracking-wider">方位</div>
-                  <div className="text-[14px] font-semibold text-brand-teal">{fortune.luckyDirection}</div>
+                <div className="flex items-center gap-3 text-[12px] text-text-tertiary">
+                  <span>宜 <span className="font-semibold text-text">{fortune.do}</span></span>
+                  <span className="text-text-tertiary/30">|</span>
+                  <span>忌 <span className="font-semibold text-text">{fortune.dont}</span></span>
+                  <span className="text-text-tertiary/30">|</span>
+                  <span className="text-brand-teal font-semibold">{fortune.luckyDirection}</span>
                 </div>
               </div>
 
               {/* tip */}
-              <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary/80">
+              <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary/80 pt-2.5 border-t border-gray-100">
                 <Sparkles className="w-3 h-3 text-brand-gold shrink-0" />
                 <span className="truncate">{fortune.tip}</span>
               </div>
@@ -227,7 +216,7 @@ export function NewsGrid() {
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-5">
-        <Link href="/lottery/dlt/chart"
+        <Link href="/lottery-sim"
           className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-gold rounded-t-[3px]" />
           <div className="text-lg mb-1">🎱</div>
@@ -249,6 +238,40 @@ export function NewsGrid() {
           <div className="text-lg mb-1">₿</div>
           <div className="text-[13px] font-bold">BTC胡判</div>
           <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">AI胡说走势<br />不准别打</div>
+        </Link>
+      </div>
+
+      {/* ════════ 4. 模拟试玩 ════════ */}
+      <div className="flex items-center justify-between mb-3 px-0.5">
+        <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-[2px] before:bg-gradient-to-b from-brand-gold to-brand-coral">
+          模拟试玩
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        <Link href="/lottery-sim"
+          className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-gold rounded-t-[3px]" />
+          <div className="text-lg mb-1">🎱</div>
+          <div className="text-[13px] font-bold">彩票试玩</div>
+          <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">模拟投注双色球大乐透<br />看涨跌大小单双</div>
+        </Link>
+
+        <Link href="/sim"
+          className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-gold to-brand-coral rounded-t-[3px]" />
+          <div className="text-lg mb-1">📈</div>
+          <div className="text-[13px] font-bold">股指期货模拟</div>
+          <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">多空双向<br />模拟交易</div>
+        </Link>
+
+
+        <Link href="/btc"
+          className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal to-brand-coral rounded-t-[3px]" />
+          <div className="text-lg mb-1">⚡</div>
+          <div className="text-[13px] font-bold">BTC快节奏</div>
+          <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">60秒一轮<br />看涨跌·猜大小·单双·尾号</div>
         </Link>
       </div>
 
