@@ -8,7 +8,6 @@
  */
 import { HeroSection } from "@/components/home/hero-section";
 import { NewsGrid } from "@/components/home/news-grid";
-import { LotteryScroll } from "@/components/home/lottery-scroll";
 
 export interface LotteryHomeProps {
   /** 站点名称 */
@@ -33,7 +32,6 @@ export default function LotteryHomeTemplate({
     <main className="pb-20">
       <HeroSection />
       <NewsGrid />
-      <LotteryScroll />
       <div className="px-4 pt-6 pb-4 text-center text-[10px] text-text-tertiary/60">
         AI趣预测 · 仅娱乐参考 · 理性参与
       </div>

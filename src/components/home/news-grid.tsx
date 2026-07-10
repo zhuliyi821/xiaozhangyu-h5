@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import { Sparkles, Target, Scan, Calculator } from "lucide-react";
 import Link from "next/link";
-import LotteryHotCard from "@/components/home/lottery-hot-card";
 
 // ── 运势等级映射 ──
 const SCORE_TAGS = [
@@ -38,8 +37,6 @@ export function NewsGrid() {
     do: string; dont: string; luckyDirection: string; tip: string;
   } | null>(null);
   const [loadingFortune, setLoadingFortune] = useState(true);
-  const [hotCardData, setHotCardData] = useState<any>(null);
-  const [loadingHotCard, setLoadingHotCard] = useState(true);
 
   // 从 fortune-engine 获取真实运势数据
   useEffect(() => {
@@ -67,15 +64,6 @@ export function NewsGrid() {
       .catch(() => {})
       .finally(() => setLoadingFortune(false));
   }, [user]);
-
-  // 拉取热号推荐卡片
-  useEffect(() => {
-    fetch("/api/v2/lottery/hot-card")
-      .then(r => r.json())
-      .then(d => setHotCardData(d?.data || null))
-      .catch(() => setHotCardData(null))
-      .finally(() => setLoadingHotCard(false));
-  }, []);
 
   return (
     <section className="mt-4 px-4">
@@ -123,6 +111,12 @@ export function NewsGrid() {
             </div>
           ) : fortune && (
             <>
+              {/* 今日运势 标题 */}
+              <div className="flex items-center gap-1.5 mb-3">
+                <div className="w-1.5 h-4 rounded-[2px] bg-gradient-to-b from-brand-teal to-brand-teal-dark" />
+                <span className="text-xs font-bold text-text">今日运势</span>
+              </div>
+
               {/* 得分 */}
               <div className="flex items-end justify-between mb-4">
                 <div className="flex items-baseline gap-0.5">
@@ -162,9 +156,6 @@ export function NewsGrid() {
 
         </Link>
       </div>
-
-      {/* ════════ 热号推荐卡片 ════════ */}
-      <LotteryHotCard data={hotCardData} loading={loadingHotCard} />
 
       {/* ── AI小龙虾 ── */}
       <Link
@@ -211,7 +202,7 @@ export function NewsGrid() {
       {/* ════════ 2. 工具与服务 ════════ */}
       <div className="flex items-center justify-between mb-3 px-0.5">
         <h2 className="text-base font-bold flex items-center gap-2 before:content-[''] before:w-1 before:h-[17px] before:rounded-[2px] before:bg-gradient-to-b from-brand-gold to-brand-gold-dark">
-          工具与服务
+          彩票工具
         </h2>
       </div>
 
