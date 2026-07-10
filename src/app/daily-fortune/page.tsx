@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { ChevronLeft, Sparkles, Flame, TrendingUp, MapPin, Clock, Bot, AlertCircle } from "lucide-react";
+import { ChevronLeft, Sparkles, Flame, TrendingUp, Clock, AlertCircle } from "lucide-react";
 import { API_BASE } from "@/config/api";
 import FortuneShare from "@/components/fortune/fortune-share";
 import LoginModal from "@/components/ui/login-modal";
@@ -52,7 +52,6 @@ interface FortuneDetail {
   hexagram: Hexagram;
   dimensions: Record<string, DimItem>;
   hourly: HourlyItem[];
-  recommendation: { prediction_bonus: number; rooms: {name:string;type:string}[]; stores: {name:string;direction:string;distance:string}[] };
 }
 const DIM_ICONS: Record<string, string> = {
   wealth: "💰", love: "❤️", career: "💼", health: "🏥", social: "👥",
@@ -295,7 +294,6 @@ export default function DailyFortunePage() {
   const dims = dd.dimensions;
   const hourly = dd.hourly || [];
   const nowHour = hourly[currentHourIndex] || hourly[0] || null;
-  const rec = dd.recommendation;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-brand-teal-light/20 via-white to-white pb-28">
@@ -642,49 +640,6 @@ export default function DailyFortunePage() {
             <span>🟣 上吉</span><span>🟢 中吉</span><span>🟡 中平</span><span>🔴 小凶</span>
           </div>
         </div>
-
-        {/* ═══════ 平台推荐 ═══════ */}
-        {rec && (
-          <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Bot className="w-4 h-4 text-brand-teal" />
-              <span className="text-xs font-bold text-brand-teal-dark">平台推荐</span>
-              {rec.prediction_bonus > 0 && (
-                <span className="text-[9px] bg-brand-gold-light/30 text-brand-gold-dark rounded-full px-2 py-0.5 font-medium">今日加成 +{rec.prediction_bonus}%</span>
-              )}
-            </div>
-
-            {rec.rooms && rec.rooms.length > 0 && (
-              <div className="mb-3">
-                <div className="text-[10px] text-gray-400 mb-2">🎯 推荐PK房间</div>
-                {rec.rooms.map((room: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[8px] px-3.5 py-2.5 mb-1.5">
-                    <span className="text-xs font-medium text-brand-teal-dark">{room.name}</span>
-                    <span className="text-[9px] text-gray-400">{room.type}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {rec.stores && rec.stores.length > 0 && (
-              <div>
-                <div className="text-[10px] text-gray-400 mb-2">📍 附近门店</div>
-                {rec.stores.map((store: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[8px] px-3.5 py-2.5 mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-brand-coral" />
-                      <span className="text-xs font-medium text-brand-teal-dark">{store.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[9px] text-gray-400">
-                      <span>{store.direction}</span>
-                      <span>{store.distance}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* ═══════ 运势助手 — 白底卡片 ═══════ */}
         <div className="mb-5">

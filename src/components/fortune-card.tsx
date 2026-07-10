@@ -1,21 +1,8 @@
 "use client";
+import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-
-// 模拟数据（实际应从 API 获取）
-const TODAY_DATA = {
-  score: 72,
-  tag: "中吉",
-  dayElement: "木",
-  useGod: "水",
-  levels: [
-    { level: "大吉", name: "绿色", relation: "生助用神·最佳", shades: ["#4CAF50", "#69F0AE", "#00C853", "#827717", "#1B5E20"] },
-    { level: "次吉", name: "红色", relation: "与用神相同", shades: ["#F44336", "#C62828", "#F48FB1", "#FF7043", "#E91E63"] },
-    { level: "平", name: "黄色", relation: "用神所生·平顺", shades: ["#C8B89D", "#FFC107", "#A1887F", "#795548"] },
-    { level: "忌", name: "白黑", relation: "克制用神·不宜", shades: ["#FFFFFF", "#FAFAFA", "#212121", "#616161"] },
-  ],
-  advice: "绿色系为主调 + 红色配饰点缀，旺财旺桃花。避开黑白两色。",
-};
+import { API_BASE } from "@/config/api";
 
 const WUXING_ROW = [
   { key: "金", icon: "⚜️" },
@@ -26,7 +13,39 @@ const WUXING_ROW = [
 ];
 
 export default function FortuneCard() {
-  const { score, tag, dayElement, useGod, levels, advice } = TODAY_DATA;
+  const [data, setData] = useState<{
+    score: number; tag: string;
+    dayElement: string; useGod: string;
+    levels: { level: string; name: string; relation: string; shades: string[] }[];
+    advice: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/v1/fortune/today`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: 1 }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.code === 0 && d.data?.wuxing_dress) {
+          const wd = d.data.wuxing_dress;
+          const tag = d.data.score >= 85 ? "大吉" : d.data.score >= 70 ? "中吉" : d.data.score >= 55 ? "中平" : "小凶";
+          setData({
+            score: d.data.score, tag,
+            dayElement: wd.day_element,
+            useGod: wd.use_god,
+            levels: wd.levels,
+            advice: wd.advice,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  if (!data) return null;
+
+  const { score, tag, dayElement, useGod, levels, advice } = data;
   const dayIdx = WUXING_ROW.findIndex(w => w.key === dayElement);
 
   return (
