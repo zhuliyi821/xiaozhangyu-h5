@@ -303,7 +303,7 @@ export default function BTCGamePage() {
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-tertiary/40">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-[11px] text-text-tertiary">标记价格 Mark Price</span>
+                <span className="text-[11px] text-text-tertiary">标记价格</span>
               </div>
               <div className={`text-lg font-bold tracking-tight ${direction === 1 ? "text-red-500" : "text-green-500"}`}>
                 ${cp ? cp.toLocaleString() : "—"}
@@ -405,7 +405,7 @@ export default function BTCGamePage() {
             <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-text-tertiary pt-3 border-t border-border-tertiary/40">
               <span>资金费率: <span className="font-semibold text-brand-teal-dark">+0.0025%</span></span>
               <span>下次结算: <span className="font-semibold">~2h</span></span>
-              <span>Max 杠杆: <span className="font-semibold">50x</span></span>
+              <span>最大杠杆: <span className="font-semibold">50倍</span></span>
             </div>
           </div>
         )}

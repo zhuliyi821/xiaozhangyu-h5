@@ -375,11 +375,11 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
 
             <div className="space-y-2.5">
               {[
-                { label: "RSI (14)", val: result.prediction.indicators.rsi, status: result.prediction.indicators.rsi < 30 ? "超卖" : result.prediction.indicators.rsi > 70 ? "超买" : "中性", color: result.prediction.indicators.rsi < 30 ? "#10B981" : result.prediction.indicators.rsi > 70 ? "#DC2626" : "#6B7280" },
-                { label: "MACD 柱", val: result.prediction.indicators.macd_hist, status: result.prediction.indicators.macd_hist > 0 ? "多头" : "空头", color: result.prediction.indicators.macd_hist > 0 ? "#DC2626" : "#10B981" },
-                { label: "KDJ-K", val: result.prediction.indicators.kdj_k, status: result.prediction.indicators.kdj_k < 30 ? "超卖" : result.prediction.indicators.kdj_k > 80 ? "超买" : "中性", color: result.prediction.indicators.kdj_k < 30 ? "#10B981" : result.prediction.indicators.kdj_k > 80 ? "#DC2626" : "#6B7280" },
-                { label: "成交量比", val: result.prediction.indicators.vol_ratio, status: result.prediction.indicators.vol_ratio > 1.5 ? "放量" : result.prediction.indicators.vol_ratio < 0.5 ? "缩量" : "正常", color: result.prediction.indicators.vol_ratio > 1.5 ? "#F27152" : "#6B7280" },
-                { label: "波动率", val: result.prediction.volatility, status: result.prediction.volatility < 1 ? "低波" : result.prediction.volatility > 3 ? "高波" : "中波", color: result.prediction.volatility < 1 ? "#10B981" : result.prediction.volatility > 3 ? "#DC2626" : "#6B7280" },
+                { label: "RSI", val: result.prediction.indicators.rsi, status: result.prediction.indicators.rsi < 30 ? "超卖" : result.prediction.indicators.rsi > 70 ? "超买" : "中性", color: result.prediction.indicators.rsi < 30 ? "#45CCD5" : result.prediction.indicators.rsi > 70 ? "#F27152" : "#8E8E93" },
+                { label: "MACD", val: result.prediction.indicators.macd_hist, status: result.prediction.indicators.macd_hist > 0 ? "多头" : "空头", color: result.prediction.indicators.macd_hist > 0 ? "#F27152" : "#45CCD5" },
+                { label: "KDJ", val: result.prediction.indicators.kdj_k, status: result.prediction.indicators.kdj_k < 30 ? "超卖" : result.prediction.indicators.kdj_k > 80 ? "超买" : "中性", color: result.prediction.indicators.kdj_k < 30 ? "#45CCD5" : result.prediction.indicators.kdj_k > 80 ? "#F27152" : "#8E8E93" },
+                { label: "成交量比", val: result.prediction.indicators.vol_ratio, status: result.prediction.indicators.vol_ratio > 1.5 ? "放量" : result.prediction.indicators.vol_ratio < 0.5 ? "缩量" : "正常", color: result.prediction.indicators.vol_ratio > 1.5 ? "#F27152" : "#8E8E93" },
+                { label: "波动率", val: result.prediction.volatility, status: result.prediction.volatility < 1 ? "低波" : result.prediction.volatility > 3 ? "高波" : "中波", color: result.prediction.volatility < 1 ? "#45CCD5" : result.prediction.volatility > 3 ? "#F27152" : "#8E8E93" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5 border-b border-border-tertiary/40 last:border-0">
                   <div className="flex items-center gap-1.5">
@@ -533,9 +533,9 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
                   {compScore.breakdown.fundamentals.pe !== null ? (
                     <>
                       {[
-                        { label: "市盈率 PE", val: compScore.breakdown.fundamentals.pe, unit: "" },
-                        { label: "市净率 PB", val: compScore.breakdown.fundamentals.pb, unit: "" },
-                        { label: "净资产收益率 ROE", val: compScore.breakdown.fundamentals.roe, unit: "%" },
+                        { label: "市盈率", val: compScore.breakdown.fundamentals.pe, unit: "" },
+                        { label: "市净率", val: compScore.breakdown.fundamentals.pb, unit: "" },
+                        { label: "净资产收益率", val: compScore.breakdown.fundamentals.roe, unit: "%" },
                         { label: "营收增长率", val: compScore.breakdown.fundamentals.rev_growth, unit: "%" },
                         { label: "利润增长率", val: compScore.breakdown.fundamentals.profit_growth, unit: "%" },
                       ].map((item, i) => (
