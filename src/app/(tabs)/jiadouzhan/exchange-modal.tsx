@@ -309,7 +309,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
 
               {/* 去消费补充 */}
               <a
-                href="/store-services"
+                href="/store"
                 className="block w-full text-center py-2.5 rounded-[8px] text-[11px] font-medium bg-gray-50 text-gray-500 active:scale-[0.98] transition-transform"
               >
                 游戏豆不够？去消费赚豆 🛒

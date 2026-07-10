@@ -121,7 +121,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
               className="px-5 py-2.5 border border-brand-teal text-brand-teal text-xs rounded-full">
               查看订单
             </a>
-            <a href="/stores"
+            <a href="/store"
               className="px-5 py-2.5 bg-gradient-to-r from-[#F27152] to-[#E06050] text-white text-xs rounded-full">
               继续逛逛
             </a>

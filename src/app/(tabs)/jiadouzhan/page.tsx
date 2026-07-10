@@ -154,7 +154,7 @@ function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number;
               激活后可兑换余额或继续下注
             </div>
             <div className="flex gap-2 mt-3">
-              <a href="/store-services"
+              <a href="/store"
                 className="inline-flex items-center gap-1 px-4 py-2 bg-brand-gold text-white text-[11px] font-medium rounded-[10px] active:scale-95 transition-transform">
                 🛒 去消费赚豆
               </a>
@@ -217,7 +217,7 @@ function QuickLinks() {
           <div className="text-[11px] font-semibold text-text">全网商品</div>
           <div className="text-[9px] text-text-tertiary mt-0.5">平台·置换·附近</div>
         </a>
-        <a href="/stores"
+        <a href="/store"
           className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] text-center active:scale-[0.98] transition-transform">
           <div className="w-8 h-8 rounded-[10px] bg-brand-coral-light/60 flex items-center justify-center mx-auto mb-1.5 text-base">📍</div>
           <div className="text-[11px] font-semibold text-text">合作门店</div>

@@ -4,7 +4,7 @@
  * 🏪 门店模板
  *
  * 从供应链 API 获取真实商品数据，点击商品跳转芸众收银台购买
- * "消费"Tab 跳转到 /store-services 门店服务页
+ * "消费"Tab 跳转到 /store 门店聚合页
  */
 
 import { useState, useEffect } from "react";
@@ -265,7 +265,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
       <div className="flex mx-4 mt-3 bg-bg rounded-sm p-[3px]">
         {["商品", "消费", "闲豆"].map((tab, i) => (
           <button key={i} onClick={() => {
-            if (i === 1) { window.location.href = "/store-services"; return; }
+            if (i === 1) { window.location.href = "/store"; return; }
             setActiveTab(i);
           }}
             className={`flex-1 py-2 text-center rounded-[8px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>

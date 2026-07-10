@@ -42,6 +42,9 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   const [store, setStore] = useState<StoreConfig>(defaultStore(storeId));
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
+  const [decoration, setDecoration] = useState<{ theme_color: string; modules: any[]; logo: string } | null>(null);
+  const [buyProduct, setBuyProduct] = useState<any>(null);
+  const [buySuccess, setBuySuccess] = useState<{ product: any; earned: number } | null>(null);
 
   useEffect(() => {
     async function loadStore() {
@@ -71,6 +74,19 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
         const prodJson = await prodRes.json();
         if (prodJson.code === 0) {
           setProducts(prodJson.data || []);
+        }
+
+        // 3. 获取装修配置（覆盖品牌色）
+        const decoRes = await fetch(
+          `${API_BASE}/plugins/api-store-decoration.php?api=decoration&store_id=${storeId}`
+        );
+        const decoJson = await decoRes.json();
+        if (decoJson.code === 0 && decoJson.data) {
+          const d = decoJson.data;
+          setDecoration({ theme_color: d.theme_color, modules: d.modules || [], logo: d.logo || "" });
+          if (d.theme_color) {
+            setStore(prev => ({ ...prev, brand_primary: d.theme_color }));
+          }
         }
       } catch (e) {
         console.error("Failed to load store:", e);
@@ -133,6 +149,59 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
         </div>
       </div>
 
+      {/* 装修模块 */}
+      {decoration && decoration.modules.length > 0 && (
+        <div className="px-4 mt-4 space-y-3">
+          {decoration.modules.filter(m => m.enabled !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(mod => {
+            if (mod.type === 'banner' && mod.config?.images?.length > 0) {
+              return (
+                <div key={mod.id} className="rounded-[12px] overflow-hidden shadow-sm">
+                  <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-none">
+                    {mod.config.images.map((img: string, i: number) => (
+                      <div key={i} className="snap-start shrink-0 w-full h-36 bg-gray-100">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            if (mod.type === 'coupon' && mod.config?.coupons?.length > 0) {
+              return (
+                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100">
+                  <div className="text-xs font-semibold mb-2">{mod.config.title || "优惠券"}</div>
+                  <div className="flex gap-2 overflow-x-auto scrollbar-none">
+                    {mod.config.coupons.map((c: any, i: number) => (
+                      <div key={i} className="shrink-0 w-28 p-2 rounded-[8px] text-center" style={{background: `${primary}12`}}>
+                        <div className="text-sm font-bold" style={{color: primary}}>{c.discount || c.amount}</div>
+                        <div className="text-[9px] text-gray-500 mt-0.5">{c.label || "优惠"}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            if (mod.type === 'notice' && mod.config?.text) {
+              return (
+                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100 flex items-center gap-2">
+                  <span className="text-sm">📢</span>
+                  <span className="text-[11px] text-gray-600 truncate">{mod.config.text}</span>
+                </div>
+              );
+            }
+            if (mod.type === 'store-intro') {
+              return store.intro ? (
+                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100">
+                  <div className="text-xs font-semibold mb-1">{mod.config?.title || "门店介绍"}</div>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">{store.intro}</p>
+                </div>
+              ) : null;
+            }
+            return null;
+          })}
+        </div>
+      )}
+
       {/* 门店商品 */}
       <div className="px-4 mt-5">
         <div className="flex items-center justify-between mb-3">
@@ -174,7 +243,7 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
                     <span className="text-sm font-bold" style={{ color: primary === "#6BA3A3" ? "#E85D3A" : primary }}>
                       ¥{p.selling_price || p.price}
                     </span>
-                    <button className="text-[10px] text-white px-2.5 py-1 rounded-full" style={{ background: primary }}>
+                    <button onClick={() => setBuyProduct(p)} className="text-[10px] text-white px-2.5 py-1 rounded-full" style={{ background: primary }}>
                       立即购买
                     </button>
                   </div>
@@ -206,6 +275,77 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
           <span className="text-[10px] text-gray-500">联系</span>
         </a>
       </nav>
+
+      {/* 购买浮层 */}
+      {buyProduct && !buySuccess && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setBuyProduct(null)}>
+          <div className="bg-white rounded-t-[20px] sm:rounded-[20px] w-full max-w-[400px] p-5 mx-auto"
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+              <div className="w-16 h-16 rounded-[12px] bg-gray-50 flex items-center justify-center overflow-hidden">
+                {buyProduct.thumb ? (
+                  <img src={buyProduct.thumb.startsWith("http") ? buyProduct.thumb : `${API_BASE}/${buyProduct.thumb}`} alt={buyProduct.title || buyProduct.name} className="w-full h-full object-cover" />
+                ) : <span className="text-2xl">📦</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold truncate">{buyProduct.title || buyProduct.name}</div>
+                <div className="text-lg font-bold mt-1" style={{color: primary}}>¥{buyProduct.selling_price || buyProduct.price}</div>
+              </div>
+            </div>
+
+            {/* 支付方式 */}
+            <div className="mt-4 space-y-2">
+              <div className="text-[11px] font-medium text-gray-500 mb-2">选择支付方式</div>
+              {[
+                { id: "balance", label: "余额支付", desc: `可用余额 ¥--`, icon: "💰" },
+                { id: "wechat", label: "微信支付", desc: "推荐使用微信支付", icon: "💳" },
+              ].map(pm => (
+                <button key={pm.id} onClick={() => {
+                  const earned = Math.floor((buyProduct.selling_price || buyProduct.price) * 100);
+                  setBuySuccess({ product: buyProduct, earned });
+                  setBuyProduct(null);
+                }}
+                  className="w-full flex items-center gap-3 p-3 rounded-[12px] border border-gray-100 active:scale-[0.98] transition-transform hover:border-gray-200">
+                  <span className="text-xl">{pm.icon}</span>
+                  <div className="text-left flex-1">
+                    <div className="text-xs font-semibold">{pm.label}</div>
+                    <div className="text-[10px] text-gray-400">{pm.desc}</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </button>
+              ))}
+            </div>
+
+            <button onClick={() => setBuyProduct(null)}
+              className="w-full mt-4 py-2.5 rounded-[10px] text-xs font-medium bg-gray-50 text-gray-500 active:scale-[0.98] transition-transform">
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 购买成功动画 */}
+      {buySuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setBuySuccess(null)}>
+          <div className="bg-white rounded-[20px] p-6 text-center mx-4 max-w-[300px] shadow-2xl"
+            style={{animation: 'celebrate-pop 0.6s ease-out'}}
+            onClick={e => e.stopPropagation()}>
+            <div className="text-5xl mb-3">🎉</div>
+            <div className="text-base font-bold mb-1">购买成功！</div>
+            <div className="text-[12px] text-gray-500 mb-3">{buySuccess.product.title || buySuccess.product.name}</div>
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-[12px] p-3 mb-4">
+              <div className="text-[10px] text-gray-500">获得游戏豆</div>
+              <div className="text-2xl font-bold" style={{color: primary}}>+{buySuccess.earned.toLocaleString()} 🎮</div>
+            </div>
+            <button onClick={() => setBuySuccess(null)}
+              className="w-full py-2.5 rounded-[10px] text-xs font-bold text-white" style={{background: primary}}>
+              继续逛逛
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
