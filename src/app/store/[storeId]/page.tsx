@@ -97,68 +97,79 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   }, [storeId, API_BASE]);
 
   const primary = store.brand_primary || "#6BA3A3";
-  const secondary = store.brand_secondary || "#C9A96E";
+
+  // 加载状态
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-white pb-24">
+        <div className="h-52 bg-gray-100 animate-pulse" />
+        <div className="mx-4 -mt-6 relative z-10">
+          <div className="bg-white rounded-[12px] shadow-sm p-4 animate-pulse space-y-3">
+            <div className="h-4 bg-gray-100 rounded w-3/4" />
+            <div className="h-3 bg-gray-50 rounded w-1/2" />
+          </div>
+        </div>
+        <div className="px-4 mt-4">
+          <div className="grid grid-cols-2 gap-2.5 animate-pulse">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm">
+                <div className="aspect-square bg-gray-100" />
+                <div className="p-2.5 space-y-1.5">
+                  <div className="h-3 bg-gray-100 rounded w-3/4" />
+                  <div className="h-4 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main style={{ "--brand-primary": primary, "--brand-secondary": secondary } as React.CSSProperties}
-      className="min-h-screen pb-24">
+    <main className="min-h-screen pb-24" style={{'--brand-primary':primary} as React.CSSProperties}>
 
       {/* 门店封面 */}
-      <div className="relative h-52 bg-gray-100 overflow-hidden" style={{ background: `linear-gradient(135deg, ${primary}22, ${secondary}22)` }}>
+      <div className="relative h-48 bg-gray-100 overflow-hidden" style={{background:`linear-gradient(135deg,${primary}22,#C9A96E22)`}}>
         {store.cover ? (
           <img src={store.cover} alt={store.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-6xl opacity-30">
-            <MapPin className="w-16 h-16" style={{ color: primary }} />
+            <span className="text-6xl">🏪</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4">
-          <h1 className="text-2xl font-bold text-white">{store.name}</h1>
-          <div className="flex items-center gap-2 mt-1 text-white/80 text-xs">
-            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-            <span>{store.rating}</span>
-            <span className="w-1 h-1 rounded-full bg-white/40" />
-            <Clock className="w-3 h-3" />
-            <span>{store.hours}</span>
-          </div>
+          <h1 className="text-xl font-bold text-white">{store.name}</h1>
+          {store.address && <p className="text-[11px] text-white/70 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" />{store.address}</p>}
         </div>
       </div>
 
-      {/* 门店信息卡片 */}
-      <div className="mx-4 -mt-6 relative z-10">
-        <div className="bg-white rounded-sm shadow-sm p-4">
-          {store.address && (
-            <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-              <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: primary }} />
-              <span className="truncate">{store.address}</span>
-            </div>
-          )}
-          {store.phone && (
-            <a href={`tel:${store.phone}`} className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-              <Phone className="w-3.5 h-3.5 shrink-0" style={{ color: primary }} />
-              <span>{store.phone}</span>
-              <ChevronRight className="w-3 h-3 ml-auto text-gray-300" />
-            </a>
-          )}
-          {store.intro && (
-            <p className="text-[11px] text-gray-500 leading-relaxed mt-2 border-t border-gray-100 pt-2">
-              {store.intro}
-            </p>
-          )}
+      {/* 门店信息条 */}
+      <div className="mx-4 -mt-5 relative z-10">
+        <div className="bg-white rounded-[12px] shadow-sm px-4 py-3 flex items-center justify-between">
+          <a href={`tel:${store.phone}`} className="flex items-center gap-2 text-[11px] text-gray-500">
+            <Phone className="w-3.5 h-3.5" style={{color:primary}} />
+            {store.phone || "暂无电话"}
+          </a>
+          <a href={store.address ? `https://uri.amap.com/search?keyword=${encodeURIComponent(store.name+' '+store.address)}` : '#'}
+            target="_blank" rel="noopener noreferrer"
+            className="text-[10px] px-2.5 py-1 rounded-full text-white" style={{background:primary}}>
+            导航
+          </a>
         </div>
       </div>
 
       {/* 装修模块 */}
-      {decoration && decoration.modules.length > 0 && (
+      {decoration && decoration.modules.filter(m => m.enabled !== false).length > 0 && (
         <div className="px-4 mt-4 space-y-3">
-          {decoration.modules.filter(m => m.enabled !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(mod => {
+          {decoration.modules.filter(m => m.enabled !== false).sort((a,b) => (a.sort_order||0)-(b.sort_order||0)).map(mod => {
             if (mod.type === 'banner' && mod.config?.images?.length > 0) {
               return (
                 <div key={mod.id} className="rounded-[12px] overflow-hidden shadow-sm">
-                  <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-none">
-                    {mod.config.images.map((img: string, i: number) => (
-                      <div key={i} className="snap-start shrink-0 w-full h-36 bg-gray-100">
+                  <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
+                    {mod.config.images.map((img:string,i:number) => (
+                      <div key={i} className="snap-start shrink-0 w-full h-36 bg-gray-50">
                         <img src={img} alt="" className="w-full h-full object-cover" />
                       </div>
                     ))}
@@ -168,13 +179,13 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
             }
             if (mod.type === 'coupon' && mod.config?.coupons?.length > 0) {
               return (
-                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100">
-                  <div className="text-xs font-semibold mb-2">{mod.config.title || "优惠券"}</div>
+                <div key={mod.id} className="bg-white rounded-[12px] p-3.5 shadow-sm border border-gray-50">
+                  <div className="text-[11px] font-semibold mb-2.5">{mod.config.title || "领优惠券"}</div>
                   <div className="flex gap-2 overflow-x-auto scrollbar-none">
-                    {mod.config.coupons.map((c: any, i: number) => (
-                      <div key={i} className="shrink-0 w-28 p-2 rounded-[8px] text-center" style={{background: `${primary}12`}}>
-                        <div className="text-sm font-bold" style={{color: primary}}>{c.discount || c.amount}</div>
-                        <div className="text-[9px] text-gray-500 mt-0.5">{c.label || "优惠"}</div>
+                    {mod.config.coupons.map((c:any,i:number) => (
+                      <div key={i} className="shrink-0 w-28 p-2.5 rounded-[10px] text-center" style={{background:`${primary}10`}}>
+                        <div className="text-base font-bold" style={{color:primary}}>{c.discount || c.amount}</div>
+                        <div className="text-[9px] text-gray-500 mt-0.5">{c.label || "优惠券"}</div>
                       </div>
                     ))}
                   </div>
@@ -183,19 +194,13 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
             }
             if (mod.type === 'notice' && mod.config?.text) {
               return (
-                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100 flex items-center gap-2">
-                  <span className="text-sm">📢</span>
-                  <span className="text-[11px] text-gray-600 truncate">{mod.config.text}</span>
+                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-50 flex items-center gap-2.5">
+                  <span className="text-base shrink-0">📢</span>
+                  <div className="w-full overflow-hidden">
+                    <p className="text-[11px] text-gray-600 whitespace-nowrap animate-marquee">{mod.config.text}</p>
+                  </div>
                 </div>
               );
-            }
-            if (mod.type === 'store-intro') {
-              return store.intro ? (
-                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-100">
-                  <div className="text-xs font-semibold mb-1">{mod.config?.title || "门店介绍"}</div>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">{store.intro}</p>
-                </div>
-              ) : null;
             }
             return null;
           })}
@@ -205,46 +210,29 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
       {/* 门店商品 */}
       <div className="px-4 mt-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold flex items-center gap-1.5">
-            <span className="w-1 h-4 rounded-sm" style={{ background: `linear-gradient(to bottom, ${primary}, ${secondary})` }} />
-            本店商品
-          </h2>
-          <span className="text-[10px]" style={{ color: primary }}>共 {products.length} 件</span>
+          <h2 className="text-sm font-bold">本店商品</h2>
+          <span className="text-[10px] text-gray-400">{products.length}件</span>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-sm overflow-hidden shadow-sm animate-pulse">
-                <div className="aspect-square bg-gray-100" />
-                <div className="p-2.5 space-y-1.5">
-                  <div className="h-3 bg-gray-100 rounded w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 text-xs">暂无商品</div>
+        {products.length === 0 ? (
+          <div className="text-center py-12 text-gray-300 text-xs">暂无商品上架</div>
         ) : (
           <div className="grid grid-cols-2 gap-2.5">
-            {products.map((p: any) => (
-              <div key={p.id} className="bg-white rounded-sm overflow-hidden shadow-sm active:scale-[0.97] transition-transform cursor-pointer">
+            {products.map((p:any) => (
+              <div key={p.id} className="bg-white rounded-[12px] overflow-hidden shadow-sm active:scale-[0.97] transition-transform">
                 <div className="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
                   {p.thumb ? (
-                    <img src={p.thumb.startsWith("http") ? p.thumb : `${API_BASE}/${p.thumb}`} alt={p.title || p.name} className="w-full h-full object-cover" />
+                    <img src={p.thumb.startsWith("http") ? p.thumb : `${API_BASE}/${p.thumb}`} alt={p.title||p.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-3xl opacity-30">📦</span>
+                    <span className="text-3xl opacity-20">📦</span>
                   )}
                 </div>
                 <div className="p-2.5">
-                  <div className="text-[12px] font-medium truncate">{p.title || p.name}</div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-sm font-bold" style={{ color: primary === "#6BA3A3" ? "#E85D3A" : primary }}>
-                      ¥{p.selling_price || p.price}
-                    </span>
-                    <button onClick={() => setBuyProduct(p)} className="text-[10px] text-white px-2.5 py-1 rounded-full" style={{ background: primary }}>
-                      立即购买
+                  <div className="text-[12px] font-medium truncate">{p.title||p.name}</div>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-sm font-bold" style={{color:primary}}>¥{p.selling_price||p.price}</span>
+                    <button onClick={() => setBuyProduct(p)} className="text-[10px] text-white px-2.5 py-1 rounded-full active:scale-90 transition-transform" style={{background:primary}}>
+                      购买
                     </button>
                   </div>
                 </div>
@@ -255,25 +243,25 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
       </div>
 
       {/* 底部导航 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-[20px] border-t border-gray-100 h-[64px] flex items-center justify-around z-50">
-        <a href={`/store/${storeId}`} className="flex flex-col items-center gap-0.5">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: `${primary}20` }}>
-            <div className="w-3 h-3 rounded-sm" style={{ background: primary }} />
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-[12px] border-t border-gray-100 h-14 flex items-center justify-around z-50">
+        <div onClick={() => window.location.href=`/store/${storeId}`} className="flex flex-col items-center gap-0.5 cursor-pointer active:scale-90 transition-transform">
+          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{background:`${primary}20`}}>
+            <div className="w-2.5 h-2.5 rounded-sm" style={{background:primary}} />
           </div>
-          <span className="text-[10px]" style={{ color: primary }}>首页</span>
-        </a>
-        <a href={`/store/${storeId}/products`} className="flex flex-col items-center gap-0.5">
+          <span className="text-[9px]" style={{color:primary}}>首页</span>
+        </div>
+        <div onClick={() => window.location.href='/store'} className="flex flex-col items-center gap-0.5 cursor-pointer active:scale-90 transition-transform">
           <ShoppingCart className="w-5 h-5 text-gray-400" />
-          <span className="text-[10px] text-gray-500">商品</span>
-        </a>
-        <a href={`/store/${storeId}/about`} className="flex flex-col items-center gap-0.5">
-          <MapPin className="w-5 h-5 text-gray-400" />
-          <span className="text-[10px] text-gray-500">门店</span>
-        </a>
-        <a href={`tel:${store.phone}`} className="flex flex-col items-center gap-0.5">
+          <span className="text-[9px] text-gray-500">门店</span>
+        </div>
+        <a href={`tel:${store.phone}`} className="flex flex-col items-center gap-0.5 active:scale-90 transition-transform">
           <Phone className="w-5 h-5 text-gray-400" />
-          <span className="text-[10px] text-gray-500">联系</span>
+          <span className="text-[9px] text-gray-500">联系</span>
         </a>
+        <div onClick={() => window.history.back()} className="flex flex-col items-center gap-0.5 cursor-pointer active:scale-90 transition-transform">
+          <span className="text-lg leading-none text-gray-400">←</span>
+          <span className="text-[9px] text-gray-500">返回</span>
+        </div>
       </nav>
 
       {/* 购买浮层 */}
