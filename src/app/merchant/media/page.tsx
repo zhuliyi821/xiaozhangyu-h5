@@ -37,6 +37,7 @@ export default function MediaPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filterPlatform, setFilterPlatform] = useState("");
+  const [genProgress, setGenProgress] = useState<{current:number; total:number; label:string} | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -63,16 +64,27 @@ export default function MediaPage() {
 
   const generate = async () => {
     setGenerating(true);
-    try {
-      const r = await fetch(`${API_BASE}/api/store-media?action=generate`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store_id: storeId, platform: "all" }),
-      });
-      const d = await r.json();
-      if (d.code === 0) setMsg(`✅ ${d.msg}`);
-      else setMsg("❌ 生成失败");
-      loadData(storeId);
-    } catch { setMsg("❌ 网络错误"); }
+    const platforms = ["wechat", "xiaohongshu", "douyin", "digital_human"];
+    const labels: Record<string,string> = { wechat: "公众号", xiaohongshu: "小红书", douyin: "抖音", digital_human: "数字人" };
+    let totalCount = 0;
+    setGenProgress({ current: 0, total: platforms.length, label: "准备中..." });
+    for (let i = 0; i < platforms.length; i++) {
+      const p = platforms[i];
+      setGenProgress({ current: i, total: platforms.length, label: `正在生成 ${labels[p]} 内容...` });
+      await new Promise(r => setTimeout(r, 300));
+      try {
+        const r = await fetch(`${API_BASE}/api/store-media?action=generate`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ store_id: storeId, platform: p }),
+        });
+        const d = await r.json();
+        if (d.code === 0) totalCount += d.count || 0;
+      } catch {}
+    }
+    setGenProgress(null);
+    if (totalCount > 0) setMsg(`✅ 已生成 ${totalCount} 条内容`);
+    else setMsg("❌ 生成失败");
+    loadData(storeId);
     setGenerating(false);
     setTimeout(() => setMsg(""), 3000);
   };
@@ -241,6 +253,20 @@ export default function MediaPage() {
             style={{backgroundColor: filterPlatform === k ? v.color : "#eee", color: filterPlatform === k ? "#fff" : "#888"}}>{v.label}</button>
         ))}
       </div>
+
+      {/* 生成进度 */}
+      {genProgress && (
+        <div className="mx-4 mt-3 bg-white rounded-[12px] p-4 shadow-sm border border-brand-teal/20">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm animate-spin">⏳</span>
+            <span className="text-[11px] font-medium">{genProgress.label}</span>
+            <span className="text-[9px] text-gray-400 ml-auto">{genProgress.current}/{genProgress.total}</span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{width:`${(genProgress.current/genProgress.total)*100}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.coral})`}} />
+          </div>
+        </div>
+      )}
 
       {/* 内容列表 + 批量操作栏 */}
       {batchMode && selectedIds.length > 0 && (
