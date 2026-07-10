@@ -86,7 +86,7 @@ export default function ScanPage() {
           <h1 className="text-base font-semibold flex-1">扫码验奖</h1>
         </div>
         {/* Mode Tabs */}
-        <div className="flex mx-3 mb-2 bg-surface rounded-[4px] p-[3px]">
+        <div className="flex mx-3 mb-2 bg-surface rounded-[8px] p-[3px]">
           {[
             { key: "scan" as const, icon: Scan, label: "扫码" },
             { key: "manual" as const, icon: Camera, label: "手动输入" },
@@ -104,14 +104,14 @@ export default function ScanPage() {
       <div className="px-4 mt-3 space-y-3">
         {/* Scanner */}
         {mode === "scan" && (
-          <div className="bg-black rounded-[4px] overflow-hidden relative min-h-[300px]">
+          <div className="bg-black rounded-[8px] overflow-hidden relative min-h-[300px]">
             {cameraActive ? (
               <>
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                 {/* Scan frame overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-48 h-48 relative">
-                    <div className="absolute inset-0 border-2 border-white/50 rounded-[4px]" />
+                    <div className="absolute inset-0 border-2 border-white/50 rounded-[8px]" />
                     <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white rounded-tl-[16px]" />
                     <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white rounded-tr-[16px]" />
                     <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white rounded-bl-[16px]" />
@@ -121,7 +121,7 @@ export default function ScanPage() {
                   </div>
                 </div>
                 <button onClick={stopCamera}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-[4px] text-xs">
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-[8px] text-xs">
                   关闭相机
                 </button>
               </>
@@ -132,7 +132,7 @@ export default function ScanPage() {
                 </div>
                 <p className="text-white/70 text-sm mb-4">点击下方按钮启动扫码</p>
                 <button onClick={startCamera}
-                  className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-[4px] text-sm font-semibold flex items-center gap-2">
+                  className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-[8px] text-sm font-semibold flex items-center gap-2">
                   <Camera className="w-4 h-4" /> 启动扫码
                 </button>
                 <p className="text-white/40 text-xs mt-3">扫码识别后自动验奖</p>
@@ -143,34 +143,34 @@ export default function ScanPage() {
 
         {/* Manual Input */}
         {mode === "manual" && (
-          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
             <div className="text-xs font-semibold mb-3">输入彩票号码</div>
             {/* Front numbers */}
             <div className="mb-3">
               <div className="text-[10px] text-text-tertiary mb-1.5">前区号码（5个，01-35）</div>
               <input value={frontInput} onChange={e => setFrontInput(e.target.value)}
                 placeholder="例: 07,13,28,29,34"
-                className="w-full bg-bg rounded-[4px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
+                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
             </div>
             {/* Back numbers */}
             <div className="mb-3">
               <div className="text-[10px] text-text-tertiary mb-1.5">后区号码（2个，01-12）</div>
               <input value={backInput} onChange={e => setBackInput(e.target.value)}
                 placeholder="例: 06,11"
-                className="w-full bg-bg rounded-[4px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
+                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
             </div>
             {/* Quick actions */}
             <div className="flex gap-2 mb-3">
-              <button onClick={genRandom} className="flex-1 py-2 bg-bg rounded-[4px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)] hover:bg-brand-teal/5">
+              <button onClick={genRandom} className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)] hover:bg-brand-teal/5">
                 🎲 随机生成
               </button>
               <button onClick={() => { setFrontInput(""); setBackInput(""); setResult(null); }}
-                className="flex-1 py-2 bg-bg rounded-[4px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)] hover:bg-red-50">
+                className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)] hover:bg-red-50">
                 🗑️ 清空
               </button>
             </div>
             <button onClick={handleVerify} disabled={loading || !frontInput.trim() || !backInput.trim()}
-              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-semibold disabled:opacity-50 active:scale-[0.98] transition-transform">
+              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-semibold disabled:opacity-50 active:scale-[0.98] transition-transform">
               {loading ? "验奖中..." : "立即验奖"}
             </button>
           </div>
@@ -178,7 +178,7 @@ export default function ScanPage() {
 
         {/* Result */}
         {result && (
-          <div className={`rounded-[4px] p-5 shadow-sm border overflow-hidden ${
+          <div className={`rounded-[8px] p-5 shadow-sm border overflow-hidden ${
             result.result === "win"
               ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200"
               : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200"
@@ -196,13 +196,13 @@ export default function ScanPage() {
 
             {/* Match stats */}
             <div className="flex gap-3 mb-3">
-              <div className="flex-1 bg-white/80 rounded-[4px] p-3 text-center">
+              <div className="flex-1 bg-white/80 rounded-[8px] p-3 text-center">
                 <div className="text-[10px] text-text-tertiary">前区匹配</div>
                 <div className={`text-xl font-bold ${result.matched_front > 0 ? "text-brand-coral" : "text-text-tertiary"}`}>
                   {result.matched_front}
                 </div>
               </div>
-              <div className="flex-1 bg-white/80 rounded-[4px] p-3 text-center">
+              <div className="flex-1 bg-white/80 rounded-[8px] p-3 text-center">
                 <div className="text-[10px] text-text-tertiary">后区匹配</div>
                 <div className={`text-xl font-bold ${result.matched_back > 0 ? "text-brand-teal" : "text-text-tertiary"}`}>
                   {result.matched_back}
@@ -212,7 +212,7 @@ export default function ScanPage() {
 
             {/* Prize info */}
             {result.prize && (
-              <div className="bg-white/80 rounded-[4px] p-3 text-center">
+              <div className="bg-white/80 rounded-[8px] p-3 text-center">
                 <div className="text-[10px] text-text-tertiary mb-1">中奖信息</div>
                 <div className="text-base font-bold text-brand-coral">{result.prize}</div>
               </div>
@@ -221,7 +221,7 @@ export default function ScanPage() {
         )}
 
         {/* How to use guide */}
-        <details className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+        <details className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
           <summary className="text-[11px] font-semibold cursor-pointer">💡 使用说明</summary>
           <div className="mt-3 text-[10px] text-text-tertiary space-y-1.5 leading-relaxed">
             <p>1. 选择「扫码」模式，将相机对准彩票上的二维码</p>

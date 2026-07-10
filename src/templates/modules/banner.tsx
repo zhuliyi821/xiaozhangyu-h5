@@ -8,7 +8,7 @@ export default function BannerModule({ config }: ModuleProps) {
 
   return (
     <div className="px-3 mt-3">
-      <div className="rounded-[4px] overflow-hidden bg-gray-100">
+      <div className="rounded-[8px] overflow-hidden bg-gray-100">
         <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
           {images.map((img, i) => (
             <div key={i} className="min-w-full snap-center">

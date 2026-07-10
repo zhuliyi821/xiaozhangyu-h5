@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import ShareButton from "@/components/ui/share-button";
 import SharePanel from "@/components/ui/share-panel";
@@ -10,7 +11,7 @@ export function HeroSection() {
   const formatAsset = (n: number) => n >= 10000 ? (n/10000).toFixed(1)+"w" : n >= 1000 ? (n/1000).toFixed(1)+"k" : String(Math.floor(n));
 
   return (
-    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-[4px] p-6 shadow-lg shadow-brand-teal/20 overflow-hidden">
+    <div className="relative mx-4 mt-2 bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-[12px] p-6 shadow-lg shadow-brand-teal/20 overflow-hidden">
       <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[radial-gradient(circle,rgba(242,182,49,0.25)_0%,transparent_70%)]" />
       <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
       <div className="relative z-10">
@@ -27,11 +28,11 @@ export function HeroSection() {
         </p>
         {user && (
           <div className="flex gap-2 mt-3.5">
-            <div className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-[10px] px-3 py-1.5 text-white text-xs">
+            <div className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-[8px] px-3 py-1.5 text-white text-xs">
               <span>🎮</span>
               <span>{formatAsset(gameBeans)}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-[10px] px-3 py-1.5 text-white text-xs">
+            <div className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-[8px] px-3 py-1.5 text-white text-xs">
               <span>🏪</span>
               <span>到店消费</span>
             </div>
@@ -49,9 +50,15 @@ export function HeroSection() {
         </button>
       </div>
 
+      {/* Agent 入口 */}
+      <Link href="/agent"
+        className="mt-4 flex items-center justify-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-[11px] font-bold active:scale-95 transition-transform">
+        🤖 我的 AI Agent
+      </Link>
+
       {showShare && (
         <SharePanel
-          data={{ title: "小章鱼 · AI趣预测", desc: "AI驱动 · 全民预测 · 有奖PK", brand: "小章鱼", url: "https://h5.ws.hi.cn" }}
+          data={{ title: "小章鱼 · AI趣预测", desc: "AI驱动 · 全民预测 · 有奖PK", brand: "小章鱼", url: typeof window !== "undefined" ? window.location.origin : "https://ws.hi.cn" }}
           onClose={() => setShowShare(false)}
         />
       )}

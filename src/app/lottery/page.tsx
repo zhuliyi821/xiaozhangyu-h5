@@ -50,7 +50,7 @@ export default function LotteryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/lottery/hot-card")
+    fetch("/api/v2/lottery/hot-card")
       .then(r => r.json())
       .then(d => setData(d?.data || null))
       .catch(() => setData(null))
@@ -61,7 +61,7 @@ export default function LotteryPage() {
     return (
       <main className="min-h-screen bg-bg pb-20">
         <div className="animate-pulse p-4 space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-100 rounded-[4px]" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-100 rounded-[8px]" />)}
         </div>
       </main>
     );
@@ -95,7 +95,7 @@ export default function LotteryPage() {
 
       <div className="px-4 py-4 space-y-4">
         {/* 最新开奖 */}
-        <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-[8px] p-4 shadow-sm border border-gray-100">
           <div className="text-xs font-bold text-text-primary mb-2">📅 最新开奖</div>
           <div className="flex items-center justify-between">
             <div>
@@ -110,7 +110,7 @@ export default function LotteryPage() {
         </div>
 
         {/* 冷热温号 */}
-        <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100 space-y-3">
+        <div className="bg-white rounded-[8px] p-4 shadow-sm border border-gray-100 space-y-3">
           <div className="text-xs font-bold text-text-primary">📊 冷热温号分布</div>
           <div className="flex items-start gap-3">
             <span className="flex items-center gap-1 text-[10px] font-medium text-red-500 shrink-0 mt-1">🔥 热</span>
@@ -127,7 +127,7 @@ export default function LotteryPage() {
         </div>
 
         {/* AI精选 */}
-        <div className="bg-gradient-to-r from-brand-teal/5 to-brand-gold/5 rounded-[4px] p-4 border border-brand-teal/20 shadow-sm">
+        <div className="bg-gradient-to-r from-brand-teal/5 to-brand-gold/5 rounded-[8px] p-4 border border-brand-teal/20 shadow-sm">
           <div className="flex items-center gap-1.5 mb-3">
             <Sparkles className="w-4 h-4 text-brand-teal" />
             <span className="text-xs font-bold text-brand-teal">AI精选推荐</span>
@@ -145,7 +145,7 @@ export default function LotteryPage() {
         </div>
 
         {/* 平台对比 */}
-        <div className="bg-white rounded-[4px] p-4 shadow-sm border border-gray-100 space-y-3">
+        <div className="bg-white rounded-[8px] p-4 shadow-sm border border-gray-100 space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-bold text-text-primary">
             <TrendingUp className="w-4 h-4" />
             近30期命中率对比 (≥3红)

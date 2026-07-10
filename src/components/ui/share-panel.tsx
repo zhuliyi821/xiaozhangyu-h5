@@ -118,25 +118,37 @@ async function generatePoster(data: PosterData): Promise<string> {
     ctx.fillText(data.subtitle, W / 2, titleY + 56);
   }
 
-  // 底部信息
+  // 二维码（从服务器生成真实 QR Code）
+  const qrSize = 100;
+  const qrX = (W - qrSize) / 2;
+  const qrY = H - 170;
+  const qrUrl = `/api/wechat?action=qrcode&text=${encodeURIComponent(data.url || window.location.href)}&size=10&margin=2`;
+
+  try {
+    const qrImg = await loadImage(qrUrl);
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 8);
+    ctx.clip();
+    ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+  } catch {
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 8);
+    ctx.fill();
+    ctx.fillStyle = "#999";
+    ctx.font = "10px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("QR", W / 2, qrY + qrSize / 2);
+  }
+
   ctx.fillStyle = "rgba(255,255,255,0.5)";
-  ctx.font = "12px system-ui";
+  ctx.font = "11px system-ui";
   ctx.textAlign = "center";
-  ctx.fillText("长按识别 或 微信扫码", W / 2, H - 80);
-
-  // 二维码占位区域
-  const qrSize = 80;
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.roundRect((W - qrSize) / 2, H - 140, qrSize, qrSize, 8);
-  ctx.fill();
-
-  ctx.fillStyle = "#333";
-  ctx.font = "9px system-ui";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  const shortUrl = data.url.replace(/^https?:\/\//, "").substring(0, 18);
-  ctx.fillText(shortUrl, W / 2, H - 100);
+  ctx.textBaseline = "top";
+  ctx.fillText("微信扫码查看详情", W / 2, qrY - 22);
 
   ctx.fillStyle = "rgba(255,255,255,0.3)";
   ctx.font = "11px system-ui";
@@ -211,25 +223,25 @@ export function PosterModal({ data, onClose }: PosterModalProps) {
 
   return (
     <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-[4px] overflow-hidden max-w-[340px] w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-[8px] overflow-hidden max-w-[340px] w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <h3 className="text-sm font-semibold">分享海报</h3>
           <button onClick={onClose} className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center"><X className="w-3.5 h-3.5" /></button>
         </div>
         <div className="p-4 flex justify-center">
           {loading ? (
-            <div className="w-[280px] h-[420px] bg-gray-100 rounded-[4px] animate-pulse flex items-center justify-center">
+            <div className="w-[280px] h-[420px] bg-gray-100 rounded-[8px] animate-pulse flex items-center justify-center">
               <span className="text-xs text-gray-400">生成海报中...</span>
             </div>
           ) : (
-            <img src={posterUrl} alt="分享海报" className="w-[280px] rounded-[4px] shadow-md" />
+            <img src={posterUrl} alt="分享海报" className="w-[280px] rounded-[8px] shadow-md" />
           )}
         </div>
         <div className="px-4 pb-4 space-y-2">
           <button
             onClick={handleSave}
             disabled={loading || saved}
-            className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-50"
           >
             {saved ? "✅ 已保存" : loading ? "⏳ 生成中..." : "💾 保存海报"}
           </button>
@@ -237,7 +249,7 @@ export function PosterModal({ data, onClose }: PosterModalProps) {
         </div>
       </div>
       {toastMsg && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[999] bg-black/80 text-white text-xs px-5 py-2.5 rounded-[4px] shadow-lg animate-fade-in">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[999] bg-black/80 text-white text-xs px-5 py-2.5 rounded-[8px] shadow-lg animate-fade-in">
           {toastMsg}
         </div>
       )}
@@ -276,7 +288,7 @@ export default function SharePanel({ data, onClose }: { data: PosterData; onClos
           {/* 微信分享 — 独占按钮 */}
           <button
             onClick={handleWeChat}
-            className="w-full py-4 rounded-[4px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-sm font-semibold shadow-[0_4px_16px_rgba(69,204,213,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-sm font-semibold shadow-[0_4px_16px_rgba(69,204,213,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <span className="text-lg">💬</span>
             <span>分享到微信</span>
@@ -285,7 +297,7 @@ export default function SharePanel({ data, onClose }: { data: PosterData; onClos
           {/* 辅助: 生成海报 */}
           <button
             onClick={() => setMode("poster")}
-            className="w-full py-3.5 rounded-[4px] bg-gray-50 text-gray-500 text-xs font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-[8px] bg-gray-50 text-gray-500 text-xs font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <ImageIcon className="w-4 h-4" />
             <span>生成分享海报</span>

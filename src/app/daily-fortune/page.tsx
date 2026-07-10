@@ -70,25 +70,25 @@ function BirthInfoForm({ birthDate, setBirthDate, birthHour, setBirthHour, onSub
   onSubmit: () => void; onClose?: () => void;
 }) {
   return (
-    <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 text-left">
+    <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 text-left">
       <div className="text-xs font-semibold text-brand-teal-dark mb-3">📅 设置出生信息</div>
       <div className="space-y-3">
         <div>
           <label className="text-[10px] text-text-secondary mb-1 block">出生日期</label>
           <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-[4px] text-xs outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20" />
+            className="w-full px-3 py-2 border border-gray-200 rounded-[8px] text-xs outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20" />
         </div>
         <div>
           <label className="text-[10px] text-text-secondary mb-1 block">出生时辰</label>
           <select value={birthHour} onChange={e => setBirthHour(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-[4px] text-xs outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20">
+            className="w-full px-3 py-2 border border-gray-200 rounded-[8px] text-xs outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20">
             {["子时(23-01)","丑时(01-03)","寅时(03-05)","卯时(05-07)","辰时(07-09)","巳时(09-11)",
               "午时(11-13)","未时(13-15)","申时(15-17)","酉时(17-19)","戌时(19-21)","亥时(21-23)"]
               .map((label, i) => <option key={i} value={i}>{label}</option>)}
           </select>
         </div>
         <button onClick={onSubmit}
-          className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-semibold active:scale-[0.97] transition-transform shadow-sm">
+          className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-semibold active:scale-[0.97] transition-transform shadow-sm">
           生成我的运势
         </button>
       </div>
@@ -241,11 +241,11 @@ export default function DailyFortunePage() {
               </p>
               <div className="space-y-2.5">
                 <button onClick={() => setShowLogin(true)}
-                  className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-semibold active:scale-[0.97] transition-transform shadow-sm">
+                  className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-semibold active:scale-[0.97] transition-transform shadow-sm">
                   登录查看运势
                 </button>
                 <button onClick={() => { setGuestMode(true); setLoading(true); setRetryKey(k => k + 1); }}
-                  className="w-full py-2.5 border border-gray-200 text-text-secondary rounded-[4px] text-xs font-medium active:scale-[0.97] transition-transform">
+                  className="w-full py-2.5 border border-gray-200 text-text-secondary rounded-[8px] text-xs font-medium active:scale-[0.97] transition-transform">
                   游客体验（无个性化）
                 </button>
               </div>
@@ -260,11 +260,11 @@ export default function DailyFortunePage() {
               <p className="text-xs text-text-secondary mb-4">{error === "数据加载异常" ? "暂时无法获取您的专属运势，试试游客模式" : error}</p>
               <div className="flex gap-2 justify-center">
                 <button onClick={() => { setError(""); setLoading(true); setRetryKey(k => k + 1); }}
-                  className="px-5 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-medium active:scale-[0.97] transition-transform">
+                  className="px-5 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium active:scale-[0.97] transition-transform">
                   重试
                 </button>
                 <button onClick={() => { setGuestMode(true); setLoading(true); setRetryKey(k => k + 1); }}
-                  className="px-5 py-2 border border-gray-200 text-text-secondary rounded-[4px] text-xs font-medium active:scale-[0.97] transition-transform">
+                  className="px-5 py-2 border border-gray-200 text-text-secondary rounded-[8px] text-xs font-medium active:scale-[0.97] transition-transform">
                   游客模式
                 </button>
               </div>
@@ -320,7 +320,7 @@ export default function DailyFortunePage() {
       <div className="px-4 pt-5">
 
         {/* ═══════ Hero 区 ═══════ */}
-        <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-dark rounded-[4px] p-6 mb-5 text-white shadow-lg shadow-brand-teal/30">
+        <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-dark rounded-[8px] p-6 mb-5 text-white shadow-lg shadow-brand-teal/30">
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="text-xs text-white/70">{dateStr} 星期{weekDay}</div>
@@ -345,11 +345,11 @@ export default function DailyFortunePage() {
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-1 bg-white/10 rounded-[4px] px-3.5 py-2.5">
+            <div className="flex-1 bg-white/10 rounded-[8px] px-3.5 py-2.5">
               <div className="text-[9px] text-green-300 font-medium mb-0.5">✅ 今日宜</div>
               <div className="text-xs font-bold">{td.advice.do.join(" · ")}</div>
             </div>
-            <div className="flex-1 bg-white/10 rounded-[4px] px-3.5 py-2.5">
+            <div className="flex-1 bg-white/10 rounded-[8px] px-3.5 py-2.5">
               <div className="text-[9px] text-red-300 font-medium mb-0.5">❌ 今日忌</div>
               <div className="text-xs font-bold">{td.advice.dont.join(" · ")}</div>
             </div>
@@ -357,7 +357,7 @@ export default function DailyFortunePage() {
         </div>
 
         {/* ═══════ 卦象区 — 墨朱爻线 · 正宗六爻 ═══════ */}
-        <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 mb-5">
+        <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-brand-gold" />
             <span className="text-xs font-bold text-brand-teal-dark">今日卦象</span>
@@ -367,7 +367,7 @@ export default function DailyFortunePage() {
             {/* 本卦六爻 */}
             <div className="flex-shrink-0">
               <div className="text-[9px] text-gray-400 mb-1 text-center">本卦</div>
-              <div className="bg-brand-teal-light/10 rounded-[4px] p-2.5 border border-brand-teal-light/30">
+              <div className="bg-brand-teal-light/10 rounded-[8px] p-2.5 border border-brand-teal-light/30">
                 {hexagram.yao && [...hexagram.yao].reverse().map((y, i) => {
                   const isChanging = y.changing;
                   return (
@@ -390,7 +390,7 @@ export default function DailyFortunePage() {
             {hexagram.changed_hexagram && (
               <div className="flex-shrink-0">
                 <div className="text-[9px] text-gray-400 mb-1 text-center">变卦</div>
-                <div className="bg-gray-50 rounded-[4px] p-2.5 border border-gray-100">
+                <div className="bg-gray-50 rounded-[8px] p-2.5 border border-gray-100">
                   {hexagram.yao && [...hexagram.yao].reverse().map((y, i) => {
                     const changedValue = y.changing ? 1 - y.value : y.value;
                     return (
@@ -466,7 +466,7 @@ export default function DailyFortunePage() {
             if (level === "平") return "#FFC107"; return "#F44336";
           };
           return (
-          <div className="bg-white rounded-[4px] shadow-sm border border-gray-100 mb-5 overflow-hidden">
+          <div className="bg-white rounded-[8px] shadow-sm border border-gray-100 mb-5 overflow-hidden">
             <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark px-4 pt-4 pb-5 text-white">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">&#128085;</span>
@@ -476,7 +476,7 @@ export default function DailyFortunePage() {
               <div className="flex items-center justify-center gap-2">
                 {WUXING_ROW.map((wx, i) => (
                   <div key={wx.key} className="flex flex-col items-center gap-0.5">
-                    <div className={`w-9 h-9 flex items-center justify-center text-base ${i === dayIdx ? "bg-white/20 text-white rounded-[4px] scale-110" : "text-white/50"}`}>{wx.icon}</div>
+                    <div className={`w-9 h-9 flex items-center justify-center text-base ${i === dayIdx ? "bg-white/20 text-white rounded-[8px] scale-110" : "text-white/50"}`}>{wx.icon}</div>
                     <span className={`text-[9px] ${i === dayIdx ? "text-white font-bold" : "text-white/40"}`}>{wx.key}</span>
                     {i === dayIdx && <span className="text-[7px] bg-white/20 text-white px-1">旺</span>}
                   </div>
@@ -528,7 +528,7 @@ export default function DailyFortunePage() {
 
 
         {/* ═══════ 5维度 ═══════ */}
-        <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 mb-5">
+        <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
           <div className="flex items-center gap-2 mb-4">
             <Flame className="w-4 h-4 text-brand-teal" />
             <span className="text-xs font-bold text-brand-teal-dark">运势维度</span>
@@ -556,13 +556,13 @@ export default function DailyFortunePage() {
         </div>
 
         {/* ═══════ 幸运信息 ═══════ */}
-        <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 mb-5">
+        <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-brand-gold" />
             <span className="text-xs font-bold text-brand-teal-dark">幸运指南</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-brand-teal-light/15 rounded-[4px] p-3">
+            <div className="bg-brand-teal-light/15 rounded-[8px] p-3">
               <div className="text-[9px] text-gray-400 mb-1">🎨 幸运色</div>
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full border border-gray-200 shadow-sm" style={{ background: td.lucky.color_hex }} />
@@ -573,7 +573,7 @@ export default function DailyFortunePage() {
               </div>
               <div className="text-[8px] text-gray-400/60 mt-0.5">{td.lucky.color_hex}</div>
             </div>
-            <div className="bg-brand-teal-light/15 rounded-[4px] p-3">
+            <div className="bg-brand-teal-light/15 rounded-[8px] p-3">
               <div className="text-[9px] text-gray-400 mb-1">🔢 幸运数字</div>
               <div className="flex items-center gap-2">
                 {td.lucky.numbers.map((n, i) => (
@@ -581,11 +581,11 @@ export default function DailyFortunePage() {
                 ))}
               </div>
             </div>
-            <div className="bg-brand-teal-light/15 rounded-[4px] p-3">
+            <div className="bg-brand-teal-light/15 rounded-[8px] p-3">
               <div className="text-[9px] text-gray-400 mb-1">📍 幸运方位</div>
               <div className="text-xs font-bold text-brand-teal-dark">{td.lucky.direction}</div>
             </div>
-            <div className="bg-brand-teal-light/15 rounded-[4px] p-3">
+            <div className="bg-brand-teal-light/15 rounded-[8px] p-3">
               <div className="text-[9px] text-gray-400 mb-1">⏰ 最佳时段</div>
               <div className="text-xs font-bold text-brand-teal-dark">{td.best_hour.name} ({td.best_hour.range})</div>
               <div className="text-[9px] text-brand-teal mt-0.5">加成 +{td.best_hour.bonus}%</div>
@@ -595,7 +595,7 @@ export default function DailyFortunePage() {
 
         {/* ═══════ 当前时辰 ═══════ */}
         {nowHour && (
-          <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[4px] p-5 shadow-sm mb-5 text-white">
+          <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[8px] p-5 shadow-sm mb-5 text-white">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-white/80" />
@@ -615,7 +615,7 @@ export default function DailyFortunePage() {
         )}
 
         {/* ═══════ 12时辰走势 ═══════ */}
-        <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 mb-5">
+        <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4 text-brand-teal" />
             <span className="text-xs font-bold text-brand-teal-dark">今日时辰运势走势</span>
@@ -625,7 +625,7 @@ export default function DailyFortunePage() {
               {hourly.map((h, i) => {
                 const isNow = i === currentHourIndex;
                 return (
-                  <div key={i} className={`flex flex-col items-center gap-1 p-2 rounded-[4px] min-w-[52px] transition-all ${isNow ? "bg-brand-teal-light/30 ring-2 ring-brand-teal ring-offset-1" : "bg-brand-teal-light/10"}`}>
+                  <div key={i} className={`flex flex-col items-center gap-1 p-2 rounded-[8px] min-w-[52px] transition-all ${isNow ? "bg-brand-teal-light/30 ring-2 ring-brand-teal ring-offset-1" : "bg-brand-teal-light/10"}`}>
                     <div className="text-[9px] text-brand-teal font-medium">{h.hour}</div>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm ${scoreBg(h.score)}`}>
                       {h.score}
@@ -645,7 +645,7 @@ export default function DailyFortunePage() {
 
         {/* ═══════ 平台推荐 ═══════ */}
         {rec && (
-          <div className="bg-white rounded-[4px] p-5 shadow-sm border border-gray-100 mb-5">
+          <div className="bg-white rounded-[8px] p-5 shadow-sm border border-gray-100 mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Bot className="w-4 h-4 text-brand-teal" />
               <span className="text-xs font-bold text-brand-teal-dark">平台推荐</span>
@@ -658,7 +658,7 @@ export default function DailyFortunePage() {
               <div className="mb-3">
                 <div className="text-[10px] text-gray-400 mb-2">🎯 推荐PK房间</div>
                 {rec.rooms.map((room: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[4px] px-3.5 py-2.5 mb-1.5">
+                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[8px] px-3.5 py-2.5 mb-1.5">
                     <span className="text-xs font-medium text-brand-teal-dark">{room.name}</span>
                     <span className="text-[9px] text-gray-400">{room.type}</span>
                   </div>
@@ -670,7 +670,7 @@ export default function DailyFortunePage() {
               <div>
                 <div className="text-[10px] text-gray-400 mb-2">📍 附近门店</div>
                 {rec.stores.map((store: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[4px] px-3.5 py-2.5 mb-1.5">
+                  <div key={i} className="flex items-center justify-between bg-brand-teal-light/15 rounded-[8px] px-3.5 py-2.5 mb-1.5">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3 h-3 text-brand-coral" />
                       <span className="text-xs font-medium text-brand-teal-dark">{store.name}</span>
@@ -688,7 +688,7 @@ export default function DailyFortunePage() {
 
         {/* ═══════ 运势助手 — 白底卡片 ═══════ */}
         <div className="mb-5">
-          <Link href="/ai?tab=chat" className="block bg-white rounded-[4px] p-8 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+          <Link href="/ai?tab=chat" className="block bg-white rounded-[8px] p-8 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
             <div className="flex flex-col items-center gap-3">
               <div className="w-20 h-20 flex items-center justify-center text-4xl">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D85A30] to-[#F27152] flex items-center justify-center shadow-md">
@@ -717,7 +717,7 @@ export default function DailyFortunePage() {
         </div>
 
         {/* 免责声明 */}
-        <div className="p-3.5 rounded-[4px] bg-brand-teal-light/10 border border-gray-100 text-[9px] text-gray-400/60 text-center leading-relaxed">
+        <div className="p-3.5 rounded-[8px] bg-brand-teal-light/10 border border-gray-100 text-[9px] text-gray-400/60 text-center leading-relaxed">
           本运势由 AI 基于八字命理 · 奇门遁甲 · 六十四卦算法综合生成，仅供娱乐参考。<br />
           事在人为，保持积极心态方能顺势而行。
         </div>

@@ -48,7 +48,7 @@ export default function DrawFreshnessBar({ type, lastPeriod, lastDrawDate, onRef
   }, [now.getHours(), now.getMinutes()]);
 
   return (
-    <div className={`mx-4 rounded-[4px] p-3 flex items-center gap-3 text-xs ${
+    <div className={`mx-4 rounded-[8px] p-3 flex items-center gap-3 text-xs ${
       isStale ? "bg-red-50 text-red-600 border border-red-200" :
       nextDraw.isDrawDay ? "bg-amber-50 text-amber-700 border border-amber-200" :
       "bg-brand-teal/10 text-brand-teal-dark border border-brand-teal/20"

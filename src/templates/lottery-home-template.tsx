@@ -34,6 +34,9 @@ export default function LotteryHomeTemplate({
       <HeroSection />
       <NewsGrid />
       <LotteryScroll />
+      <div className="px-4 pt-6 pb-4 text-center text-[10px] text-text-tertiary/60">
+        AI趣预测 · 仅娱乐参考 · 理性参与
+      </div>
     </main>
   );
 }

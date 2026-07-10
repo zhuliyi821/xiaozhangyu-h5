@@ -1,18 +1,18 @@
 /**
- * 统一分享到微信工具
+ * 统一分享工具
  *
- * 点击分享按钮 → 复制内容到剪贴板 → 提示用户去微信粘贴
- * 同时尝试通过 URL Scheme 打开微信 App
+ * 策略（仅一条）：
+ * 复制内容到剪贴板 → 提示用户去微信粘贴
  *
- * 这是在不接入微信 JS-SDK 前提下，最接近"直接分享到微信"的体验。
+ * 在微信内置浏览器内，JS-SDK（wechat-jssdk.ts）负责拦截右上角「...」分享事件；
+ * 本模块仅处理用户主动点击分享按钮的场景。
  */
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 /** 显示一个自动消失的 Toast */
-function showToast(msg: string, duration = 2500) {
+function showToast(msg: string, duration = 3000) {
   if (toastTimer) clearTimeout(toastTimer);
-  // 移除已有 toast
   document.querySelectorAll("#wechat-share-toast").forEach((el) => el.remove());
 
   const toast = document.createElement("div");
@@ -27,11 +27,11 @@ function showToast(msg: string, duration = 2500) {
     background: "rgba(0,0,0,0.82)",
     color: "#fff",
     fontSize: "13px",
-    padding: "16px 24px",
+    padding: "20px 28px",
     borderRadius: "16px",
     textAlign: "center",
-    lineHeight: "1.6",
-    maxWidth: "280px",
+    lineHeight: "1.7",
+    maxWidth: "300px",
     boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
     backdropFilter: "blur(8px)",
     animation: "fadeIn 0.2s ease",
@@ -46,31 +46,13 @@ function showToast(msg: string, duration = 2500) {
   }, duration);
 }
 
-/** 尝试通过 URL Scheme 打开微信 */
-function tryOpenWeChat() {
-  // Android: weixin:// 协议
-  // iOS: 不支持直接打开，但仍尝试
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = "weixin://";
-  document.body.appendChild(iframe);
-  setTimeout(() => iframe.remove(), 3000);
-}
-
-/**
- * 分享到微信 — 核心函数
- *
- * @param content 分享的文本/链接内容
- * @param posterUrl 可选的海报图片 URL（生成后传入）
- */
-export async function shareToWeChat(content: string, posterUrl?: string) {
-  // 1. 复制内容到剪贴板
+/** 复制文本到剪贴板 */
+async function copyToClipboard(text: string) {
   try {
-    await navigator.clipboard.writeText(content);
+    await navigator.clipboard.writeText(text);
   } catch {
-    // 降级：创建 textarea 复制
     const ta = document.createElement("textarea");
-    ta.value = content;
+    ta.value = text;
     ta.style.position = "fixed";
     ta.style.left = "-9999px";
     document.body.appendChild(ta);
@@ -78,15 +60,36 @@ export async function shareToWeChat(content: string, posterUrl?: string) {
     document.execCommand("copy");
     document.body.removeChild(ta);
   }
+}
 
-  // 2. 尝试打开微信
-  tryOpenWeChat();
+/**
+ * 分享 — 核心函数
+ *
+ * 剪贴板复制 → Toast 提示用户去微信粘贴
+ * 微信内分享卡片的 JS-SDK 由 wechat-jssdk.ts 自动处理
+ *
+ * @param content 分享的文本/链接
+ * @param posterUrl 可选海报图片 URL（仅用于记录，不参与流程）
+ */
+export async function shareToWeChat(content: string, posterUrl?: string) {
+  await copyToClipboard(content);
 
-  // 3. 显示提示
+  // 判断是否在微信浏览器内
+  const isWeChat = /micromessenger/i.test(navigator.userAgent);
+
   showToast(
-    `✅ 已复制到剪贴板<br/>去微信粘贴给好友吧 💬<br/><br/>` +
-    `<span style="font-size:11px;opacity:0.7">正在尝试打开微信...</span>`
+    isWeChat
+      ? `✅ 已复制到剪贴板<br/>点击右上角「...」<br/>粘贴给好友吧 💬`
+      : `✅ 已复制到剪贴板<br/>打开微信，粘贴发送给好友 💬`
   );
+}
+
+/**
+ * 获取当前页面所在域（用于分享链接，避免硬编码）
+ */
+export function getShareOrigin(): string {
+  if (typeof window !== "undefined") return window.location.origin;
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://ws.hi.cn";
 }
 
 /**
@@ -102,7 +105,7 @@ export function buildShareText(
 }
 
 /**
- * 注入 fadeIn 动画（在 app 入口处调用一次即可）
+ * 注入 fadeIn 动画
  */
 export function injectShareAnimations() {
   if (typeof document === "undefined") return;

@@ -46,7 +46,7 @@ export default function OrdersPage() {
       {loading && (
         <div className="px-4 mt-4 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-surface rounded-[4px] p-4 animate-pulse">
+            <div key={i} className="bg-surface rounded-[8px] p-4 animate-pulse">
               <div className="h-4 bg-bg rounded w-1/3 mb-3" />
               <div className="h-3 bg-bg rounded w-2/3 mb-2" />
               <div className="h-3 bg-bg rounded w-1/4" />
@@ -56,7 +56,7 @@ export default function OrdersPage() {
       )}
 
       {error && (
-        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[4px] text-center">
+        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[8px] text-center">
           <div className="text-red-500 text-sm mb-2">加载失败</div>
           <div className="text-[11px] text-red-400">{error}</div>
           <button onClick={() => { setLoading(true); setError(""); getMemberOrders(user?.uid ?? 0).then(r => setOrders(r.list)).catch(e => setError(e.message)).finally(() => setLoading(false)); }}
@@ -75,7 +75,7 @@ export default function OrdersPage() {
       {!loading && !error && orders.length > 0 && (
         <div className="px-4 mt-4 space-y-3">
           {orders.map((o) => (
-            <div key={o.order_sn} className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+            <div key={o.order_sn} className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
               {/* Header row */}
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-[10px] px-2 py-0.5 rounded-[8px] font-medium ${typeColors[o.order_type] || "bg-gray-500 text-white"}`}>
@@ -87,7 +87,7 @@ export default function OrdersPage() {
               </div>
               {/* Product info */}
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-[4px] bg-bg flex items-center justify-center text-xl shrink-0 border border-[rgba(69,204,213,0.08)]">
+                <div className="w-14 h-14 rounded-[8px] bg-bg flex items-center justify-center text-xl shrink-0 border border-[rgba(69,204,213,0.08)]">
                   {o.order_type === "闲豆" ? "🫘" : "📦"}
                 </div>
                 <div className="flex-1 min-w-0">

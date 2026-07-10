@@ -31,6 +31,7 @@ interface AuthContextType {
   register: (mobile: string, password: string) => Promise<void>;
   logout: () => void;
   refreshBalance: () => Promise<void>;
+  loginWithToken: (token: string, data: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -99,8 +100,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user, saveUser]);
 
+  /** 微信 OAuth 登录：直接用后端返回的 token + 用户信息 */
+  const loginWithToken = useCallback((token: string, data: any) => {
+    saveUser({
+      uid: data.uid,
+      nickname: data.nickname || '微信用户',
+      avatar: data.avatar || '',
+      token: token,
+      balance: data.balance || { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0 },
+    });
+  }, [saveUser]);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshBalance }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshBalance, loginWithToken }}>
       {children}
     </AuthContext.Provider>
   );

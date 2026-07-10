@@ -7,6 +7,7 @@ import { normalizeImageUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { API_BASE } from "@/config/api";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 
 /** 解码 HTML 实体编码（如 &lt; → <） */
 function decodeHtmlEntities(str: string): string {
@@ -46,7 +47,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       const r = await fetch(`${API_BASE}/api/store-services?action=create_order&goods_id=${id}&member_id=${user.uid}&quantity=${qty}`);
       const j = await r.json();
       if (j.code !== 0) throw new Error(j.msg);
-      window.location.href = "/orders";
+      window.location.href = "/checkout/" + j.data.order_id;
     } catch (e: any) {
       alert("下单失败: " + e.message);
     }
@@ -113,7 +114,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <ArrowLeft className="w-5 h-5" />
         </button>
         <span className="text-sm font-medium">商品详情</span>
-        <button className="ml-auto p-1">
+        <button onClick={() => {
+          const text = buildShareText(goods?.title || "小章鱼商品", `¥${goods?.price || 0} · 闲豆可抵扣`);
+          shareToWeChat(text);
+        }} className="ml-auto p-1">
           <Share2 className="w-5 h-5 text-gray-400" />
         </button>
       </div>

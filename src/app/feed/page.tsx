@@ -45,7 +45,7 @@ export default function FeedPage() {
   const [comments, setComments] = useState<Record<number, CommentItem[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [commentLoading, setCommentLoading] = useState<Set<number>>(new Set());
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://h5.ws.hi.cn";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" ? window.location.origin : "https://ws.hi.cn");
 
   const loadFeeds = useCallback(() => {
     setLoading(true);
@@ -135,11 +135,11 @@ export default function FeedPage() {
       </div>
 
       {/* Post Input */}
-      <div className="mx-4 mt-3 bg-surface rounded-[4px] p-3 border border-[rgba(69,204,213,0.08)]">
+      <div className="mx-4 mt-3 bg-surface rounded-[8px] p-3 border border-[rgba(69,204,213,0.08)]">
         <textarea value={postContent} onChange={e => setPostContent(e.target.value)}
           placeholder={user ? "分享你的预测心得..." : "登录后可以发动态"}
           rows={2} maxLength={2000}
-          className="w-full bg-bg rounded-[4px] px-3 py-2 text-xs resize-none outline-none focus:ring-2 focus:ring-brand-teal/30" />
+          className="w-full bg-bg rounded-[8px] px-3 py-2 text-xs resize-none outline-none focus:ring-2 focus:ring-brand-teal/30" />
         <div className="flex justify-end mt-2">
           <button onClick={handlePost} disabled={posting || !postContent.trim() || !user}
             className="px-4 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[11px] font-medium rounded-[10px] disabled:opacity-40 active:scale-95 transition-transform flex items-center gap-1">
@@ -152,10 +152,10 @@ export default function FeedPage() {
       {/* Feed List */}
       {loading ? (
         <div className="mx-4 mt-3 space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-28 bg-surface rounded-[4px] animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-28 bg-surface rounded-[8px] animate-pulse" />)}
         </div>
       ) : feeds.length === 0 ? (
-        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[4px]">
+        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[8px]">
           <div className="text-4xl mb-3">💬</div>
           <p className="text-sm text-text-secondary mb-1">还没有动态</p>
           <p className="text-[11px] text-text-tertiary">第一个发布预测心得吧</p>
@@ -163,7 +163,7 @@ export default function FeedPage() {
       ) : (
         <div className="mx-4 mt-3 space-y-3">
           {feeds.map(feed => (
-            <div key={feed.id} className="bg-surface rounded-[4px] p-4 border border-[rgba(69,204,213,0.08)]">
+            <div key={feed.id} className="bg-surface rounded-[8px] p-4 border border-[rgba(69,204,213,0.08)]">
               {/* Header */}
               <div className="flex items-center gap-2.5 mb-2.5">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-sm text-white font-bold shrink-0">

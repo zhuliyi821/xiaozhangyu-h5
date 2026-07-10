@@ -44,7 +44,7 @@ export default function DrawQueryPage() {
         <div className="flex gap-1 px-3 pb-2 overflow-x-auto scrollbar-none">
           {Object.entries(LOTTERY_CONFIG).map(([key, conf]) => (
             <button key={key} onClick={() => { setActiveKey(key); setPage(1); }}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors ${
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-[8px] text-xs font-medium transition-colors ${
                 activeKey === key
                   ? "bg-brand-teal text-white shadow-sm"
                   : "bg-surface text-text-secondary border border-[rgba(69,204,213,0.08)]"
@@ -57,13 +57,13 @@ export default function DrawQueryPage() {
 
       {loading ? (
         <div className="p-4 space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-24 bg-surface rounded-[4px] animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-24 bg-surface rounded-[8px] animate-pulse" />)}
         </div>
       ) : (
         <div className="px-4 mt-4 space-y-4">
           {/* Latest Draw Detail */}
           {activeDraw && (
-            <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+            <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -102,15 +102,15 @@ export default function DrawQueryPage() {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-3 gap-2">
-                <div className="bg-bg rounded-[4px] p-3 text-center">
+                <div className="bg-bg rounded-[8px] p-3 text-center">
                   <div className="text-[10px] text-text-tertiary">一等奖</div>
                   <div className="text-sm font-bold text-brand-coral mt-0.5">{activeDraw.prize1 || "-"}</div>
                 </div>
-                <div className="bg-bg rounded-[4px] p-3 text-center">
+                <div className="bg-bg rounded-[8px] p-3 text-center">
                   <div className="text-[10px] text-text-tertiary">奖池</div>
                   <div className="text-xs font-bold mt-0.5 truncate">{activeDraw.pool ? `${(Number(activeDraw.pool.replace(/,/g, '')) / 1e8).toFixed(1)}亿` : "-"}</div>
                 </div>
-                <div className="bg-bg rounded-[4px] p-3 text-center">
+                <div className="bg-bg rounded-[8px] p-3 text-center">
                   <div className="text-[10px] text-text-tertiary">销售额</div>
                   <div className="text-xs font-bold mt-0.5 truncate">{activeDraw.sales ? `${(Number(activeDraw.sales.replace(/,/g, '')) / 1e4).toFixed(0)}万` : "-"}</div>
                 </div>
@@ -119,7 +119,7 @@ export default function DrawQueryPage() {
           )}
 
           {/* History List */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold">历史开奖</span>
               <span className="text-[10px] text-text-tertiary">共 {history.length} 期</span>

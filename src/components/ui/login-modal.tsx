@@ -139,7 +139,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   return (
     <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-[4px] w-full max-w-[360px] overflow-hidden shadow-2xl"
+        className="bg-white rounded-[8px] w-full max-w-[360px] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -167,7 +167,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             {mode === "forgot" && "输入注册手机号重置密码"}
           </p>
           {referrer && mode === "register" && (
-            <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[4px]">
+            <div className="mt-2 inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-3 py-1 rounded-[8px]">
               <Gift className="w-3 h-3" /> {referrer.nickname} 推荐了你，你们各得 1,000 游戏豆 🎉
             </div>
           )}
@@ -182,7 +182,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                 type="tel" placeholder="手机号" maxLength={11}
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[8px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
               />
             </div>
 
@@ -192,7 +192,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                 type={showPwd ? "text" : "password"} placeholder="密码"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-9 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                className="w-full pl-9 pr-9 py-3 bg-gray-50 rounded-[8px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2">
                 {showPwd ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
@@ -214,7 +214,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             )}
 
             <button type="submit" disabled={submitting}
-              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-medium active:scale-[0.98] transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {mode === "login" ? "登录" : "注册并登录"}
@@ -230,6 +230,24 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           </form>
         )}
 
+        {/* ── WeChat Login Divider + Button ── */}
+        {mode === "login" && (
+          <div className="px-6 pb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-[11px] text-text-tertiary shrink-0">其他登录方式</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+            <button type="button" onClick={() => window.location.href = "/api/wechat?action=auth_url"}
+              className="w-full py-2.5 border border-[#07C160] text-[#07C160] rounded-[8px] text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:bg-[#07C160]/5">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.5 13.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5S10 11.17 10 12s-.67 1.5-1.5 1.5zm5 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5S15 11.17 15 12s-.67 1.5-1.5 1.5zM12 2C6.48 2 2 5.58 2 10c0 2.5 1.35 4.67 3.44 6.15l-.94 2.85 3.09-1.69c.82.23 1.76.36 2.71.36h.3A7.85 7.85 0 0010 16.5c0-3.87 3.13-7 7-7 .34 0 .68.03 1.01.07C16.87 5.56 14.54 2 12 2zm7 7c-2.76 0-5 2.24-5 5s2.24 5 5 5c.46 0 .9-.07 1.33-.19l1.84 1.01-.56-1.69C22.37 17.23 23 15.9 23 14.43 23 11.18 20.76 9 18.59 9z"/>
+              </svg>
+              微信一键登录
+            </button>
+          </div>
+        )}
+
         {/* ── Forgot Password Form ── */}
         {mode === "forgot" && (
           <div className="px-6 pb-6 space-y-3">
@@ -241,12 +259,12 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="tel" placeholder="注册手机号" maxLength={11}
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[8px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
 
                 {codeSent && debugCode && (
-                  <div className="bg-amber-50 rounded-[4px] px-4 py-2.5 text-center">
+                  <div className="bg-amber-50 rounded-[8px] px-4 py-2.5 text-center">
                     <p className="text-[10px] text-amber-600">📱 验证码（调试模式）</p>
                     <p className="text-lg font-mono font-bold text-amber-800 tracking-[0.3em]">{debugCode}</p>
                     <p className="text-[9px] text-amber-500 mt-0.5">接入短信后将自动发送到手机</p>
@@ -257,14 +275,14 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
 
                 {!codeSent ? (
                   <button onClick={handleSendCode} disabled={submitting}
-                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     获取验证码
                   </button>
                 ) : (
                   <button onClick={() => setForgotStep(2)}
-                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium"
+                    className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-medium"
                   >
                     下一步
                   </button>
@@ -280,7 +298,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="text" placeholder="输入验证码" maxLength={6}
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[8px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
                 <div className="relative">
@@ -288,7 +306,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
                   <input type="password" placeholder="新密码（至少6位）"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[4px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-3 py-3 bg-gray-50 rounded-[8px] text-sm outline-none focus:ring-2 focus:ring-brand-teal/30 focus:bg-white transition-all"
                   />
                 </div>
 
@@ -305,11 +323,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
 
                 <div className="flex gap-2">
                   <button onClick={() => { setForgotStep(1); setCode(""); setNewPassword(""); setError(""); }}
-                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-[4px] text-sm font-medium">
+                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-[8px] text-sm font-medium">
                     返回
                   </button>
                   <button onClick={handleResetPassword} disabled={submitting}
-                    className="flex-[2] py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="flex-[2] py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     重置密码

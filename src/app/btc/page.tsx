@@ -248,7 +248,7 @@ export default function BTCGamePage() {
       <div className="px-4 pt-4">
         {/* BTC Real-Time Price Banner */}
         {cp > 0 && (
-          <div className={`bg-gradient-to-r from-orange-500 to-amber-500 rounded-[4px] p-3 mb-3 flex items-center justify-between shadow-sm transition-all duration-300 ${
+          <div className={`bg-gradient-to-r from-orange-500 to-amber-500 rounded-[8px] p-3 mb-3 flex items-center justify-between shadow-sm transition-all duration-300 ${
             priceFlash === true ? "scale-[1.02] ring-2 ring-green-300/50" : priceFlash === false ? "scale-[1.02] ring-2 ring-red-300/50" : ""
           }`}>
             <div className="flex-1">
@@ -281,7 +281,7 @@ export default function BTCGamePage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 rounded-[4px] bg-bg p-0.5 mb-4 overflow-x-auto">
+        <div className="flex gap-1 rounded-[8px] bg-bg p-0.5 mb-4 overflow-x-auto">
           {[
             { k: "fast" as const, l: "🎲 快节奏" },
             { k: "predict" as const, l: "📈 合约交易" },
@@ -289,7 +289,7 @@ export default function BTCGamePage() {
             { k: "orders" as const, l: "📜 订单" },
           ].map(t => (
             <button key={t.k} onClick={() => setTab(t.k)}
-              className={`flex-1 whitespace-nowrap rounded-[4px] px-3 py-2 text-center text-xs font-medium transition ${
+              className={`flex-1 whitespace-nowrap rounded-[8px] px-3 py-2 text-center text-xs font-medium transition ${
                 tab === t.k ? "bg-surface text-text-primary shadow-sm" : "text-text-tertiary hover:text-text-secondary"
               }`}>
               {t.l}
@@ -299,7 +299,7 @@ export default function BTCGamePage() {
 
         {/* ── Futures Trading Tab ── */}
         {tab === "predict" && (
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-tertiary/40">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -315,14 +315,14 @@ export default function BTCGamePage() {
               <label className="text-[10px] text-text-tertiary mb-1.5 block">方向</label>
               <div className="flex gap-2">
                 <button onClick={() => setDirection(1)}
-                  className={`flex-1 rounded-[4px] py-3 text-xs font-bold transition-all ${
+                  className={`flex-1 rounded-[8px] py-3 text-xs font-bold transition-all ${
                     direction === 1 ? "bg-red-500 text-white shadow-sm ring-2 ring-red-300" : "bg-bg text-text-secondary border border-border-tertiary"
                   }`}>
                   <div className="text-lg">📈</div>
                   <div>做多</div>
                 </button>
                 <button onClick={() => setDirection(2)}
-                  className={`flex-1 rounded-[4px] py-3 text-xs font-bold transition-all ${
+                  className={`flex-1 rounded-[8px] py-3 text-xs font-bold transition-all ${
                     direction === 2 ? "bg-green-500 text-white shadow-sm ring-2 ring-green-300" : "bg-bg text-text-secondary border border-border-tertiary"
                   }`}>
                   <div className="text-lg">📉</div>
@@ -361,7 +361,7 @@ export default function BTCGamePage() {
                 ))}
               </div>
               <input type="number" min="100" value={marginAmount} onChange={e => setMarginAmount(e.target.value)}
-                className="w-full rounded-[4px] border border-border-tertiary bg-bg p-2.5 text-sm outline-none focus:border-brand-teal" placeholder="自定义金额 (≥100)" />
+                className="w-full rounded-[8px] border border-border-tertiary bg-bg p-2.5 text-sm outline-none focus:border-brand-teal" placeholder="自定义金额 (≥100)" />
             </div>
 
             {/* Position Info */}
@@ -394,7 +394,7 @@ export default function BTCGamePage() {
             )}
 
             <button onClick={openPosition} disabled={loading}
-              className={`w-full rounded-[4px] py-3.5 text-sm font-bold text-white transition-all active:scale-[0.97] ${
+              className={`w-full rounded-[8px] py-3.5 text-sm font-bold text-white transition-all active:scale-[0.97] ${
                 loading ? "bg-text-tertiary" : direction === 1
                   ? "bg-gradient-to-r from-red-500 to-red-600 shadow-sm"
                   : "bg-gradient-to-r from-green-500 to-green-600 shadow-sm"
@@ -413,7 +413,7 @@ export default function BTCGamePage() {
         {/* ── Fast Game Tab ── */}
         {tab === "fast" && (
           <div className="space-y-3">
-            <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-[4px] p-3 flex items-center justify-between shadow-sm">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-[8px] p-3 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
                 <div>
@@ -430,7 +430,7 @@ export default function BTCGamePage() {
             </div>
 
             {/* Countdown Bar */}
-            <div className="bg-surface rounded-[4px] px-4 py-3 shadow-sm border border-border-tertiary">
+            <div className="bg-surface rounded-[8px] px-4 py-3 shadow-sm border border-border-tertiary">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-text-secondary">本轮倒计时</span>
@@ -455,7 +455,7 @@ export default function BTCGamePage() {
             </div>
 
             {/* Bet Panel */}
-            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             {/* Game Type Tabs */}
             <div className="grid grid-cols-4 gap-1.5 mb-4">
               {[
@@ -465,7 +465,7 @@ export default function BTCGamePage() {
                 { k: "tail", l: "🎯 尾号", odds: "8.5" },
               ].map(g => (
                 <button key={g.k} onClick={() => setBetType(g.k)}
-                  className={`rounded-[4px] py-2.5 text-center active:scale-95 transition-all ${
+                  className={`rounded-[8px] py-2.5 text-center active:scale-95 transition-all ${
                     betType === g.k ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                   }`}>
                   <div className="text-[17px]">{g.l.split(" ")[0]}</div>
@@ -481,11 +481,11 @@ export default function BTCGamePage() {
                 <label className="text-[10px] text-text-tertiary mb-1.5 block">方向选择</label>
                 <div className="flex gap-2">
                   <button onClick={() => setFastDirection("涨")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       fastDirection === "涨" ? "bg-red-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>📈 看涨</button>
                   <button onClick={() => setFastDirection("跌")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       fastDirection === "跌" ? "bg-green-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>📉 看跌</button>
                 </div>
@@ -496,11 +496,11 @@ export default function BTCGamePage() {
                 <label className="text-[10px] text-text-tertiary mb-1.5 block">方向选择</label>
                 <div className="flex gap-2">
                   <button onClick={() => setBsDirection("大")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       bsDirection === "大" ? "bg-red-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>🔴 大 (5-9)</button>
                   <button onClick={() => setBsDirection("小")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       bsDirection === "小" ? "bg-green-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>🟢 小 (0-4)</button>
                 </div>
@@ -511,11 +511,11 @@ export default function BTCGamePage() {
                 <label className="text-[10px] text-text-tertiary mb-1.5 block">方向选择</label>
                 <div className="flex gap-2">
                   <button onClick={() => setOeDirection("单")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       oeDirection === "单" ? "bg-red-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>🔵 单 (1,3,5,7,9)</button>
                   <button onClick={() => setOeDirection("双")}
-                    className={`flex-1 rounded-[4px] py-2.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-[8px] py-2.5 text-xs font-semibold transition ${
                       oeDirection === "双" ? "bg-green-500 text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>🟢 双 (0,2,4,6,8)</button>
                 </div>
@@ -527,7 +527,7 @@ export default function BTCGamePage() {
                 <div className="grid grid-cols-5 gap-1.5">
                   {Array.from({ length: 10 }, (_, i) => i).map(n => (
                     <button key={n} onClick={() => setTailNumber(n)}
-                      className={`w-full aspect-square rounded-[4px] text-sm font-bold flex items-center justify-center active:scale-90 transition-all ${
+                      className={`w-full aspect-square rounded-[8px] text-sm font-bold flex items-center justify-center active:scale-90 transition-all ${
                         tailNumber === n ? "bg-gradient-to-br from-brand-gold to-brand-gold-dark text-white shadow-sm" : "bg-bg text-text-secondary border border-border-tertiary"
                       }`}>{n}</button>
                   ))}
@@ -549,7 +549,7 @@ export default function BTCGamePage() {
               <div className="mt-1.5 flex gap-2">
                 {[100, 500, 1000, 5000].map(v => (
                   <button key={v} onClick={() => setBetPoints(String(v))}
-                    className={`flex-1 rounded-[4px] py-2 text-xs font-medium transition ${
+                    className={`flex-1 rounded-[8px] py-2 text-xs font-medium transition ${
                       betPoints === String(v) ? "bg-brand-teal/10 text-brand-teal-dark border border-brand-teal/30" : "bg-bg text-text-secondary border border-border-tertiary"
                     }`}>{v.toLocaleString()}</button>
                 ))}
@@ -572,7 +572,7 @@ export default function BTCGamePage() {
             </div>
 
             <button onClick={placeFastBet} disabled={loading || settling || localCountdown <= 0}
-              className={`w-full rounded-[4px] py-3 text-sm font-semibold text-white transition ${
+              className={`w-full rounded-[8px] py-3 text-sm font-semibold text-white transition ${
                 loading || settling ? "bg-text-tertiary" : localCountdown <= 0 ? "bg-text-tertiary/50" : "bg-gradient-to-r from-brand-teal to-brand-teal-dark shadow-sm active:scale-[0.97]"
               }`}>
               {settling ? "⏳ 结算中..." : loading ? "⏳" : localCountdown <= 0 ? "⏳ 等待开奖" : "🎲 投注"}
@@ -581,7 +581,7 @@ export default function BTCGamePage() {
 
             {/* My Fast Bets */}
             {fastBets.length > 0 && (
-              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold">本轮投注</span>
                   <span className="text-[10px] text-text-tertiary">{fastBets.length} 注</span>
@@ -611,7 +611,7 @@ export default function BTCGamePage() {
 
         {/* ── Positions Tab ── */}
         {tab === "positions" && (
-          <div className="bg-surface rounded-[4px] overflow-hidden shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] overflow-hidden shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between p-4 pb-2">
               <span className="text-sm font-semibold">持有仓位 ({positions.length})</span>
               <button onClick={loadPositions} className="text-[11px] text-brand-teal-dark">🔄 刷新</button>
@@ -665,7 +665,7 @@ export default function BTCGamePage() {
 
         {/* ── Orders Tab ── */}
         {tab === "orders" && (
-          <div className="bg-surface rounded-[4px] overflow-hidden shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] overflow-hidden shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between p-4 pb-2">
               <span className="text-sm font-semibold">历史订单 ({orders.length})</span>
               <button onClick={loadOrders} className="text-[11px] text-brand-teal-dark">🔄 刷新</button>

@@ -43,7 +43,7 @@ export default function BTCPredictPage() {
   const fetchPrediction = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_BASE + "/api/btc/predict");
+      const res = await fetch(API_BASE + "/api/v2/btc/predict");
       const json = await res.json();
       if (json.code !== 0) throw new Error(json.msg || "请求失败");
       setData(json.data);
@@ -132,7 +132,7 @@ export default function BTCPredictPage() {
       <div className="px-4 -mt-4 relative z-20">
         {/* Signal Card */}
         {sigInfo && (
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-text-tertiary" />
@@ -172,7 +172,7 @@ export default function BTCPredictPage() {
         )}
 
         {/* Mini Chart */}
-        <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
+        <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-4 h-4 text-text-tertiary" />
             <span className="text-sm font-semibold">价格趋势</span>
@@ -190,7 +190,7 @@ export default function BTCPredictPage() {
                 { label: "24h 成交量", val: formatLarge(data.market_data.volume_24h) + " BTC", color: "#6B7280" },
                 { label: "市值", val: "$" + formatLarge(data.market_data.market_cap), color: "#6B7280" },
               ].map((item, i) => (
-                <div key={i} className="bg-surface rounded-[4px] p-3 shadow-sm border border-border-tertiary">
+                <div key={i} className="bg-surface rounded-[8px] p-3 shadow-sm border border-border-tertiary">
                   <div className="text-[10px] text-text-tertiary">{item.label}</div>
                   <div className="text-sm font-bold mt-0.5" style={{ color: item.color }}>{item.val}</div>
                 </div>
@@ -198,7 +198,7 @@ export default function BTCPredictPage() {
             </div>
 
             {/* Derivatives Data */}
-            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-text-tertiary" />
                 <span className="text-sm font-semibold">衍生品市场</span>
@@ -224,7 +224,7 @@ export default function BTCPredictPage() {
             </div>
 
             {/* Technical Indicators */}
-            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
               <div className="flex items-center gap-2 mb-3">
                 <Activity className="w-4 h-4 text-text-tertiary" />
                 <span className="text-sm font-semibold">技术指标</span>
@@ -250,7 +250,7 @@ export default function BTCPredictPage() {
             </div>
 
             {/* Returns */}
-            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary mb-3">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-text-tertiary" />
                 <span className="text-sm font-semibold">区间涨跌</span>
@@ -270,7 +270,7 @@ export default function BTCPredictPage() {
             </div>
 
             {/* Model Breakdown */}
-            <details className="bg-surface rounded-[4px] overflow-hidden shadow-sm border border-border-tertiary mb-3">
+            <details className="bg-surface rounded-[8px] overflow-hidden shadow-sm border border-border-tertiary mb-3">
               <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-semibold">
                 <span>7模型评分明细</span>
                 <ChevronDown className="w-4 h-4 text-text-tertiary" />

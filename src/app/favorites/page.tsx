@@ -39,7 +39,7 @@ export default function FavoritesPage() {
       {loading && (
         <div className="px-4 mt-4 space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-surface rounded-[4px] p-4 animate-pulse">
+            <div key={i} className="bg-surface rounded-[8px] p-4 animate-pulse">
               <div className="h-4 bg-bg rounded w-1/3 mb-3" /><div className="h-3 bg-bg rounded w-1/2" />
             </div>
           ))}
@@ -47,7 +47,7 @@ export default function FavoritesPage() {
       )}
 
       {error && (
-        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[4px] text-center">
+        <div className="mx-4 mt-8 p-4 bg-red-50 rounded-[8px] text-center">
           <div className="text-red-500 text-sm mb-2">加载失败</div>
           <button onClick={() => { setError(""); setLoading(true); if (user) getFavorites(user.uid).then(r => setItems(r.list)).catch(e => setError(e.message)).finally(() => setLoading(false)); }}
             className="px-4 py-1.5 bg-red-500 text-white text-xs rounded-[10px]">重试</button>
@@ -65,8 +65,8 @@ export default function FavoritesPage() {
       {!loading && !error && items.length > 0 && (
         <div className="px-4 mt-4 space-y-3">
           {items.map(item => (
-            <div key={item.id} className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)] flex items-center gap-3">
-              <div className="w-14 h-14 rounded-[4px] bg-gradient-to-br from-brand-gold-light to-brand-coral-light flex items-center justify-center text-xl shrink-0">📦</div>
+            <div key={item.id} className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)] flex items-center gap-3">
+              <div className="w-14 h-14 rounded-[8px] bg-gradient-to-br from-brand-gold-light to-brand-coral-light flex items-center justify-center text-xl shrink-0">📦</div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold truncate">{item.product_name}</div>
                 <div className="text-sm font-bold text-brand-coral mt-0.5">¥{item.selling_price}</div>

@@ -137,7 +137,7 @@ export default function CategoryPKHall() {
           <h1 className="text-xl font-bold text-white">{cfg.name} PK厅</h1>
           <p className="text-xs text-white/80 mt-0.5">{cfg.desc}</p>
         </div>
-        <div className="mx-2 mt-3 bg-white/15 backdrop-blur-sm rounded-[4px] p-3 flex justify-around relative z-10">
+        <div className="mx-2 mt-3 bg-white/15 backdrop-blur-sm rounded-[8px] p-3 flex justify-around relative z-10">
           <div className="text-center"><div className="text-sm font-bold text-white">{activeCount}</div><div className="text-[9px] text-white/70">进行中</div></div>
           <div className="w-px bg-white/20" />
           <div className="text-center"><div className="text-sm font-bold text-white">{totalPool}</div><div className="text-[9px] text-white/70">总奖池💰</div></div>
@@ -150,7 +150,7 @@ export default function CategoryPKHall() {
 
       {/* 错误提示 */}
       {error && (
-        <div className="mx-4 mt-3 px-4 py-2 text-[11px] font-medium bg-red-50 text-red-600 rounded-[4px] text-center">
+        <div className="mx-4 mt-3 px-4 py-2 text-[11px] font-medium bg-red-50 text-red-600 rounded-[8px] text-center">
           {error}
           <button onClick={() => loadTopics()} className="ml-2 underline">重试</button>
         </div>
@@ -159,10 +159,10 @@ export default function CategoryPKHall() {
       {/* 列表 */}
       {loading ? (
         <div className="mx-4 mt-3 space-y-2">
-          {[1,2].map(i => <div key={i} className="h-28 bg-white rounded-[4px] animate-pulse border border-gray-100" />)}
+          {[1,2].map(i => <div key={i} className="h-28 bg-white rounded-[8px] animate-pulse border border-gray-100" />)}
         </div>
       ) : topics.length === 0 ? (
-        <div className="mx-4 mt-3 bg-white rounded-[4px] p-8 text-center border border-gray-100">
+        <div className="mx-4 mt-3 bg-white rounded-[8px] p-8 text-center border border-gray-100">
           <div className="text-3xl mb-2">{cfg.icon}</div>
           <div className="text-[11px] text-gray-400">还没有PK话题</div>
           <div className="text-[10px] text-gray-400 mt-1">发起第一个PK吧！</div>
@@ -174,7 +174,7 @@ export default function CategoryPKHall() {
             const isSettled = p.status === 3;
             return (
               <div key={p.id} onClick={() => router.push(`/pk-hall/${category}/${p.id}`)}
-                className={`bg-white rounded-[4px] p-4 shadow-sm border cursor-pointer active:scale-[0.98] transition-transform ${isSettled ? 'border-amber-200' : 'border-gray-100'}`}>
+                className={`bg-white rounded-[8px] p-4 shadow-sm border cursor-pointer active:scale-[0.98] transition-transform ${isSettled ? 'border-amber-200' : 'border-gray-100'}`}>
                 <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-2">
                   <span className={isSettled ? 'text-amber-600 font-medium' : p.status === 2 ? 'text-red-400' : 'text-brand-teal-dark'}>{p.status_label}</span>
                   <span className="w-[3px] h-[3px] rounded-full bg-gray-300" />
@@ -201,7 +201,7 @@ export default function CategoryPKHall() {
 
       {/* 消息提示 */}
       {voteMsg && (
-        <div className="fixed bottom-24 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[4px] animate-fade-in z-50 shadow-lg">
+        <div className="fixed bottom-24 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[8px] animate-fade-in z-50 shadow-lg">
           {voteMsg}
         </div>
       )}
@@ -212,7 +212,7 @@ export default function CategoryPKHall() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
           <button onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
-            className="flex-1 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white py-3.5 rounded-[4px] text-sm font-semibold shadow-sm active:scale-[0.97] transition-transform">
+            className="flex-1 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white py-3.5 rounded-[8px] text-sm font-semibold shadow-sm active:scale-[0.97] transition-transform">
             💰 发起PK
           </button>
           <button onClick={() => {
@@ -225,10 +225,10 @@ export default function CategoryPKHall() {
       {/* 投注确认弹窗 */}
       {confirmVote && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setConfirmVote(null)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-3">🎯 投注确认</h3>
             <div className="space-y-2.5 text-xs">
-              <div className="bg-gray-50 rounded-[4px] p-3">
+              <div className="bg-gray-50 rounded-[8px] p-3">
                 <div className="font-medium mb-1">{confirmVote.pk.title}</div>
                 <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">
                   {confirmVote.choice === 'A' ? (confirmVote.pk.option_a || confirmVote.pk.options?.[0]) : (confirmVote.pk.option_b || confirmVote.pk.options?.[1])}
@@ -250,7 +250,7 @@ export default function CategoryPKHall() {
                   className="flex-1 px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" placeholder="自定义" />
                 <span className="text-[10px] text-gray-400 whitespace-nowrap">游戏豆</span>
               </div>
-              <div className="bg-amber-50 rounded-[4px] p-3 text-center">
+              <div className="bg-amber-50 rounded-[8px] p-3 text-center">
                 <div className="text-[10px] text-gray-400">预估预测正确可赢得</div>
                 <div className="text-lg font-bold text-amber-600">
                   +{(() => {
@@ -267,8 +267,8 @@ export default function CategoryPKHall() {
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[4px] text-xs font-medium">取消</button>
-              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-medium">
+              <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[8px] text-xs font-medium">取消</button>
+              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium">
                 确认投注 {confirmVote.betAmount} 豆
               </button>
             </div>
@@ -279,17 +279,17 @@ export default function CategoryPKHall() {
       {/* 发起PK弹窗 */}
       {showCreate && (
         <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-4">💰 发起PK · {cfg.name}</h3>
             <div className="space-y-3">
               <input type="text" placeholder="PK话题" value={pkForm.title} onChange={e => setPkForm({...pkForm, title: e.target.value})}
-                className="w-full px-3 py-2.5 bg-gray-50 rounded-[4px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
+                className="w-full px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
               <div className="flex gap-2">
                 <input type="text" placeholder="选项A" value={pkForm.options[0] || ""} onChange={e => { const o = [...pkForm.options]; o[0] = e.target.value; setPkForm({...pkForm, options: o}); }}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[4px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
+                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
                 <span className="self-center text-xs text-gray-400">VS</span>
                 <input type="text" placeholder="选项B" value={pkForm.options[1] || ""} onChange={e => { const o = [...pkForm.options]; o[1] = e.target.value; setPkForm({...pkForm, options: o}); }}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[4px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
+                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
               </div>
               <div>
                 <div className="text-[10px] text-gray-400 mb-1.5">⏱ 截止时间</div>
@@ -314,7 +314,7 @@ export default function CategoryPKHall() {
                 </div>
               </div>
               <button onClick={handleCreatePK} disabled={!pkForm.title || pkForm.options.filter(o => o.trim()).length < 2}
-                className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-medium disabled:opacity-50">
+                className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium disabled:opacity-50">
                 发起PK
               </button>
             </div>
@@ -325,9 +325,9 @@ export default function CategoryPKHall() {
       {/* 分享弹窗 */}
       {showShare && shareTopic && (
         <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowShare(false)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[340px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[340px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-3">↗ 分享此PK</h3>
-            <div className="bg-gray-50 rounded-[4px] p-4 mb-4">
+            <div className="bg-gray-50 rounded-[8px] p-4 mb-4">
               <div className="text-xs font-medium mb-1">{shareTopic.title}</div>
               <div className="flex gap-2 text-[11px] mt-2">
                 <span className="px-2 py-1 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">{shareTopic.option_a || shareTopic.options?.[0]}</span>
@@ -337,7 +337,7 @@ export default function CategoryPKHall() {
               <div className="text-[10px] text-gray-400 mt-2">💰 当前奖池：{shareTopic.total_pool}豆</div>
             </div>
             <button onClick={copyShareLink}
-              className="w-full py-3 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white rounded-[4px] text-sm font-medium">
+              className="w-full py-3 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white rounded-[8px] text-sm font-medium">
               📋 复制分享文本
             </button>
           </div>

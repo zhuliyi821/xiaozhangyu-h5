@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { TrendingUp, Search, RefreshCw, AlertTriangle, ChevronDown, BarChart3, Activity, Target, Shield, Building2, Coins, Sparkles } from "lucide-react";
 
-import { API_BASE } from '@/config/api';
+import { API_V2 } from '@/config/api';
 
 interface PredictionResult {
   code: string;
@@ -85,30 +85,11 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
     setLoading(true);
     setError("");
     try {
-      // 并行调三个API: 技术分析 + 多源评分 + 准确率
-      const [res1, res2, res3] = await Promise.all([
-        fetch(`${API_BASE}/api/stock/analysis?code=${stockCode}`),
-        fetch(`${API_BASE}/api/stock/comprehensive?code=${stockCode}`),
-        fetch(`${API_BASE}/api/stock/accuracy?code=${stockCode}&days=30`),
-      ]);
+      // 调用新平台 API (统一分析)
+      const res1 = await fetch(`${API_V2}/stock/analysis?code=${stockCode}`);
       const json1 = await res1.json();
       if (json1.code !== 0) throw new Error(json1.msg || "分析失败");
       setResult(json1.data);
-      
-      // 多源评分(非必须)
-      try {
-        const json2 = await res2.json();
-        if (json2.code === 0) setCompScore(json2.data);
-      } catch {}
-      
-      // 准确率(非必须)
-      try {
-        const json3 = await res3.json();
-        if (json3.code === 0) {
-          setStockAccuracy(json3.data.accuracy);
-          setAccuracyDays(json3.data.period_days);
-        }
-      } catch {}
       
       onData?.(json1.data);
       setCode(stockCode);

@@ -138,15 +138,15 @@ export default function PKHallPage() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white/12 backdrop-blur-sm rounded-[4px] py-2.5 text-center">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
             <div className="text-sm font-bold">{stats.active}</div>
             <div className="text-[9px] text-white/70">进行中</div>
           </div>
-          <div className="bg-white/12 backdrop-blur-sm rounded-[4px] py-2.5 text-center">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
             <div className="text-sm font-bold">{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
             <div className="text-[9px] text-white/70">总奖池</div>
           </div>
-          <div className="bg-white/12 backdrop-blur-sm rounded-[4px] py-2.5 text-center">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
             <div className="text-sm font-bold">{stats.voters}</div>
             <div className="text-[9px] text-white/70">参与者</div>
           </div>
@@ -156,7 +156,7 @@ export default function PKHallPage() {
       <div className="px-3">
         {/* ─── 错误提示 ─── */}
         {error && (
-          <div className="mt-2 px-4 py-2.5 bg-red-50 text-red-600 text-[11px] rounded-[4px] text-center">
+          <div className="mt-2 px-4 py-2.5 bg-red-50 text-red-600 text-[11px] rounded-[8px] text-center">
             {error}
             <span className="ml-2 underline cursor-pointer" onClick={() => window.location.reload()}>重试</span>
           </div>
@@ -170,7 +170,7 @@ export default function PKHallPage() {
           </div>
         )}
         {showBind && (
-          <div className="bg-white rounded-[4px] p-3 mt-2 mb-2 border border-brand-teal shadow-[0_2px_12px_rgba(69,204,213,0.15)] relative">
+          <div className="bg-white rounded-[8px] p-3 mt-2 mb-2 border border-brand-teal shadow-[0_2px_12px_rgba(69,204,213,0.15)] relative">
             <div className="text-[11px] font-semibold text-brand-teal-dark mb-1.5">🔗 身份绑定</div>
             <div className="text-[10px] text-[#6B6B6E] mb-2">绑定后可在企微接收结算通知、到店核销奖励</div>
             <div className="flex gap-1.5">
@@ -202,7 +202,7 @@ export default function PKHallPage() {
         )}
 
         {/* ─── 双列筛选: 品类 + 排序 ─── */}
-        <div className="mt-3 bg-white rounded-[4px] p-2.5 border border-gray-100 shadow-sm">
+        <div className="mt-3 bg-white rounded-[8px] p-2.5 border border-gray-100 shadow-sm">
           {/* 品类标签 */}
           <div className="flex gap-1.5 flex-wrap mb-2">
             {CATEGORIES.map(cat => (
@@ -246,7 +246,7 @@ export default function PKHallPage() {
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {[1,2,3].map(i => (
-              <div key={i} className="bg-white rounded-[4px] p-4 shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-gray-200 animate-pulse">
+              <div key={i} className="bg-white rounded-[8px] p-4 shadow-[0_2px_8px_rgba(69,204,213,0.05)] border border-gray-200 animate-pulse">
                 <div className="h-3.5 w-3/5 bg-gray-200 rounded mb-3" />
                 <div className="h-2.5 w-full bg-gray-200 rounded mb-2" />
                 <div className="h-2 w-full bg-gray-200 rounded" />
@@ -267,7 +267,7 @@ export default function PKHallPage() {
               const pctB = Math.min(100, Math.round(((pk.vote_b || 0) / total) * 100));
               return (
               <div key={pk.id}
-                className="bg-white rounded-[4px] overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+                className="bg-white rounded-[8px] overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
 
                 {/* Card header tags */}
                 <div className="px-3.5 pt-3 flex items-center gap-1.5 flex-wrap">
@@ -354,7 +354,7 @@ export default function PKHallPage() {
       {/* ─── 发起PK弹窗 ─── */}
       {showCreate && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[400px] p-5 shadow-2xl overflow-y-auto" style={{ maxHeight: "85vh" }} onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[400px] p-5 shadow-2xl overflow-y-auto" style={{ maxHeight: "85vh" }} onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-4">📝 发起事件</h3>
             <div className="space-y-3.5">
 
@@ -383,7 +383,7 @@ export default function PKHallPage() {
               {/* 2. 话题 + 选项 */}
               <input type="text" placeholder="PK话题" value={pkForm.title}
                 onChange={e => setPkForm({...pkForm, title: e.target.value})}
-                className="w-full px-3 py-2.5 bg-gray-50 rounded-[4px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
+                className="w-full px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
 
               <div>
                 <div className="text-[10px] text-gray-400 mb-1.5">选项（至少2个）</div>
@@ -422,7 +422,7 @@ export default function PKHallPage() {
                   </button>
                 </div>
                 {pkForm.charity !== "none" && (
-                  <div className="bg-red-50/50 rounded-[4px] p-3 space-y-2">
+                  <div className="bg-red-50/50 rounded-[8px] p-3 space-y-2">
                     <div className="flex gap-1.5">
                       {(["all_donate", "percentage"] as CharityMode[]).filter(c => c !== "none" && c !== "brand_match").map(c => (
                         <button key={c} onClick={() => setPkForm(f => ({ ...f, charity: c }))}
@@ -564,7 +564,7 @@ export default function PKHallPage() {
               {/* 提交 */}
               <button onClick={handleCreatePK}
                 disabled={!pkForm.title || pkForm.options.filter(o => o.trim()).length < 2}
-                className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-semibold shadow-[0_4px_16px_rgba(69,204,213,0.3)] disabled:opacity-50 active:scale-[0.98] transition-transform">
+                className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-semibold shadow-[0_4px_16px_rgba(69,204,213,0.3)] disabled:opacity-50 active:scale-[0.98] transition-transform">
                 发布事件
               </button>
             </div>
@@ -573,7 +573,7 @@ export default function PKHallPage() {
       )}
 
       {voteMsg && (
-        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[4px] z-50 shadow-lg">
+        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[8px] z-50 shadow-lg">
           {voteMsg}
         </div>
       )}

@@ -2,7 +2,7 @@
 
 export default function AIGuessCard() {
   return (
-    <div className="mx-3 mt-3 rounded-[4px] bg-white border border-gray-100 p-4">
+    <div className="mx-3 mt-3 rounded-[8px] bg-white border border-gray-100 p-4">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-lg">🐙</span>
         <span className="text-[12px] font-medium text-gray-700">AI瞎猜</span>

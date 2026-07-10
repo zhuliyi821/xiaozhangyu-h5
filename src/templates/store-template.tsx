@@ -14,6 +14,7 @@ import { ImageOff } from "lucide-react";
 import ShareButton from "@/components/ui/share-button";
 import SharePanel from "@/components/ui/share-panel";
 import SwapPurchaseModal from "@/components/ui/swap-purchase-modal";
+import { getShareOrigin } from "@/lib/share-to-wechat";
 
 export interface StoreProduct {
   emoji: string;
@@ -140,7 +141,7 @@ function ProductCard({ p, i, onBuy, onShare }: {
     <div onClick={() => onBuy(p)}
       className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-96 transition-transform cursor-pointer relative">
       <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); onShare(p); }}>
-        <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `https://h5.ws.hi.cn/store` }} />
+        <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `${getShareOrigin()}/store` }} />
       </div>
       {/* 商品图片 */}
       <div className="w-full aspect-square bg-gray-100 flex items-center justify-center overflow-hidden mb-2">
@@ -170,7 +171,7 @@ function ProductCard({ p, i, onBuy, onShare }: {
             <span className="text-[9px] text-text-tertiary">已售{p.sales_count}</span>
           )}
         </div>
-        <div className="text-[10px] text-brand-gold-dark mt-1 bg-[rgba(242,182,49,0.1)] px-2 py-0.5 rounded-[4px] inline-block">
+        <div className="text-[10px] text-brand-gold-dark mt-1 bg-[rgba(242,182,49,0.1)] px-2 py-0.5 rounded-[8px] inline-block">
           赠游戏豆
         </div>
         {p.local_stock > 0 && p.local_stock <= 10 && (
@@ -243,7 +244,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
   return (
     <main className="pb-20">
       {/* Carousel */}
-      <div className="mx-4 mt-2 rounded-[4px] overflow-hidden shadow-soft" onClick={() => setCarouselIdx((carouselIdx + 1) % cfg.carousels.length)}>
+      <div className="mx-4 mt-2 rounded-[8px] overflow-hidden shadow-soft" onClick={() => setCarouselIdx((carouselIdx + 1) % cfg.carousels.length)}>
         <div className={`bg-gradient-to-r ${carouselBg[carouselIdx]} p-5 relative cursor-pointer active:scale-[0.98] transition-transform`}>
           <div className="relative z-10">
             <div className="text-[11px] text-white/80 mb-1">{cfg.carousels[carouselIdx].subtitle}</div>
@@ -267,7 +268,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             if (i === 1) { window.location.href = "/store-services"; return; }
             setActiveTab(i);
           }}
-            className={`flex-1 py-2 text-center rounded-[4px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>
+            className={`flex-1 py-2 text-center rounded-[8px] text-xs font-medium transition-colors ${activeTab===i?'bg-surface shadow-sm font-semibold':'text-text-secondary'}`}>
             {tab}
           </button>
         ))}
@@ -313,7 +314,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
                   p={p}
                   i={i}
                   onBuy={handleBuy}
-                  onShare={(product) => setShareData({ title: product.name, subtitle: `¥${product.selling_price}`, brand: product.brand || "小章鱼", url: "https://h5.ws.hi.cn/store" })}
+                  onShare={(product) => setShareData({ title: product.name, subtitle: `¥${product.selling_price}`, brand: product.brand || "小章鱼", url: `${getShareOrigin()}/store` })}
                 />
               ))}
             </div>
@@ -346,8 +347,8 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
               {swapProducts.map((p) => (
                 <div key={p.id} onClick={() => setSwapBuyProduct(p)}
                   className="bg-gradient-to-br from-brand-gold-light/30 to-brand-coral-light/30 rounded-sm py-3.5 px-3 text-center shadow-sm border border-brand-gold/20 active:scale-96 transition-transform cursor-pointer relative">
-                  <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: "https://h5.ws.hi.cn/store" }); }}>
-                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `https://h5.ws.hi.cn/store` }} className="bg-brand-gold-light/20 text-brand-gold-dark hover:bg-brand-gold hover:text-white" />
+                  <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: `${getShareOrigin()}/store` }); }}>
+                    <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `${getShareOrigin()}/store` }} className="bg-brand-gold-light/20 text-brand-gold-dark hover:bg-brand-gold hover:text-white" />
                   </div>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-2"
                     style={{ background: "linear-gradient(135deg,#fef3c7,#fde68a)" }}>
@@ -355,11 +356,11 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
                   </div>
                   <div className="text-xs font-semibold mb-1 line-clamp-2">{p.product_name}</div>
                   <div className="text-base font-bold text-brand-gold-dark">¥{p.price}</div>
-                  <div className="text-[10px] text-brand-gold mt-1 bg-brand-gold-light/20 px-2 py-0.5 rounded-[4px] inline-block">
+                  <div className="text-[10px] text-brand-gold mt-1 bg-brand-gold-light/20 px-2 py-0.5 rounded-[8px] inline-block">
                     闲豆抵扣 {p.max_idle_bean_ratio}x
                   </div>
                   {Number(p.bonus_sim_coin) > 0 && (
-                    <div className="text-[10px] text-green-600 mt-1 bg-green-50 px-2 py-0.5 rounded-[4px] inline-block">
+                    <div className="text-[10px] text-green-600 mt-1 bg-green-50 px-2 py-0.5 rounded-[8px] inline-block">
                       🎮 送 {Number(p.bonus_sim_coin).toLocaleString()} 游戏豆
                     </div>
                   )}
@@ -384,7 +385,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
 
       {/* Success toast */}
       {swapBuyMsg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-green-600 text-white px-5 py-2.5 rounded-[4px] text-xs shadow-lg animate-bounce">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-green-600 text-white px-5 py-2.5 rounded-[8px] text-xs shadow-lg animate-bounce">
           {swapBuyMsg}
         </div>
       )}

@@ -166,12 +166,12 @@ export default function PredictionReportPage() {
       </div>
 
       {loading || !prediction ? (
-        <div className="p-4 space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-32 bg-surface rounded-[4px] animate-pulse" />)}</div>
+        <div className="p-4 space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-32 bg-surface rounded-[8px] animate-pulse" />)}</div>
       ) : (
         <div className="px-4 mt-3 space-y-3">
 
           {/* ═══════════ 1. 预测摘要 ═══════════ */}
-          <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[4px] p-5 text-white">
+          <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[8px] p-5 text-white">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <div className="text-[11px] opacity-80">{cfg.name} 预测报告</div>
@@ -190,7 +190,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 2. 推荐组合 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] text-center">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] text-center">
             <div className="text-[11px] text-text-tertiary mb-2">🎯 AI 推荐组合</div>
             <div className="text-xl font-bold tracking-widest mb-2">
               {prediction.ensemble.top5.map(n => (
@@ -212,7 +212,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 3. 模型雷达图 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold">📡 模型对比雷达图</span>
               <span className="text-[9px] text-text-tertiary">Top5号码 · 5维度评分</span>
@@ -229,7 +229,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 4. 模型贡献度 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="text-xs font-semibold mb-3">📊 模型贡献度分析</div>
             <div className="space-y-2">
               {Object.entries(prediction.stats.modelContributions)
@@ -250,7 +250,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 5. 号码详情条形图 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold">📈 各号码多模型评分</span>
               <select value={selectedNum ?? ""} onChange={e => setSelectedNum(e.target.value ? Number(e.target.value) : null)}
@@ -265,7 +265,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 6. 号码详细表格 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="text-xs font-semibold mb-3">📋 完整排名（前区）</div>
             <div className="overflow-x-auto">
               <table className="w-full text-[10px]">
@@ -317,7 +317,7 @@ export default function PredictionReportPage() {
 
           {/* ═══════════ 7. 后区推荐 ═══════════ */}
           {cfg.back > 0 && prediction.back.length > 0 && (
-            <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
               <div className="text-xs font-semibold mb-3">🎯 后区推荐</div>
               <div className="flex gap-3 flex-wrap">
                 {prediction.back.slice(0, 6).map(r => (
@@ -334,7 +334,7 @@ export default function PredictionReportPage() {
           )}
 
           {/* ═══════════ 8. 区间分析 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="text-xs font-semibold mb-3">📐 区间分析</div>
             <div className="grid grid-cols-5 gap-2">
               {["01-07", "08-14", "15-21", "22-28", "29-35"].map((zone, idx) => {
@@ -344,7 +344,7 @@ export default function PredictionReportPage() {
                   return r.number >= min && r.number <= max;
                 }).length;
                 return (
-                  <div key={zone} className="text-center bg-bg rounded-[4px] p-2">
+                  <div key={zone} className="text-center bg-bg rounded-[8px] p-2">
                     <div className="text-[9px] text-text-tertiary">{zone}</div>
                     <div className="text-lg font-bold" style={{ color: hits > 2 ? "#F27152" : hits > 0 ? "#6BA3A3" : "#93C5FD" }}>{hits}</div>
                     <div className="text-[8px] text-text-tertiary">{hits > 2 ? "热区 🔥" : hits > 0 ? "温区" : "冷区"}</div>
@@ -355,7 +355,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 9. 模型权重 ═══════════ */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
             <div className="text-xs font-semibold mb-2">⚙️ 模型权重配置</div>
             <div className="grid grid-cols-5 gap-2 text-center text-[10px]">
               {Object.entries(prediction.ensemble.modelWeights).map(([key, val]) => (

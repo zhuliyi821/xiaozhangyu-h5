@@ -31,7 +31,7 @@ export default function FortuneCard() {
 
   return (
     <Link href="/daily-fortune" className="block mx-3 mt-3">
-      <div className="bg-white rounded-[4px] p-4 border border-gray-100 shadow-sm">
+      <div className="bg-white rounded-[8px] p-4 border border-gray-100 shadow-sm">
         {/* 顶部：标题 + 评分 */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">

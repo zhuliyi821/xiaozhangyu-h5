@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import ExchangeModal from "./exchange-modal";
 import DailyTasks from "./daily-tasks";
-import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
+import { shareToWeChat, buildShareText, getShareOrigin } from "@/lib/share-to-wechat";
 
 // ─── 接口 ───
 interface WalletBrief {
@@ -78,7 +78,7 @@ function AssetGrid({ credits }: { credits: WalletBrief }) {
   const frozen = Math.floor(totalCrystal * CRYSTAL_FROZEN_RATIO);
   return (
     <section className="mx-4 mt-4">
-      <div className="bg-white rounded-[4px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+      <div className="bg-white rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
         <div className="grid grid-cols-5 gap-2">
           <AssetCell icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" />
           <AssetCell icon="⛏️" value={formatAsset(totalCrystal)} label="水晶石" sub={frozen > 0 ? `🔒${frozen}冻结` : ""} subColor="text-brand-coral" />
@@ -106,7 +106,7 @@ function AssetCell({ icon, value, label, sub, subColor }: { icon: string; value:
 function ExchangeHub({ onClick }: { onClick: () => void }) {
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-brand-teal-light/30 rounded-[4px] p-4 border border-brand-teal-light/50">
+      <div className="bg-brand-teal-light/30 rounded-[8px] p-4 border border-brand-teal-light/50">
         <div className="flex items-center gap-2 mb-3">
           <ArrowRightLeft className="w-4 h-4 text-brand-teal-dark" />
           <span className="text-sm font-bold text-brand-teal-dark">兑换中心</span>
@@ -118,7 +118,7 @@ function ExchangeHub({ onClick }: { onClick: () => void }) {
           <ExchangeDir icon="🔒→🎮" label="激活冻结" rate="消耗豆" />
         </div>
         <button onClick={onClick}
-          className="mt-3 w-full bg-brand-teal text-white rounded-[4px] py-2.5 text-xs font-bold active:scale-[0.98] transition-transform">
+          className="mt-3 w-full bg-brand-teal text-white rounded-[8px] py-2.5 text-xs font-bold active:scale-[0.98] transition-transform">
           去兑换 →
         </button>
         <div className="mt-2 text-center">
@@ -131,7 +131,7 @@ function ExchangeHub({ onClick }: { onClick: () => void }) {
 
 function ExchangeDir({ icon, label, rate }: { icon: string; label: string; rate: string }) {
   return (
-    <div className="bg-white rounded-[4px] py-2.5 px-2 text-center border border-gray-100">
+    <div className="bg-white rounded-[8px] py-2.5 px-2 text-center border border-gray-100">
       <div className="text-base mb-1">{icon}</div>
       <div className="text-[11px] font-medium text-text">{label}</div>
       <div className="text-[10px] text-text-tertiary mt-0.5">{rate}</div>
@@ -144,7 +144,7 @@ function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number;
   if (frozenCount <= 0) return null;
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-brand-coral-light/60 rounded-[4px] p-4 border border-brand-coral/30">
+      <div className="bg-brand-coral-light/60 rounded-[8px] p-4 border border-brand-coral/30">
         <div className="flex items-start gap-3">
           <span className="text-2xl leading-none mt-0.5">💎</span>
           <div className="flex-1">
@@ -173,11 +173,11 @@ function ActivationCard({ frozenCount, onExchangeClick }: { frozenCount: number;
 /** 邀请好友 — 金色主题 */
 function InviteCard() {
   const { user } = useAuth();
-  const inviteUrl = user ? `https://h5.ws.hi.cn?ref=${user.uid}` : "https://h5.ws.hi.cn";
+  const inviteUrl = user ? `${getShareOrigin()}?ref=${user.uid}` : getShareOrigin();
   const handleCopy = () => shareToWeChat(inviteUrl);
   return (
     <section className="mx-4 mt-3">
-      <div className="bg-brand-gold-light/80 rounded-[4px] p-4 border border-brand-gold/30">
+      <div className="bg-brand-gold-light/80 rounded-[8px] p-4 border border-brand-gold/30">
         <div className="flex items-start gap-3">
           <Gift className="w-5 h-5 text-brand-gold-dark mt-0.5 shrink-0" />
           <div className="flex-1">
@@ -210,22 +210,18 @@ function InviteCard() {
 function QuickLinks() {
   return (
     <section className="mx-4 mt-3">
-      <div className="grid grid-cols-2 gap-2.5">
-        <a href="/store-services"
-          className="bg-surface rounded-[4px] p-3.5 shadow-sm border border-[rgba(69,204,213,0.08)] flex items-center gap-3 active:scale-[0.98] transition-transform">
-          <div className="w-8 h-8 rounded-[10px] bg-brand-teal-light/60 flex items-center justify-center shrink-0 text-base">🛒</div>
-          <div>
-            <div className="text-xs font-semibold text-text">购物商城</div>
-            <div className="text-[10px] text-text-tertiary mt-0.5">现金余额支付</div>
-          </div>
+      <div className="grid grid-cols-2 gap-2">
+        <a href="/marketplace"
+          className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] text-center active:scale-[0.98] transition-transform">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-gold-light/60 flex items-center justify-center mx-auto mb-1.5 text-base">🏪</div>
+          <div className="text-[11px] font-semibold text-text">全网商品</div>
+          <div className="text-[9px] text-text-tertiary mt-0.5">平台·置换·附近</div>
         </a>
-        <a href="/store"
-          className="bg-surface rounded-[4px] p-3.5 shadow-sm border border-[rgba(69,204,213,0.08)] flex items-center gap-3 active:scale-[0.98] transition-transform">
-          <div className="w-8 h-8 rounded-[10px] bg-brand-coral-light/60 flex items-center justify-center shrink-0 text-base">📍</div>
-          <div>
-            <div className="text-xs font-semibold text-text">附近消费</div>
-            <div className="text-[10px] text-text-tertiary mt-0.5">到店送豆</div>
-          </div>
+        <a href="/stores"
+          className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] text-center active:scale-[0.98] transition-transform">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-coral-light/60 flex items-center justify-center mx-auto mb-1.5 text-base">📍</div>
+          <div className="text-[11px] font-semibold text-text">合作门店</div>
+          <div className="text-[9px] text-text-tertiary mt-0.5">到店送豆</div>
         </a>
       </div>
     </section>
@@ -271,7 +267,7 @@ function RecentFlow({ uid }: { uid: number }) {
         </div>
       </div>
 
-      <div className="bg-surface rounded-[4px] border border-[rgba(69,204,213,0.08)] overflow-hidden">
+      <div className="bg-surface rounded-[8px] border border-[rgba(69,204,213,0.08)] overflow-hidden">
         {loading ? (
           <div className="p-4 text-center text-[11px] text-text-tertiary animate-pulse">加载中...</div>
         ) : error ? (
@@ -351,12 +347,12 @@ export default function JiadouzhanPage() {
           <div className="h-4 w-40 bg-gray-100 rounded mx-auto" />
         </div>
       ) : !user ? (
-        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[4px] border border-[rgba(69,204,213,0.08)]">
+        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[8px] border border-[rgba(69,204,213,0.08)]">
           <div className="text-4xl mb-3">🐙</div>
           <p className="text-sm text-text-secondary mb-1">来啦! 先登录解锁全部玩法</p>
           <p className="text-[11px] text-text-tertiary mb-4">游戏豆送新用户哦</p>
           <button onClick={() => setShowLogin(true)}
-            className="px-6 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-medium rounded-[4px] active:scale-95 transition-transform">
+            className="px-6 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-xs font-medium rounded-[8px] active:scale-95 transition-transform">
             登录 / 注册
           </button>
           {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}

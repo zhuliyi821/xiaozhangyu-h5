@@ -10,7 +10,7 @@ export default function CouponModule({ config }: ModuleProps) {
         <span className="text-sm font-medium text-gray-800">{title}</span>
         <span className="text-[11px] text-gray-400">查看更多 →</span>
       </div>
-      <div className="bg-white rounded-[4px] border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[8px] border border-gray-100 overflow-hidden">
         {Array.from({ length: 2 }).map((_, i) => (
           <div
             key={i}

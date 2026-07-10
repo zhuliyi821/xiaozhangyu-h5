@@ -6,6 +6,7 @@
  */
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
+export const API_V2 = `${API_BASE}/api/v2`;
 
 export const API_CONFIG = {
   baseUrl: API_BASE,

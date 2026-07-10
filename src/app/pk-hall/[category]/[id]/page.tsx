@@ -105,7 +105,7 @@ export default function PKRoomPage() {
       <div className={`bg-gradient-to-r ${cfg.color} px-6 pt-8 pb-7`}>
         <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">←</button>
       </div>
-      <div className="mx-4 mt-4 h-40 bg-white rounded-[4px] animate-pulse border border-gray-100" />
+      <div className="mx-4 mt-4 h-40 bg-white rounded-[8px] animate-pulse border border-gray-100" />
     </main>
   );
 
@@ -114,7 +114,7 @@ export default function PKRoomPage() {
       <div className={`bg-gradient-to-r ${cfg.color} px-6 pt-8 pb-7`}>
         <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">←</button>
       </div>
-      <div className="mx-4 mt-4 bg-white rounded-[4px] p-8 text-center border border-gray-100">
+      <div className="mx-4 mt-4 bg-white rounded-[8px] p-8 text-center border border-gray-100">
         <div className="text-2xl mb-2">🔍</div>
         <div className="text-[11px] text-gray-400">{error || "PK话题不存在"}</div>
         <button onClick={() => { setError(""); setLoading(true); loadDetail(); }} className="mt-2 text-xs text-brand-teal-dark font-medium">重试</button>
@@ -144,7 +144,7 @@ export default function PKRoomPage() {
       </div>
 
       {/* 状态条 */}
-      <div className="mx-4 -mt-3 relative z-20 bg-white rounded-[4px] p-3 shadow-sm border border-gray-100 flex justify-around text-center">
+      <div className="mx-4 -mt-3 relative z-20 bg-white rounded-[8px] p-3 shadow-sm border border-gray-100 flex justify-around text-center">
         <div><div className="text-[10px] text-gray-400">状态</div><div className={`text-[11px] font-medium ${isSettled ? 'text-brand-gold-dark' : isActive ? 'text-green-600' : 'text-red-400'}`}>{topic.status_label}</div></div>
         <div className="w-px bg-gray-100" />
         <div><div className="text-[10px] text-gray-400">倒计时</div><div className="text-[11px] font-medium">{topic.time_label}</div></div>
@@ -155,8 +155,8 @@ export default function PKRoomPage() {
       </div>
 
       {/* PK对战卡片 */}
-      <div className="mx-4 mt-3 bg-white rounded-[4px] p-5 shadow-sm border border-gray-100">
-          <div className={`rounded-[4px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-teal/10 border border-brand-teal/20'}`}>
+      <div className="mx-4 mt-3 bg-white rounded-[8px] p-5 shadow-sm border border-gray-100">
+          <div className={`rounded-[8px] p-4 text-center ${isSettled && topic.winner === 'A' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-teal/10 border border-brand-teal/20'}`}>
           <div className={`text-sm font-bold ${isSettled && topic.winner === 'A' ? 'text-brand-gold-dark' : 'text-brand-teal-dark'}`}>
             {options[0] || topic.option_a} {isSettled && topic.winner === 'A' && '🏆'}
           </div>
@@ -178,7 +178,7 @@ export default function PKRoomPage() {
           <span className="inline-block w-8 h-8 rounded-full bg-gray-100 text-[11px] font-bold flex items-center justify-center mx-auto">VS</span>
         </div>
 
-        <div className={`rounded-[4px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-coral/10 border border-brand-coral/10'}`}>
+        <div className={`rounded-[8px] p-4 text-center ${isSettled && topic.winner === 'B' ? 'bg-amber-50 border-2 border-amber-400' : 'bg-brand-coral/10 border border-brand-coral/10'}`}>
           <div className={`text-sm font-bold ${isSettled && topic.winner === 'B' ? 'text-brand-gold-dark' : 'text-brand-coral-dark'}`}>
             {topic.option_b} {isSettled && topic.winner === 'B' && '🏆'}
           </div>
@@ -210,7 +210,7 @@ export default function PKRoomPage() {
       </div>
 
       {/* 评论区 */}
-      <div className="mx-4 mt-3 bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
+      <div className="mx-4 mt-3 bg-white rounded-[8px] p-4 shadow-sm border border-gray-100">
         <div className="text-[11px] font-semibold mb-3">💬 评论 ({comments.length})</div>
         <div className="space-y-2.5 max-h-48 overflow-y-auto mb-3">
           {comments.length === 0 ? (
@@ -237,9 +237,9 @@ export default function PKRoomPage() {
             <input type="text" value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleComment()}
               placeholder="说点什么..."
-              className="flex-1 px-3 py-2 bg-gray-50 rounded-[4px] text-[11px] outline-none focus:ring-2 focus:ring-brand-teal/30" />
+              className="flex-1 px-3 py-2 bg-gray-50 rounded-[8px] text-[11px] outline-none focus:ring-2 focus:ring-brand-teal/30" />
             <button onClick={handleComment} disabled={!commentText.trim()}
-              className="px-4 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-[11px] font-medium disabled:opacity-50">发送</button>
+              className="px-4 py-2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-[11px] font-medium disabled:opacity-50">发送</button>
           </div>
         ) : (
           <div className="text-center text-[10px] text-gray-400 py-2">登录后可以参与评论</div>
@@ -247,7 +247,7 @@ export default function PKRoomPage() {
       </div>
 
       {voteMsg && (
-        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[4px] z-50 shadow-lg">
+        <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[8px] z-50 shadow-lg">
           {voteMsg}
         </div>
       )}
@@ -255,13 +255,13 @@ export default function PKRoomPage() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
           <button onClick={() => handleOptionClick('A')} disabled={!isActive}
-            className="flex-1 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white py-3.5 rounded-[4px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            className="flex-1 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white py-3.5 rounded-[8px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
             {topic.option_a?.substring(0, 6)}
           </button>
           <button onClick={handleInvite}
             className="w-[52px] h-[52px] rounded-full bg-gray-100 flex items-center justify-center text-lg active:scale-90 transition-transform shrink-0">↗</button>
           <button onClick={() => handleOptionClick('B')} disabled={!isActive}
-            className="flex-1 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white py-3.5 rounded-[4px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
+            className="flex-1 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white py-3.5 rounded-[8px] text-xs font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 shadow-sm">
             {topic.option_b?.substring(0, 6)}
           </button>
         </div>
@@ -269,10 +269,10 @@ export default function PKRoomPage() {
 
       {confirmVote && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setConfirmVote(null)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-sm font-semibold mb-3">🎯 投注确认</h3>
             <div className="space-y-2.5 text-xs">
-              <div className="bg-gray-50 rounded-[4px] p-3">
+              <div className="bg-gray-50 rounded-[8px] p-3">
                 <div className="font-medium mb-1">{topic.title}</div>
                 <span className="px-2 py-0.5 rounded-[6px] bg-brand-teal/10 text-brand-teal-dark font-medium">
                   {confirmVote.choice === 'A' ? topic.option_a : topic.option_b}
@@ -286,7 +286,7 @@ export default function PKRoomPage() {
                   </button>
                 ))}
               </div>
-              <div className="bg-amber-50 rounded-[4px] p-3 text-center">
+              <div className="bg-amber-50 rounded-[8px] p-3 text-center">
                 <div className="text-[10px] text-gray-400">预估正确可赢得</div>
                 <div className="text-lg font-bold text-brand-gold-dark">
                   +{(() => {
@@ -301,8 +301,8 @@ export default function PKRoomPage() {
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[4px] text-xs font-medium">取消</button>
-              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-medium">
+              <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[8px] text-xs font-medium">取消</button>
+              <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium">
                 确认投注 {confirmVote.betAmount} 豆
               </button>
             </div>
@@ -315,20 +315,20 @@ export default function PKRoomPage() {
       {/* ─── 投注成功→绑定企微引导 ─── */}
       {showBindWx && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowBindWx(false)}>
-          <div className="bg-white rounded-[4px] w-full max-w-[340px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-[8px] w-full max-w-[340px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="text-center mb-4">
               <div className="text-2xl mb-2">🎉</div>
               <div className="text-sm font-bold">投注成功！</div>
               <div className="text-[11px] text-gray-400 mt-1">结果一出马上通知你</div>
             </div>
-            <div className="bg-brand-teal/10 rounded-[4px] p-3 mb-3 text-center">
+            <div className="bg-brand-teal/10 rounded-[8px] p-3 mb-3 text-center">
               <div className="text-[10px] text-gray-400">当前投注</div>
               <div className="text-xs font-bold text-brand-teal-dark">{confirmVote?.choice === 'A' ? topic?.option_a : topic?.option_b}</div>
               <div className="text-[20px] font-bold text-brand-teal-dark">{confirmVote?.betAmount || 0}豆</div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowBindWx(false)}
-                className="flex-1 py-2.5 bg-gray-100 rounded-[4px] text-xs font-medium text-gray-500">下次再说</button>
+                className="flex-1 py-2.5 bg-gray-100 rounded-[8px] text-xs font-medium text-gray-500">下次再说</button>
               <button onClick={async () => {
                   try {
                     const r = await fetch(`${API_BASE}/api/pk?action=bind_identity`, {
@@ -340,7 +340,7 @@ export default function PKRoomPage() {
                     if (j.code === 0) setTimeout(() => setShowBindWx(false), 2000);
                   } catch { setBindMsg("❌ 网络错误"); }
                 }}
-                className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[4px] text-xs font-semibold shadow-sm">
+                className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-semibold shadow-sm">
                 📱 添加企微通知
               </button>
             </div>
@@ -351,10 +351,10 @@ export default function PKRoomPage() {
 
       {/* ─── 到店核销LBS卡片 ─── */}
       {topic && (
-        <div className="mx-4 mt-3 bg-white rounded-[4px] p-4 shadow-sm border border-gray-100">
+        <div className="mx-4 mt-3 bg-white rounded-[8px] p-4 shadow-sm border border-gray-100">
           <div className="text-[11px] font-semibold mb-3">📍 附近门店</div>
-          <div className="bg-gradient-to-r from-brand-teal-light/30 to-brand-gold-light/30 rounded-[4px] p-3 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-[4px] bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-white text-xl shrink-0">
+          <div className="bg-gradient-to-r from-brand-teal-light/30 to-brand-gold-light/30 rounded-[8px] p-3 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-[8px] bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-white text-xl shrink-0">
               🏪
             </div>
             <div className="flex-1 min-w-0">
