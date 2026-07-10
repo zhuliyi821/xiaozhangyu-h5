@@ -139,7 +139,7 @@ function ProductCard({ p, i, onBuy, onShare }: {
 
   return (
     <div onClick={() => onBuy(p)}
-      className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-96 transition-transform cursor-pointer relative">
+      className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-[0.98] transition-transform cursor-pointer relative">
       <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); onShare(p); }}>
         <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `${getShareOrigin()}/store` }} />
       </div>
@@ -346,7 +346,7 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
             <div className="grid grid-cols-2 gap-2.5 px-4">
               {swapProducts.map((p) => (
                 <div key={p.id} onClick={() => setSwapBuyProduct(p)}
-                  className="bg-gradient-to-br from-brand-gold-light/30 to-brand-coral-light/30 rounded-sm py-3.5 px-3 text-center shadow-sm border border-brand-gold/20 active:scale-96 transition-transform cursor-pointer relative">
+                  className="bg-gradient-to-br from-brand-gold-light/30 to-brand-coral-light/30 rounded-sm py-3.5 px-3 text-center shadow-sm border border-brand-gold/20 active:scale-[0.98] transition-transform cursor-pointer relative">
                   <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); setShareData({ title: p.product_name, subtitle: `¥${p.price}`, brand: "闲豆商城", url: `${getShareOrigin()}/store` }); }}>
                     <ShareButton data={{ title: `闲豆 - ${p.product_name}`, text: `¥${p.price} · 闲豆抵扣 ${p.max_idle_bean_ratio}x`, url: `${getShareOrigin()}/store` }} className="bg-brand-gold-light/20 text-brand-gold-dark hover:bg-brand-gold hover:text-white" />
                   </div>

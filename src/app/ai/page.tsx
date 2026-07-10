@@ -149,7 +149,7 @@ export default function AIChatPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid: user.uid, action: "balance" }),
-    }).then(r => r.json()).then(j => { if (j.code === 0) setBalance(j.data.balance); }).catch(() => {});
+    }).then(r => r.json()).then(j => { if (j.code === 0) setBalance(j.data.balance); }).catch((err) => console.warn("AI balance fetch failed:", err));
   }, [user]);
 
   useEffect(() => {

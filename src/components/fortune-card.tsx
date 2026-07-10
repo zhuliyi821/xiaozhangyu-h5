@@ -40,7 +40,7 @@ export default function FortuneCard() {
           });
         }
       })
-      .catch(() => {});
+      .catch((err) => console.warn("FortuneCard load failed:", err));
   }, []);
 
   if (!data) return null;
@@ -101,11 +101,11 @@ export default function FortuneCard() {
             return (
               <div key={lv.level} className="flex-1 flex flex-col items-center gap-1">
                 <div className="w-full h-[8px]" style={{ background: barGrad }} />
-                <span className="text-[7px] font-medium" style={{
-                  color: lv.level === "大吉" ? "#4CAF50" :
-                         lv.level === "次吉" ? "#F44336" :
-                         lv.level === "平" ? "#FF8F00" : "#9E9E9E"
-                }}>
+                <span className={`text-[7px] font-medium ${
+                  lv.level === "大吉" ? "text-brand-teal-dark" :
+                  lv.level === "次吉" ? "text-brand-gold" :
+                  lv.level === "平" ? "text-brand-coral" : "text-text-tertiary"
+                }`}>
                   {lv.level}
                 </span>
               </div>

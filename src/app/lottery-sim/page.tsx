@@ -436,7 +436,7 @@ function LotterySimContent() {
   return (
     <main className="pb-20 min-h-screen bg-bg">
       {/* Header — 金青珊瑚品牌色 */}
-      <div className="bg-gradient-to-r from-[#0F6E56] to-[#04342C] px-5 pt-6 pb-5 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-[#0F6E56] to-[#04342C] px-5 pt-6 pb-5 relative overflow-hidden">
         <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(69,204,213,0.15),transparent_70%)] blur-[16px]" />
         {/* 顶部导航行 */}
         <div className="flex items-center justify-between relative z-10">
@@ -625,24 +625,25 @@ function LotterySimContent() {
             {/* Draw Result */}
             {result && showDraw && (
               <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
+                
+                {/* 🏆 开奖号码 (本期开出的号码) */}
                 <div className="flex items-center justify-center gap-1 mb-3">
-                  <Trophy className="w-5 h-5 text-brand-gold" />
-                  <span className="text-[14px] font-medium">开奖结果</span>
-                  <span className="text-[9px] text-text-tertiary ml-1">{result.bet_id}</span>
+                  <Trophy className="w-4 h-4 text-brand-gold" />
+                  <span className="text-[13px] font-medium">开奖号码</span>
+                  <span className="text-[8px] text-text-tertiary ml-1">第{result.bet_id?.slice(-6) || "—"}期</span>
                 </div>
                 
-                {/* Draw numbers animation */}
                 <div className="flex justify-center gap-2 mb-3">
                   {result.draw.front?.map((n: number, i: number) => (
                     <div key={"f"+i}
-                      className="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white flex items-center justify-center text-sm font-bold shadow-sm"
+                      className="w-10 h-10 rounded-full bg-[#F27152] text-white flex items-center justify-center text-sm font-bold shadow-sm"
                       style={{ animation: `ballDrop 0.4s ease-out ${i * 0.08}s both` }}>
                       {String(n).padStart(2, "0")}
                     </div>
                   ))}
                   {result.draw.back?.map((n: number, i: number) => (
                     <div key={"b"+i}
-                      className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm"
+                      className="w-10 h-10 rounded-full bg-[#45CCD5] text-white flex items-center justify-center text-sm font-bold shadow-sm"
                       style={{ animation: `ballDrop 0.4s ease-out ${(result.draw.front?.length || 0) * 0.08 + i * 0.08}s both` }}>
                       {String(n).padStart(2, "0")}
                     </div>
@@ -655,47 +656,73 @@ function LotterySimContent() {
                     </div>
                   ))}
                 </div>
-                
-                {/* Prize info */}
-                {result.tickets.map((t, i) => (
-                  <div key={i} className={`p-3 rounded-xl mb-2 ${t.prize.won ? "bg-gradient-to-r from-amber-50 to-yellow-50 border border-brand-gold/30" : "bg-bg"}`}>
-                    <div className="flex items-center justify-center gap-1 text-xs mb-1">
-                      {t.prize.won ? <Sparkles className="w-4 h-4 text-brand-gold" /> : <span className="text-text-tertiary">😅</span>}
-                      <span className={t.prize.won ? "text-brand-gold-dark font-bold" : "text-text-tertiary"}>
-                        {t.prize.won ? `🎉 ${t.prize.name} — 奖金 ` : "未中奖"}
-                        {t.prize.won && t.prize.name.includes("头彩") && (
-                          <span className="text-brand-gold-dark font-bold text-sm animate-pulse">{Number(rollDisplay || result.total_win).toLocaleString()}✨</span>
-                        )}
-                        {t.prize.won && !t.prize.name.includes("头彩") && `${Number(t.prize.amount).toLocaleString()}✨`}
-                      </span>
+
+                {/* 分割 + 比对结果 */}
+                <div className="h-px bg-gradient-to-r from-transparent via-border-tertiary to-transparent my-3" />
+
+                <div className="flex items-center justify-center gap-1 mb-3">
+                  <span className="text-[13px] font-medium">投注比对</span>
+                </div>
+
+                {/* 每注比对结果 */}
+                {result.tickets.map((t, i) => {
+                  const isWin = t.prize.won;
+                  return (
+                    <div key={i} className={`p-3 rounded-[8px] mb-2 text-left ${isWin ? "bg-[#FFF9EB] border border-[#F2B631]/30" : "bg-bg"}`}>
+                      {/* 用户的号码 */}
+                      <div className="flex items-center gap-1 mb-1.5">
+                        <span className="text-[9px] text-text-tertiary w-6 shrink-0">选号</span>
+                        <div className="flex gap-1 flex-wrap">
+                          {(t.ticket?.front || []).map((fn: number, fi: number) => {
+                            const matched = (result.draw.front || []).includes(fn);
+                            return (
+                              <span key={fi} className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold ${
+                                matched ? "bg-[#F27152] text-white" : "bg-gray-100 text-text-tertiary"
+                              }`}>
+                                {String(fn).padStart(2, "0")}
+                              </span>
+                            );
+                          })}
+                          {(t.ticket?.back || []).map((bn: number, bi: number) => {
+                            const matched = (result.draw.back || []).includes(bn);
+                            return (
+                              <span key={"b"+bi} className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold ${
+                                matched ? "bg-[#45CCD5] text-white" : "bg-gray-100 text-text-tertiary"
+                              }`}>
+                                {String(bn).padStart(2, "0")}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      {/* 中奖信息 */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-text-tertiary">
+                          匹配 {t.prize.matched_front || 0}前+{t.prize.matched_back || 0}后
+                        </span>
+                        <span className={`text-xs font-bold ${isWin ? "text-brand-gold-dark" : "text-text-tertiary"}`}>
+                          {isWin ? `🎉 ${t.prize.name}` : "😅 未中奖"}
+                        </span>
+                      </div>
+                      {isWin && (
+                        <div className="mt-1 text-right text-sm font-bold text-brand-coral">
+                          +{Number(t.prize.amount || 0).toLocaleString()} ✨
+                        </div>
+                      )}
                     </div>
-                    {t.prize.won && <div className="text-[10px] text-text-tertiary">匹配 {t.prize.matched_front}前+{t.prize.matched_back}后</div>}
-                  </div>
-                ))}
+                  );
+                })}
                 
-                {/* 数字精灵语录 */}
-                {spriteMsg && (
-                  <div className="flex items-center justify-center gap-1.5 mt-2 mb-2 text-xs text-purple-500/70">
-                    <span>💬 数字碰说:</span>
-                    <span className="italic">{spriteMsg}</span>
-                  </div>
-                )}
-                
-                {/* 彩蛋 */}
-                {easterEgg && (
-                  <div className="text-[10px] text-brand-gold-dark/60 mb-2 animate-pulse">
-                    {easterEgg}
-                  </div>
-                )}
-                
-                {/* 收银机效果 */}
-                <div className="mt-3 text-sm">
+                {/* 盈亏汇总 */}
+                <div className="mt-3 pt-2 border-t border-border-tertiary/40">
                   {result.net_result > 0 ? (
-                    <span className="text-brand-coral font-bold text-lg">+{Number(rollDisplay || result.net_result).toLocaleString()}✨ 🎉</span>
+                    <span className="text-brand-coral font-bold text-lg">
+                      +{Number(rollDisplay || result.net_result).toLocaleString()}✨ 🎉
+                    </span>
                   ) : result.net_result === 0 ? (
-                    <span className="text-text-tertiary">收支平衡</span>
+                    <span className="text-text-tertiary text-sm">收支平衡</span>
                   ) : (
-                    <span className="text-text-tertiary">{result.net_result}🎮</span>
+                    <span className="text-text-tertiary text-sm">{result.net_result}🎮</span>
                   )}
                 </div>
                 

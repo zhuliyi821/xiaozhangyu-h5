@@ -48,11 +48,11 @@ const PRESET_CODES = [
 
 function getSignalInfo(signal: string) {
   const map: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-    buy: { label: "买入", color: "#DC2626", bg: "rgba(220,38,38,0.1)", icon: "🚀" },
-    cautious_buy: { label: "谨慎买入", color: "#EA580C", bg: "rgba(234,88,12,0.1)", icon: "📈" },
-    neutral: { label: "持有观望", color: "#6B7280", bg: "rgba(107,114,128,0.1)", icon: "⏳" },
-    cautious_sell: { label: "谨慎卖出", color: "#CA8A04", bg: "rgba(202,138,4,0.1)", icon: "📉" },
-    sell: { label: "卖出", color: "#059669", bg: "rgba(5,150,105,0.1)", icon: "🛑" },
+    buy: { label: "买入", color: "#F27152", bg: "rgba(242,113,82,0.1)", icon: "🚀" },
+    cautious_buy: { label: "谨慎买入", color: "#F2B631", bg: "rgba(242,182,49,0.1)", icon: "📈" },
+    neutral: { label: "持有观望", color: "#8E8E93", bg: "rgba(142,142,147,0.1)", icon: "⏳" },
+    cautious_sell: { label: "谨慎卖出", color: "#D99A0F", bg: "rgba(217,154,15,0.1)", icon: "📉" },
+    sell: { label: "卖出", color: "#45CCD5", bg: "rgba(69,204,213,0.1)", icon: "🛑" },
   };
   return map[signal] || map.neutral;
 }
@@ -214,13 +214,13 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder="输入股票代码/名称 (如 sh600519)"
-              className="w-full h-10 pl-9 pr-3 text-sm rounded-[4px] bg-bg border-0 focus:outline-none focus:ring-2 focus:ring-brand-teal/30"
+              className="w-full h-10 pl-9 pr-3 text-sm rounded-[8px] bg-bg border-0 focus:outline-none focus:ring-2 focus:ring-brand-teal/30"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="h-10 px-5 rounded-[4px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-sm font-medium disabled:opacity-50"
+            className="h-10 px-5 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-sm font-medium disabled:opacity-50"
           >
             {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "分析"}
           </button>
@@ -233,7 +233,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           <button
             key={p.code}
             onClick={() => { setInput(p.code); fetchAnalysis(p.code); }}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-[4px] text-[11px] font-medium transition-colors ${
+            className={`flex-shrink-0 px-3 py-1.5 rounded-[8px] text-[11px] font-medium transition-colors ${
               code === p.code
                 ? "bg-brand-teal/10 text-brand-teal-dark border border-brand-teal/30"
                 : "bg-bg text-text-secondary border border-border-tertiary"
@@ -265,7 +265,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
         <div className="space-y-3">
 
           {/* Price + Signal Card */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <div className="text-[17px] font-bold">{stockName}</div>
@@ -301,7 +301,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           </div>
 
           {/* Signal Card */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-text-tertiary" />
@@ -367,7 +367,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           </div>
 
           {/* Technical Indicators */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="w-4 h-4 text-text-tertiary" />
               <span className="text-sm font-semibold">技术指标</span>
@@ -397,7 +397,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           </div>
 
           {/* Returns */}
-          <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-4 h-4 text-text-tertiary" />
               <span className="text-sm font-semibold">涨跌表现</span>
@@ -419,7 +419,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
           </div>
 
           {/* Model breakdown */}
-          <details className="bg-surface rounded-[4px] overflow-hidden shadow-sm border border-border-tertiary">
+          <details className="bg-surface rounded-[8px] overflow-hidden shadow-sm border border-border-tertiary">
             <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-semibold">
               <span>8模型评分明细</span>
               <ChevronDown className="w-4 h-4 text-text-tertiary" />
@@ -442,7 +442,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
             <>
               {/* 准确率 */}
               {stockAccuracy !== null && (
-                <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+                <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-text-secondary">📊 近{accuracyDays}日本模型准确率</span>
                     {stockAccuracy > 0 && (
@@ -464,7 +464,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               )}
 
               {/* 机构观点 */}
-              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center gap-2 mb-3">
                   <Building2 className="w-4 h-4 text-text-tertiary" />
                   <span className="text-sm font-semibold">机构观点</span>
@@ -487,7 +487,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               </div>
 
               {/* 资金流向 */}
-              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center gap-2 mb-3">
                   <Coins className="w-4 h-4 text-text-tertiary" />
                   <span className="text-sm font-semibold">资金流向</span>
@@ -521,7 +521,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               </div>
 
               {/* 基本面 */}
-              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 className="w-4 h-4 text-text-tertiary" />
                   <span className="text-sm font-semibold">基本面</span>
@@ -552,7 +552,7 @@ export default function StockPredictor({ onData }: { onData?: (data: PredictionR
               </div>
 
               {/* 玄学视角 */}
-              <div className="bg-surface rounded-[4px] p-4 shadow-sm border border-border-tertiary">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4 h-4 text-text-tertiary" />
                   <span className="text-sm font-semibold">玄学视角</span>

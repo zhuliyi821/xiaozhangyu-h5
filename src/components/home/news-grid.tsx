@@ -61,7 +61,7 @@ export function NewsGrid() {
           });
         }
       })
-      .catch(() => {})
+      .catch(() => { console.warn("Fortune load failed, using fallback"); })
       .finally(() => setLoadingFortune(false));
   }, [user]);
 

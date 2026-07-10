@@ -19,6 +19,10 @@
   --color-text-secondary: #636366;
   --color-text-tertiary: #8E8E93;
 
+  /* Border colors */
+  --color-border-tertiary: #E5E5EA;
+  --color-border-secondary: #D1D1D6;
+
   /* Ball Colors */
   --color-ball-front: #F27152;
   --color-ball-back: #45CCD5;
