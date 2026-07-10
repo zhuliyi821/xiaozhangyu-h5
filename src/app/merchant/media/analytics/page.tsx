@@ -69,6 +69,33 @@ export default function MediaAnalyticsPage() {
         </div>
       </div>
 
+      {/* 7天趋势图 */}
+      <div className="mx-4 mt-4 bg-white rounded-[12px] p-4 shadow-sm">
+        <h2 className="text-[12px] font-medium text-gray-400 mb-3">近7日发布趋势</h2>
+        {(() => {
+          const days: {label:string; count:number}[] = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().slice(0,10);
+            const label = `${d.getMonth()+1}/${d.getDate()}`;
+            const count = contents.filter(c => c.created_at && new Date(c.created_at * 1000).toISOString().slice(0,10) === dateStr).length;
+            days.push({ label, count });
+          }
+          const max = Math.max(...days.map(d => d.count), 1);
+          return (
+            <div className="flex items-end gap-2 h-24">
+              {days.map((d, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-[8px] text-gray-300">{d.count || ""}</span>
+                  <div className="w-full rounded-t-[4px] transition-all" style={{height:`${(d.count/max)*100}%`, backgroundColor: d.count > 0 ? C.teal : "#f0f0f0", minHeight: d.count > 0 ? 4 : 2}} />
+                  <span className="text-[8px] text-gray-400">{d.label}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Platform breakdown */}
       <div className="mx-4 mt-4">
         <h2 className="text-[12px] font-medium text-gray-400 mb-2.5 px-0.5">各平台内容分布</h2>
@@ -88,6 +115,40 @@ export default function MediaAnalyticsPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 状态分布 */}
+      <div className="mx-4 mt-4 bg-white rounded-[12px] p-4 shadow-sm">
+        <h2 className="text-[12px] font-medium text-gray-400 mb-3">内容状态分布</h2>
+        {(() => {
+          const pending = contents.filter(c => c.status === "pending").length;
+          const approved = contents.filter(c => c.status === "approved").length;
+          const pub = contents.filter(c => c.status === "published").length;
+          const rej = contents.filter(c => c.status === "rejected").length;
+          const total = pending + approved + pub + rej || 1;
+          const bars = [
+            { label: "待审核", count: pending, color: C.gold },
+            { label: "已通过", count: approved, color: C.green },
+            { label: "已发布", count: pub, color: C.teal },
+            { label: "已驳回", count: rej, color: "#999" },
+          ].filter(b => b.count > 0);
+          return (
+            <div className="space-y-2">
+              <div className="flex h-3 rounded-full overflow-hidden">
+                {bars.map((b, i) => <div key={i} style={{width:`${(b.count/total)*100}%`, backgroundColor:b.color, minWidth:4}} />)}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {bars.map((b, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                    <span className="w-2 h-2 rounded-full" style={{backgroundColor:b.color}} />
+                    <span className="text-gray-500">{b.label}</span>
+                    <span className="font-medium">{b.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Recent publications */}
