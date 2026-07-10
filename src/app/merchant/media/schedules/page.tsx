@@ -45,11 +45,11 @@ export default function MediaSchedulesPage() {
 
   const getSchedule = (platform: string) => schedules.find(s => s.platform === platform);
 
-  const save = async (platform: string, timeSlot: string, count: number) => {
+  const save = async (platform: string, timeSlot: string, count: number, autoPublish: boolean) => {
     try {
       const r = await fetch(`${API_BASE}/api/store-media?action=schedule_save`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store_id: storeId, platform, time_slot: timeSlot + ":00", count_per_day: count }),
+        body: JSON.stringify({ store_id: storeId, platform, time_slot: timeSlot + ":00", count_per_day: count, auto_publish: autoPublish ? 1 : 0 }),
       });
       const d = await r.json();
       setMsg(d.msg || "已保存");
@@ -105,6 +105,9 @@ export default function MediaSchedulesPage() {
                   {sched && sched.is_active == 1 && (
                     <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-50 text-green-600">已启用</span>
                   )}
+                  {sched && sched.auto_publish == 1 && (
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">自动发布</span>
+                  )}
                   {!isEditing && (
                     <button onClick={() => setEditing(p.key)}
                       className="text-[11px] px-3 py-1.5 rounded-full border border-gray-200 active:scale-90">
@@ -124,7 +127,8 @@ export default function MediaSchedulesPage() {
                   platformLabel={p.label}
                   defaultTime={sched?.time_slot?.slice(0,5) || "08:00"}
                   defaultCount={sched?.count_per_day || 3}
-                  onSave={(time, count) => save(p.key, time, count)}
+                  defaultAutoPublish={sched?.auto_publish == 1}
+                  onSave={(time, count, autoPub) => save(p.key, time, count, autoPub)}
                   onCancel={() => setEditing(null)}
                 />
               )}
@@ -145,10 +149,13 @@ export default function MediaSchedulesPage() {
           schedules.filter(s => s.is_active == 1).map(s => (
             <div key={s.id} className="flex items-center justify-between py-1.5 text-[11px]">
               <span>{PLATFORMS.find(p => p.key === s.platform)?.icon} {PLATFORMS.find(p => p.key === s.platform)?.label}</span>
-              <span className="text-gray-500">{s.time_slot.slice(0,5)} · {s.count_per_day}篇</span>
-              <span className={s.last_run ? "text-green-500" : "text-amber-500"}>
-                {s.last_run ? "✅ 今日已处理" : "⏳ 等待执行"}
-              </span>
+              <div className="flex items-center gap-2">
+                {s.auto_publish == 1 && <span className="text-[9px] text-purple-500">⚡自动</span>}
+                <span className="text-gray-500">{s.time_slot.slice(0,5)} · {s.count_per_day}篇</span>
+                <span className={s.last_run ? "text-green-500" : "text-amber-500"}>
+                  {s.last_run ? "✅ 今日已处理" : "⏳ 等待执行"}
+                </span>
+              </div>
             </div>
           ))
         )}
@@ -164,12 +171,13 @@ export default function MediaSchedulesPage() {
   );
 }
 
-function ScheduleForm({ platform, platformLabel, defaultTime, defaultCount, onSave, onCancel }: {
-  platform: string; platformLabel: string; defaultTime: string; defaultCount: number;
-  onSave: (time: string, count: number) => void; onCancel: () => void;
+function ScheduleForm({ platform, platformLabel, defaultTime, defaultCount, defaultAutoPublish, onSave, onCancel }: {
+  platform: string; platformLabel: string; defaultTime: string; defaultCount: number; defaultAutoPublish: boolean;
+  onSave: (time: string, count: number, autoPublish: boolean) => void; onCancel: () => void;
 }) {
   const [time, setTime] = useState(defaultTime);
   const [count, setCount] = useState(defaultCount);
+  const [autoPublish, setAutoPublish] = useState(defaultAutoPublish);
 
   return (
     <div className="mt-4 pt-3 border-t border-gray-100 space-y-3">
@@ -194,9 +202,16 @@ function ScheduleForm({ platform, platformLabel, defaultTime, defaultCount, onSa
           ))}
         </div>
       </div>
+      <div className="flex items-center justify-between py-2 px-1">
+        <span className="text-[10px] text-gray-400">自动发布（生成后直接进入发布队列）</span>
+        <button onClick={() => setAutoPublish(!autoPublish)}
+          className={`w-10 h-5 rounded-full relative transition-all ${autoPublish ? "bg-purple-400" : "bg-gray-200"}`}>
+          <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${autoPublish ? "left-5" : "left-0.5"}`} />
+        </button>
+      </div>
       <div className="flex gap-2 pt-1">
         <button onClick={onCancel} className="flex-1 py-2 rounded-[8px] text-xs border border-gray-200 active:scale-90">取消</button>
-        <button onClick={() => onSave(time, count)}
+        <button onClick={() => onSave(time, count, autoPublish)}
           className="flex-1 py-2 rounded-[8px] text-xs text-white font-medium active:scale-90"
           style={{background: C.teal}}>
           保存规则
