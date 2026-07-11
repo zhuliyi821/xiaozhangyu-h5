@@ -28,6 +28,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [buying, setBuying] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pendingAction, setPendingAction] = useState<"buy" | "cart" | null>(null);
+  const [activeImgIdx, setActiveImgIdx] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
 
   const handleLoginSuccess = () => {
     setShowLogin(false);
@@ -122,27 +124,73 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </button>
       </div>
 
-      {/* 主图 */}
+      {/* 主图 + 缩略图画廊 */}
       <div className="bg-white">
-        <div className="w-full aspect-square flex items-center justify-center bg-gray-50 relative overflow-hidden">
-          {thumbUrl && !imgError ? (
-            <img src={thumbUrl} alt={goods.title} className="w-full h-full object-cover"
-              onError={() => setImgError(true)} />
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-gray-300">
-              <AlertTriangle className="w-10 h-10" />
-              <span className="text-xs">暂无图片</span>
-            </div>
-          )}
+        <div className="w-full aspect-square flex items-center justify-center bg-gray-50 relative overflow-hidden cursor-pointer"
+          onClick={() => setShowGallery(true)}>
+          {(() => {
+            const images = data.images?.length > 0 ? data.images : [thumbUrl].filter(Boolean);
+            const currentImg = images[activeImgIdx] || thumbUrl;
+            return currentImg && !imgError ? (
+              <img src={normalizeImageUrl(currentImg) || undefined} alt={goods.title} className="w-full h-full object-cover"
+                onError={() => setImgError(true)} />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-gray-300">
+                <AlertTriangle className="w-10 h-10" />
+                <span className="text-xs">暂无图片</span>
+              </div>
+            );
+          })()}
         </div>
+
+        {/* 缩略图列表 */}
+        {data.images?.length > 1 && (
+          <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
+            {data.images.map((img: string, i: number) => (
+              <div key={i} onClick={() => setActiveImgIdx(i)}
+                className={`w-14 h-14 rounded-[8px] shrink-0 overflow-hidden border-2 cursor-pointer transition-all ${activeImgIdx === i ? 'border-brand-coral opacity-100' : 'border-transparent opacity-60'}`}>
+                <img src={normalizeImageUrl(img) || undefined} alt="" className="w-full h-full object-cover"
+                  onError={e => { (e.target as HTMLElement).style.display = 'none'; }} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* 全屏图片查看器 */}
+      {showGallery && (() => {
+        const images = data.images?.length > 0 ? data.images : [thumbUrl].filter(Boolean);
+        return (
+          <div className="fixed inset-0 z-50 bg-black flex items-center justify-center" onClick={() => setShowGallery(false)}>
+            <button onClick={() => setShowGallery(false)} className="absolute top-4 right-4 text-white/70 text-xl z-10">✕</button>
+            <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+              {images.length > 1 && (
+                <>
+                  <button onClick={() => setActiveImgIdx(i => Math.max(0, i - 1))}
+                    className="absolute left-2 z-10 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">‹</button>
+                  <button onClick={() => setActiveImgIdx(i => Math.min(images.length - 1, i + 1))}
+                    className="absolute right-2 z-10 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">›</button>
+                </>
+              )}
+              <img src={normalizeImageUrl(images[activeImgIdx]) || undefined} alt={goods.title}
+                className="max-w-full max-h-full object-contain p-4" />
+            </div>
+            <div className="absolute bottom-6 text-white/60 text-xs">{activeImgIdx + 1} / {images.length}</div>
+          </div>
+        );
+      })()}
 
       {/* 价格信息 */}
       <div className="bg-white px-4 py-4 mt-2">
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-brand-coral">¥{goods.price}</span>
           <span className="text-xs text-gray-400 line-through">¥{originalPrice}</span>
-          <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded ml-auto">门店直供</span>
+          {goods.game_coin_ratio !== undefined && goods.game_coin_ratio > 0 && (
+            <span className="text-[10px] bg-brand-teal-light/50 text-brand-teal-dark px-2 py-0.5 rounded ml-auto">
+              🎮 送{goods.game_coin_ratio}豆
+            </span>
+          )}
+          <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded">门店直供</span>
         </div>
         <div className="text-xs text-gray-500 mt-1">已售 {goods.stock > 100 ? "1000+" : goods.stock} 件 · 库存 {goods.stock} 件</div>
       </div>

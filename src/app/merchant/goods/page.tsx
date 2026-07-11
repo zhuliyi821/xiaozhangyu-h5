@@ -34,7 +34,7 @@ export default function MerchantGoodsPage() {
   // 新增商品表单
   const [newForm, setNewForm] = useState({
     title: "", price: 0, stock: 1, thumb: "", content: "",
-    game_coin_ratio: 0, platform: "xiaozhangyu",
+    game_coin_ratio: 0, platform: "xiaozhangyu", images: [] as string[],
   });
 
   // 处理 ?action=add 参数 → 打开添加弹窗
@@ -70,7 +70,7 @@ export default function MerchantGoodsPage() {
       if (d.code === 0) {
         setMessage("✅ 商品发布成功");
         setShowAddModal(false);
-        setNewForm({ title: "", price: 0, stock: 1, thumb: "", content: "", game_coin_ratio: 0, platform: "xiaozhangyu" });
+        setNewForm({ title: "", price: 0, stock: 1, thumb: "", content: "", game_coin_ratio: 0, platform: "xiaozhangyu", images: [] });
         // Reload
         fetch(`/api/store-services?action=merchant_my_goods&store_id=${activeStoreId}`).then(r => r.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
       } else { setMessage(`❌ ${d.msg || "发布失败"}`); }
@@ -188,7 +188,13 @@ export default function MerchantGoodsPage() {
               <div>
                 <label className="text-[11px] text-gray-400 block mb-1">商品图片 (URL)</label>
                 <input value={newForm.thumb} onChange={e => setNewForm(f => ({...f, thumb: e.target.value}))}
-                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#F27152]" placeholder="图片链接地址" />
+                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#F27152]" placeholder="主图链接地址" />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 block mb-1">更多图片 (URL, 每行一个)</label>
+                <textarea value={newForm.images.join("\n")} onChange={e => setNewForm(f => ({...f, images: e.target.value.split("\n").map(s => s.trim()).filter(Boolean)}))}
+                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#F27152] resize-none h-16" placeholder="https://..." />
+                {newForm.images.length > 0 && <p className="text-[10px] text-gray-400 mt-1">已添加 {newForm.images.length} 张图片</p>}
               </div>
               <div>
                 <label className="text-[11px] text-gray-400 block mb-1">商品描述</label>

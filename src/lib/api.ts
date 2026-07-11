@@ -384,8 +384,8 @@ export async function getStoreProductsList(limit: number = 20): Promise<StorePro
 }
 
 export interface ProductDetail {
-  goods: { id: number; title: string; price: string; thumb: string; stock: number; content: string };
-  images: any[];
+  goods: { id: number; title: string; price: string; thumb: string; stock: number; content: string; game_coin_ratio?: number };
+  images: string[];
   specs: any[];
   store_prices: { store_id: number; selling_price: string }[];
 }
