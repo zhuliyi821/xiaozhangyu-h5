@@ -1,14 +1,11 @@
 /**
- * 🏠 首页 — 彩票行业门店模板
+ * 🏠 首页 — 小章鱼首页
  *
- * 不同行业可切换不同首页模板：
- * - lottery-home-template → 彩票行业（默认）
- * - retail-home-template  → 零售行业
- * - food-home-template    → 餐饮行业
- * 只需将下面的 LotteryHomeTemplate 替换为对应行业模板即可
+ * 7个模块：顶部状态栏、今日运势、AI预测日报、
+ * 遇事起一卦、人人养小龙虾、每日任务、工具与服务
  */
-import { LotteryHomeTemplate } from "@/templates";
+import HomeTemplate from "@/templates/home-template";
 
 export default function HomePage() {
-  return <LotteryHomeTemplate />;
+  return <HomeTemplate />;
 }

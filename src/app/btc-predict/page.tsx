@@ -331,6 +331,111 @@ export default function BTCPredictPage() {
           </div>
         )}
       </div>
+
+      {/* ── 下注面板 ── */}
+      <div className="px-4 mt-4">
+        <BTCBetPanel />
+      </div>
+
     </main>
+  );
+}
+
+/** BTC 下注面板组件 */
+function BTCBetPanel() {
+  const [tab, setTab] = useState<"predict" | "record">("predict");
+  const [direction, setDirection] = useState<"up" | "down" | "flat" | null>(null);
+  const [amount, setAmount] = useState(10);
+  const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const AMOUNTS = [10, 50, 100, 200];
+  const MULTIPLIERS = { up: 1.8, down: 1.8, flat: 3.2 };
+
+  const handleBet = async () => {
+    if (!direction) { setMsg("请选择方向"); setTimeout(() => setMsg(""), 1500); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/backend/btc-game/fast-bet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bet_type: "risefall",
+          choice: direction === "up" ? "涨" : direction === "down" ? "跌" : "横",
+          points: amount,
+        }),
+      });
+      const json = await res.json();
+      setMsg(json.result === 1 ? `✅ 投注成功! 赢可获⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石` : `❌ ${json.msg || "投注失败"}`);
+      if (json.result === 1) { setDirection(null); }
+    } catch { setMsg("❌ 网络错误"); }
+    setSubmitting(false);
+    setTimeout(() => setMsg(""), 3000);
+  };
+
+  return (
+    <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm overflow-hidden">
+      {/* Tab */}
+      <div className="flex border-b border-gray-50">
+        <button onClick={() => setTab("predict")}
+          className={`flex-1 py-2.5 text-[12px] font-medium text-center transition-colors ${tab === "predict" ? "text-brand-teal-dark border-b-2 border-brand-teal" : "text-text-tertiary"}`}>
+          本轮预测
+        </button>
+        <button onClick={() => setTab("record")}
+          className={`flex-1 py-2.5 text-[12px] font-medium text-center transition-colors ${tab === "record" ? "text-brand-teal-dark border-b-2 border-brand-teal" : "text-text-tertiary"}`}>
+          我的记录
+        </button>
+      </div>
+
+      {tab === "predict" ? (
+        <div className="px-4 py-4">
+          {/* 倒计时 */}
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] text-text-tertiary">本轮倒计时</span>
+            <span className="text-[13px] font-bold text-brand-coral">⏱ 55s</span>
+          </div>
+
+          {/* 方向选择 */}
+          <div className="text-[11px] text-text-secondary mb-2">选择方向</div>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <button onClick={() => setDirection("up")}
+              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "up" ? "bg-red-50 border-red-300 text-red-600" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
+              看涨<br /><span className="text-[10px] font-normal">1.8x</span>
+            </button>
+            <button onClick={() => setDirection("flat")}
+              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "flat" ? "bg-gray-50 border-gray-300 text-text-primary" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
+              横盘<br /><span className="text-[10px] font-normal">3.2x</span>
+            </button>
+            <button onClick={() => setDirection("down")}
+              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "down" ? "bg-green-50 border-green-300 text-green-600" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
+              看跌<br /><span className="text-[10px] font-normal">1.8x</span>
+            </button>
+          </div>
+
+          {/* 投注额 */}
+          <div className="text-[11px] text-text-secondary mb-2">投注数量</div>
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {AMOUNTS.map(a => (
+              <button key={a} onClick={() => setAmount(a)}
+                className={`py-2.5 rounded-[8px] text-[13px] font-semibold border transition-all active:scale-95 ${amount === a ? "bg-brand-teal-light/50 border-brand-teal text-brand-teal-dark" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
+                {a}🎮
+              </button>
+            ))}
+          </div>
+
+          {/* 确认按钮 */}
+          <button onClick={handleBet} disabled={submitting || !direction}
+            className="w-full py-3 rounded-[10px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[13px] font-semibold active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed">
+            {submitting ? "处理中..." : direction ? `消耗🎮${amount} · 赢⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石` : "请先选择方向"}
+          </button>
+
+          {msg && <div className={`mt-2 text-[11px] text-center ${msg.includes("❌") ? "text-brand-coral" : "text-brand-teal-dark"}`}>{msg}</div>}
+        </div>
+      ) : (
+        <div className="px-4 py-8 text-center text-[12px] text-text-tertiary">
+          登录后可查看投注记录
+        </div>
+      )}
+    </div>
   );
 }

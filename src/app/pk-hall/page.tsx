@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PKTopic, PKFormData, APIResponse, DEFAULT_PK_FORM, PKMode, CharityMode, PoolMode, POOL_MODE_SCOPES, POOL_MODE_LABELS, POOL_MODE_DESCS, PK_MODE_LABELS, PK_MODE_DESCS, CHARITY_LABELS, CHARITY_PROJECTS, TIME_OPTIONS, CATEGORY_OPTIONS } from "./types";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
@@ -50,6 +51,20 @@ export default function PKHallPage() {
   const [showLogin, setShowLogin] = useState(false);
 
   const uid = (user as any)?.uid || 0;
+
+  // 钱包数据
+  const [wallet, setWallet] = useState({ credit1: 0 });
+  useEffect(() => {
+    if (!uid) return;
+    fetch("${API_BASE}/api/wallet/brief", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid }),
+    })
+      .then(r => r.json())
+      .then(d => { if (d.code === 0) setWallet(d.data); })
+      .catch(() => {});
+  }, [uid]);
 
   const handleCreatePK = async () => {
     if (!uid) return;
@@ -132,10 +147,17 @@ export default function PKHallPage() {
       {/* ─── Header ─── */}
       <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[24px] px-4 pt-5 pb-5 text-white">
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-lg font-bold">⚔️ PK大厅</div>
-            <div className="text-[10px] text-white/70 mt-0.5">选择方向，发起对战</div>
+          <div className="flex items-center gap-3">
+            <div>
+              <div className="text-lg font-bold">⚔️ PK大厅</div>
+              <div className="text-[10px] text-white/70 mt-0.5">选择方向，发起对战</div>
+            </div>
           </div>
+          <Link href="/jiadouzhan"
+            className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium active:scale-95 transition-transform">
+            <span>🎮 {wallet.credit1.toLocaleString()}</span>
+            <span className="text-white/70">获取→</span>
+          </Link>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
@@ -256,8 +278,11 @@ export default function PKHallPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-10 text-[#9A9A9D] text-xs">
             <div className="text-[40px] mb-2">🏟</div>
-            当前还没有PK话题
-            <div className="mt-2">成为第一个发起PK的人</div>
+            还没有PK话题
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <span className="text-brand-teal font-medium">成为第一个发起PK的人</span>
+              <span className="text-[10px] text-text-tertiary">· 已有 {stats.voters} 人在线</span>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
@@ -265,12 +290,23 @@ export default function PKHallPage() {
               const total = pk.total_votes || 1;
               const pctA = Math.min(100, Math.round(((pk.vote_a || 0) / total) * 100));
               const pctB = Math.min(100, Math.round(((pk.vote_b || 0) / total) * 100));
+              // 热度标签
+              const voteDiff = Math.abs(pctA - pctB);
+              const heatLabel = pk.total_pool >= 5000 ? { icon: "👑", label: "大额奖池", color: "bg-amber-100 text-amber-700" }
+                : pk.total_votes >= 20 && voteDiff <= 15 ? { icon: "🔥", label: "热门", color: "bg-red-50 text-brand-coral-dark" }
+                : pk.total_votes >= 10 && voteDiff <= 25 ? { icon: "⚡", label: "激烈", color: "bg-orange-50 text-orange-600" }
+                : null;
               return (
               <div key={pk.id}
                 className="bg-white rounded-[8px] overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
 
                 {/* Card header tags */}
                 <div className="px-3.5 pt-3 flex items-center gap-1.5 flex-wrap">
+                  {heatLabel && (
+                    <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-medium ${heatLabel.color}`}>
+                      {heatLabel.icon} {heatLabel.label}
+                    </span>
+                  )}
                   <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-medium ${
                     pk.category === "sports" ? "bg-brand-teal/10 text-brand-teal-dark"
                     : pk.category === "social" ? "bg-brand-gold-light/50 text-brand-gold-dark"
@@ -328,7 +364,7 @@ export default function PKHallPage() {
                     <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
                       className="text-[10px] px-3 py-1.5 rounded-full border border-gray-200 text-text-secondary active:scale-95 transition-transform">👀 围观</button>
                     <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
-                      className="text-[10px] px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-medium active:scale-95 transition-transform shadow-sm">💰 投注</button>
+                      className="text-[10px] px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-medium active:scale-95 transition-transform shadow-sm">🎮消耗{pk.min_bet}豆 · 赢⛏️</button>
                   </div>
                 </div>
               </div>

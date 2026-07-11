@@ -244,7 +244,10 @@ export default function StoreTemplate({ config: userConfig, storeId = 10001 }: S
   return (
     <main className="pb-20">
       {/* Carousel */}
-      <div className="mx-4 mt-2 rounded-[8px] overflow-hidden shadow-soft" onClick={() => setCarouselIdx((carouselIdx + 1) % cfg.carousels.length)}>
+      <div className="mx-4 mt-2 rounded-[8px] overflow-hidden shadow-soft" onClick={() => {
+        if (carouselIdx === 2) { window.location.href = "/ai-predictions"; return; }
+        setCarouselIdx((carouselIdx + 1) % cfg.carousels.length);
+      }}>
         <div className={`bg-gradient-to-r ${carouselBg[carouselIdx]} p-5 relative cursor-pointer active:scale-[0.98] transition-transform`}>
           <div className="relative z-10">
             <div className="text-[11px] text-white/80 mb-1">{cfg.carousels[carouselIdx].subtitle}</div>

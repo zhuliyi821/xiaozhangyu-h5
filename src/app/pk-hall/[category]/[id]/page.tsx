@@ -162,7 +162,7 @@ export default function PKRoomPage() {
           </div>
           {isActive && (
             <button onClick={() => handleOptionClick('A')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
-              投{topic.min_bet}豆支持
+              🎮投{topic.min_bet}豆 · 赢⛏️
             </button>
           )}
           <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
@@ -184,7 +184,7 @@ export default function PKRoomPage() {
           </div>
           {isActive && (
             <button onClick={() => handleOptionClick('B')} className="mt-2 px-5 py-1.5 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white rounded-[10px] text-[11px] font-medium active:scale-95 transition-transform">
-              投{topic.min_bet}豆支持
+              🎮投{topic.min_bet}豆 · 赢⛏️
             </button>
           )}
           <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
@@ -204,7 +204,7 @@ export default function PKRoomPage() {
 
         {isActive && (
           <div className="mt-2 bg-gray-50 rounded-[10px] px-3 py-2 text-[9px] text-gray-400 text-center">
-            💡 投{topic.min_bet}豆：选[{topic.option_a}]预估赢{topic.estimated_reward_a}豆 · 选[{topic.option_b}]预估赢{topic.estimated_reward_b}豆
+            💡 消耗🎮{topic.min_bet}豆：选[{topic.option_a}]赢⛏️{topic.estimated_reward_a}石 · 选[{topic.option_b}]赢⛏️{topic.estimated_reward_b}石
           </div>
         )}
       </div>
@@ -303,7 +303,7 @@ export default function PKRoomPage() {
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[8px] text-xs font-medium">取消</button>
               <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium">
-                确认投注 {confirmVote.betAmount} 豆
+                确认 · 消耗🎮{confirmVote.betAmount}豆 · 赢⛏️水晶石
               </button>
             </div>
           </div>
