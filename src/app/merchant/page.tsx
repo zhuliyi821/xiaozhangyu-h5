@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { useMerchantStores } from "./components/use-merchant-stores";
 
 const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", bg: "#F5F6FA", green: "#10B981" };
 
@@ -11,6 +12,7 @@ export default function MerchantPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [merchant, setMerchant] = useState<any>(null);
   const [stats, setStats] = useState({ goods: 0, orders: 0, revenue: 0 });
+  const { activeStoreId } = useMerchantStores();
 
   useEffect(() => {
     if (!user) return;
@@ -18,11 +20,15 @@ export default function MerchantPage() {
       .then(r => r.json())
       .then(d => { if (d.code === 0 && d.data.is_merchant) setMerchant(d.data); })
       .catch(() => {});
-    fetch(`/api/v2/merchant/store-goods?store_id=10001`)
+  }, [user]);
+
+  useEffect(() => {
+    if (!activeStoreId) return;
+    fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setStats(s => ({ ...s, goods: d.data.length })); })
       .catch(() => {});
-  }, [user]);
+  }, [activeStoreId]);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><div className="animate-spin w-6 h-6 border-2 border-[#F27152] border-t-transparent rounded-full" /></div>;
   if (!user) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><button onClick={() => setShowLogin(true)} className="px-6 py-2.5 rounded-[10px] text-white text-sm font-medium" style={{background:C.coral}}>登录后查看</button>{showLogin && <LoginModal onClose={() => setShowLogin(false)} />}</div>;

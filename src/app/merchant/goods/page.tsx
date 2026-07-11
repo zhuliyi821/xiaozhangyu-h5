@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { useMerchantStores } from "../components/use-merchant-stores";
 
 const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA" };
 
@@ -20,6 +21,7 @@ interface StoreGoods {
 
 export default function MerchantGoodsPage() {
   const { user, loading } = useAuth();
+  const { activeStoreId } = useMerchantStores();
   const [showLogin, setShowLogin] = useState(false);
   const [goods, setGoods] = useState<StoreGoods[]>([]);
   const [filterStatus, setFilterStatus] = useState<number | null>(null);
@@ -27,18 +29,18 @@ export default function MerchantGoodsPage() {
   const [message, setMessage] = useState("");
 
   const loadGoods = () => {
-    if (!user) return;
-    let url = `/api/v2/merchant/store-goods?store_id=10001`;
+    if (!user || !activeStoreId) return;
+    let url = `/api/v2/merchant/store-goods?store_id=${activeStoreId}`;
     if (filterStatus !== null) url += `&status=${filterStatus}`;
     fetch(url).then(r => r.json()).then(d => { if (d.code === 0) setGoods(d.data); }).catch(() => {});
   };
 
-  useEffect(() => { loadGoods(); }, [user, filterStatus]);
+  useEffect(() => { loadGoods(); }, [user, filterStatus, activeStoreId]);
 
   const updateGoods = async (goodsId: number, updates: Record<string, any>) => {
     setSavingId(goodsId);
     try {
-      const params = new URLSearchParams({ store_id: "10001", ...updates });
+      const params = new URLSearchParams({ store_id: String(activeStoreId || ""), ...Object.fromEntries(Object.entries(updates).map(([k,v]) => [k, String(v)])) });
       const r = await fetch(`/api/v2/merchant/store-goods/${goodsId}?${params}`, { method: "PUT" });
       const d = await r.json();
       setMessage(d.code === 0 ? "✅ 已更新" : `❌ ${d.msg}`);
