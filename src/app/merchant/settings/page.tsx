@@ -26,21 +26,13 @@ export default function MerchantSettingsPage() {
   const [staffSaving, setStaffSaving] = useState(false);
 
   // 当前门店
-  const currentStore = stores[0] || null;
+  const currentStore = stores.find(s => s.store_id === activeStoreId) || stores[0] || null;
 
   useEffect(() => {
-    if (!user) return;
-    fetch(`/api/v2/merchant/status?member_id=${user.uid}`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.code === 0 && d.data.stores?.length > 0) {
-          const s = d.data.stores[0];
-          setOperating(s.operating_state === 1);
-          setInfo({ store_name: s.store_name || "", address: s.address || "", phone: s.phone || "", intro: s.intro || "" });
-        }
-      })
-      .catch(() => {});
-  }, [user]);
+    if (!user || !currentStore) return;
+    setOperating(currentStore.operating_state === 1);
+    setInfo({ store_name: currentStore.store_name || "", address: currentStore.address || "", phone: currentStore.phone || "", intro: currentStore.intro || "" });
+  }, [user, currentStore]);
 
   const toggleOperating = async () => {
     if (!activeStoreId) return;

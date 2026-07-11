@@ -27,6 +27,22 @@ export default function MerchantGoodsPage() {
   const [filterStatus, setFilterStatus] = useState<number | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const [showAddGuide, setShowAddGuide] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // 处理 ?action=add 参数
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "add") {
+      setShowAddGuide(true);
+      window.history.replaceState({}, "", "/merchant/goods");
+    }
+  }, []);
+
+  const filteredGoods = goods.filter(g =>
+    (filterStatus === null || g.status === filterStatus) &&
+    (!searchTerm || g.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const loadGoods = () => {
     if (!user || !activeStoreId) return;
@@ -93,14 +109,38 @@ export default function MerchantGoodsPage() {
         </div>
       )}
 
+      {/* 添加商品引导提示 */}
+      {showAddGuide && (
+        <div className="mx-4 mt-3 bg-gradient-to-r from-brand-coral/5 to-brand-coral/10 rounded-[10px] p-4 border border-brand-coral/15"
+          style={{borderColor: `${C.coral}30`}}>
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">📦</div>
+            <div className="flex-1">
+              <p className="text-[13px] font-medium" style={{color:C.coral}}>添加商品</p>
+              <p className="text-[11px] text-gray-500 mt-1">商品由平台统一管理，如需添加新商品请联系平台运营</p>
+              <p className="text-[10px] text-gray-400 mt-1">联系后平台会分配商品到您的门店，届时可在下方列表管理上架/下架</p>
+            </div>
+            <button onClick={() => setShowAddGuide(false)}
+              className="text-gray-300 text-sm active:scale-90">✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* 搜索栏 */}
+      <div className="mx-4 mt-3">
+        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+          placeholder="🔍 搜索商品名称..."
+          className="w-full text-[12px] px-3 py-2 rounded-[8px] border border-gray-200 bg-white outline-none focus:border-brand-coral transition-colors" />
+      </div>
+
       {/* Goods List */}
       <div className="mx-4 mt-3 space-y-3">
-        {goods.length === 0 ? (
+        {filteredGoods.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-4xl mb-2">📦</p>
-            <p className="text-[12px] text-gray-400">暂无商品，请联系平台分配</p>
+            <p className="text-[12px] text-gray-400">{searchTerm ? "未找到匹配商品" : "暂无商品，请联系平台分配"}</p>
           </div>
-        ) : goods.map((g) => (
+        ) : filteredGoods.map((g) => (
           <GoodsCard key={g.id} goods={g} onUpdate={updateGoods} saving={savingId === g.id} />
         ))}
       </div>
