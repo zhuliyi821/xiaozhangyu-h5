@@ -8,19 +8,21 @@ export function useMerchantStores() {
   const { user } = useAuth();
   const [stores, setStores] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeStoreId, setActiveStoreId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     fetch(`/api/v2/merchant/stores?member_id=${user.uid}`)
       .then(r => r.json())
       .then(d => {
-        if (d.code === 0 && d.data?.length > 0) setStores(d.data);
+        if (d.code === 0 && d.data?.length > 0) {
+          setStores(d.data);
+          if (!activeStoreId) setActiveStoreId(d.data[0].store_id);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [user]);
 
-  const activeStoreId = stores.length > 0 ? stores[0].store_id : null;
-
-  return { stores, activeStoreId, loading };
+  return { stores, activeStoreId, setActiveStoreId, loading };
 }
