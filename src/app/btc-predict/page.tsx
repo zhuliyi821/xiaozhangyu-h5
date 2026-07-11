@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, TrendingUp, AlertTriangle, ChevronDown, BarChart3, Activity, Shield, Zap, DollarSign, RefreshCw } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ArrowLeft, TrendingUp, AlertTriangle, ChevronDown, BarChart3, Activity, Shield, Zap, DollarSign, RefreshCw, Clock, Coins } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 import { API_BASE } from "@/config/api";
 
@@ -343,35 +344,87 @@ export default function BTCPredictPage() {
 
 /** BTC 下注面板组件 */
 function BTCBetPanel() {
+  const { user } = useAuth();
   const [tab, setTab] = useState<"predict" | "record">("predict");
   const [direction, setDirection] = useState<"up" | "down" | "flat" | null>(null);
   const [amount, setAmount] = useState(10);
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState("");
+  const [balance, setBalance] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [records, setRecords] = useState<any[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const AMOUNTS = [10, 50, 100, 200];
-  const MULTIPLIERS = { up: 1.8, down: 1.8, flat: 3.2 };
+  const MULTIPLIERS: Record<string, number> = { up: 1.8, down: 1.8, flat: 3.2 };
 
+  // ── 获取余额 ──
+  const fetchBalance = useCallback(() => {
+    if (!user) return;
+    fetch(`/api/wallet-data?uid=${user.uid}&action=balance`)
+      .then(r => r.json())
+      .then(d => { if (d.code === 0) setBalance(d.data?.credit1 || 0); })
+      .catch(() => {});
+  }, [user]);
+  useEffect(() => { fetchBalance(); }, [fetchBalance]);
+
+  // ── 倒计时 ──
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) { fetchBalance(); return 60; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [fetchBalance]);
+
+  // ── 获取投注记录 ──
+  const fetchRecords = useCallback(() => {
+    if (!user) return;
+    setRecordsLoading(true);
+    fetch(`/api/backend/btc-game/fast-status?uid=${user.uid}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.code === 0 && d.data?.bets) setRecords(d.data.bets.slice(0, 20));
+      })
+      .catch(() => {})
+      .finally(() => setRecordsLoading(false));
+  }, [user]);
+  useEffect(() => { if (tab === "record") fetchRecords(); }, [tab, fetchRecords]);
+
+  // ── 投注 ──
   const handleBet = async () => {
+    if (!user) { setMsg("请先登录"); setTimeout(() => setMsg(""), 1500); return; }
     if (!direction) { setMsg("请选择方向"); setTimeout(() => setMsg(""), 1500); return; }
+    if (balance !== null && amount > balance) { setMsg(`🎮游戏豆不足 (余额: ${balance})`); setTimeout(() => setMsg(""), 2500); return; }
     setSubmitting(true);
     try {
       const res = await fetch(`/api/backend/btc-game/fast-bet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          uniacid: 7,
           bet_type: "risefall",
           choice: direction === "up" ? "涨" : direction === "down" ? "跌" : "横",
           points: amount,
         }),
       });
       const json = await res.json();
-      setMsg(json.result === 1 ? `✅ 投注成功! 赢可获⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石` : `❌ ${json.msg || "投注失败"}`);
-      if (json.result === 1) { setDirection(null); }
+      if (json.result === 1) {
+        setMsg(`✅ 投注成功! 60s后结算 · ⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石`);
+        setDirection(null);
+        fetchBalance();
+      } else {
+        setMsg(`❌ ${json.msg || "投注失败"}`);
+      }
     } catch { setMsg("❌ 网络错误"); }
     setSubmitting(false);
     setTimeout(() => setMsg(""), 3000);
   };
+
+  const canBet = !!direction && !!user;
 
   return (
     <div className="bg-white rounded-[12px] border border-gray-100 shadow-sm overflow-hidden">
@@ -389,27 +442,34 @@ function BTCBetPanel() {
 
       {tab === "predict" ? (
         <div className="px-4 py-4">
-          {/* 倒计时 */}
+          {/* 余额 + 倒计时 */}
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] text-text-tertiary">本轮倒计时</span>
-            <span className="text-[13px] font-bold text-brand-coral">⏱ 55s</span>
+            <div className="flex items-center gap-2">
+              <Coins size={14} className="text-brand-gold-dark" />
+              <span className="text-[12px] font-semibold text-text-primary">
+                🎮 {balance !== null ? balance.toLocaleString() : "—"}
+              </span>
+              {!user && <span className="text-[10px] text-text-tertiary">登录显示余额</span>}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock size={13} className="text-brand-coral" />
+              <span className="text-[13px] font-bold text-brand-coral">{timeLeft}s</span>
+            </div>
           </div>
 
           {/* 方向选择 */}
           <div className="text-[11px] text-text-secondary mb-2">选择方向</div>
           <div className="grid grid-cols-3 gap-2 mb-4">
-            <button onClick={() => setDirection("up")}
-              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "up" ? "bg-red-50 border-red-300 text-red-600" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
-              看涨<br /><span className="text-[10px] font-normal">1.8x</span>
-            </button>
-            <button onClick={() => setDirection("flat")}
-              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "flat" ? "bg-gray-50 border-gray-300 text-text-primary" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
-              横盘<br /><span className="text-[10px] font-normal">3.2x</span>
-            </button>
-            <button onClick={() => setDirection("down")}
-              className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === "down" ? "bg-green-50 border-green-300 text-green-600" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
-              看跌<br /><span className="text-[10px] font-normal">1.8x</span>
-            </button>
+            {[
+              { key: "up" as const, label: "看涨", mult: "1.8x", color: "bg-red-50 border-red-300 text-red-600", usual: "bg-gray-50 border-gray-100 text-text-secondary" },
+              { key: "flat" as const, label: "横盘", mult: "3.2x", color: "bg-gray-50 border-gray-300 text-text-primary", usual: "bg-gray-50 border-gray-100 text-text-secondary" },
+              { key: "down" as const, label: "看跌", mult: "1.8x", color: "bg-green-50 border-green-300 text-green-600", usual: "bg-gray-50 border-gray-100 text-text-secondary" },
+            ].map(d => (
+              <button key={d.key} onClick={() => setDirection(d.key)}
+                className={`py-3 rounded-[10px] text-[13px] font-semibold border transition-all active:scale-95 ${direction === d.key ? d.color : d.usual}`}>
+                {d.label}<br /><span className="text-[10px] font-normal">{d.mult}</span>
+              </button>
+            ))}
           </div>
 
           {/* 投注额 */}
@@ -417,23 +477,64 @@ function BTCBetPanel() {
           <div className="grid grid-cols-4 gap-2 mb-4">
             {AMOUNTS.map(a => (
               <button key={a} onClick={() => setAmount(a)}
-                className={`py-2.5 rounded-[8px] text-[13px] font-semibold border transition-all active:scale-95 ${amount === a ? "bg-brand-teal-light/50 border-brand-teal text-brand-teal-dark" : "bg-gray-50 border-gray-100 text-text-secondary"}`}>
+                disabled={balance !== null && a > balance}
+                className={`py-2.5 rounded-[8px] text-[13px] font-semibold border transition-all active:scale-95 ${amount === a ? "bg-brand-teal-light/50 border-brand-teal text-brand-teal-dark" : "bg-gray-50 border-gray-100 text-text-secondary"} ${balance !== null && a > balance ? "opacity-30 cursor-not-allowed" : ""}`}>
                 {a}🎮
               </button>
             ))}
           </div>
 
           {/* 确认按钮 */}
-          <button onClick={handleBet} disabled={submitting || !direction}
+          <button onClick={handleBet} disabled={submitting || !canBet}
             className="w-full py-3 rounded-[10px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[13px] font-semibold active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed">
-            {submitting ? "处理中..." : direction ? `消耗🎮${amount} · 赢⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石` : "请先选择方向"}
+            {!user ? "请先登录"
+              : submitting ? "投注中..."
+              : direction ? `消耗🎮${amount} · 赢⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石`
+              : "请先选择方向"}
           </button>
 
           {msg && <div className={`mt-2 text-[11px] text-center ${msg.includes("❌") ? "text-brand-coral" : "text-brand-teal-dark"}`}>{msg}</div>}
+
+          {/* 余额不足提示 */}
+          {user && balance !== null && balance < 10 && (
+            <div className="mt-3 p-2.5 rounded-[8px] bg-red-50 border border-red-100 text-[10px] text-red-500 text-center">
+              🎮游戏豆不足 · <a href="/marketplace" className="underline font-medium">去购物得豆 →</a>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="px-4 py-8 text-center text-[12px] text-text-tertiary">
-          登录后可查看投注记录
+        /* ── 我的记录 Tab ── */
+        <div className="px-4 py-3">
+          {!user ? (
+            <div className="py-8 text-center text-[12px] text-text-tertiary">登录后可查看投注记录</div>
+          ) : recordsLoading ? (
+            <div className="py-8 text-center text-[12px] text-text-tertiary">加载中...</div>
+          ) : records.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-2xl mb-2">🎲</p>
+              <p className="text-[12px] text-text-tertiary">暂无投注记录</p>
+              <button onClick={() => setTab("predict")} className="mt-2 text-[11px] text-brand-teal-dark underline">去投注</button>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {records.map((r: any, i: number) => (
+                <div key={i} className="flex items-center justify-between py-2 px-2 bg-gray-50 rounded-[8px]">
+                  <div className="text-[11px]">
+                    <span className="font-medium">{r.choice || "—"}</span>
+                    <span className="text-text-tertiary ml-1">{r.points}🎮</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {r.is_win === 1
+                      ? <span className="text-[10px] text-green-600">+⛏️{r.settle_points || 0}</span>
+                      : r.is_win === 0
+                      ? <span className="text-[10px] text-red-400">已结算</span>
+                      : <span className="text-[10px] text-amber-500">进行中</span>}
+                    <span className="text-[9px] text-text-tertiary">{new Date(r.created_at * 1000).toLocaleTimeString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
