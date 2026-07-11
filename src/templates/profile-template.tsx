@@ -38,7 +38,9 @@ export default function ProfileTemplate() {
   const [liveCredits, setLiveCredits] = useState<{
     credit1: number; credit2: number; credit3: number; credit4: number; credit5: number;
   } | null>(null);
-  const [isMerchant, setIsMerchant] = useState(false);
+  const [merchantStatus, setMerchantStatus] = useState<{
+    isMerchant: boolean; paid: boolean; pendingPay: boolean; hasApply: boolean;
+  }>({ isMerchant: false, paid: false, pendingPay: false, hasApply: false });
   const [couponCount, setCouponCount] = useState(0);
 
   const credits = liveCredits ?? user?.balance ?? { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0 };
@@ -63,9 +65,18 @@ export default function ProfileTemplate() {
   // ── 商户状态 ──
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/v2/merchant/status?member_id=${user.uid}`)
+    fetch(`/api/store-services?action=apply_status&member_id=${user.uid}`)
       .then(r => r.json())
-      .then(d => { if (d.code === 0 && d.data.is_merchant) setIsMerchant(true); })
+      .then(d => {
+        if (d.code === 0) {
+          setMerchantStatus({
+            isMerchant: d.data.has_merchant || false,
+            paid: d.data.paid || false,
+            pendingPay: d.data.pending_pay || false,
+            hasApply: !!d.data.merchant_apply,
+          });
+        }
+      })
       .catch(() => {});
   }, [user]);
 
@@ -109,7 +120,7 @@ export default function ProfileTemplate() {
       <QuickActions couponCount={couponCount} isLoggedIn={true} onLogin={() => setShowLogin(true)} />
 
       {/* ⑥ 服务列表 */}
-      <ServiceList isLoggedIn={true} isMerchant={isMerchant} onLogin={() => setShowLogin(true)} />
+      <ServiceList isLoggedIn={true} merchantStatus={merchantStatus} onLogin={() => setShowLogin(true)} />
 
       {/* ⑦ 邀请 */}
       <InviteBanner isLoggedIn={true} uid={user.uid} onLogin={() => setShowLogin(true)} />
