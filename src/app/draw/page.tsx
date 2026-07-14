@@ -35,7 +35,7 @@ export default function DrawQueryPage() {
   return (
     <main className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12 gap-2">
           <button onClick={() => window.history.back()} className="text-text-secondary text-lg">‹</button>
           <h1 className="text-base font-semibold flex-1">开奖查询</h1>
@@ -47,7 +47,7 @@ export default function DrawQueryPage() {
               className={`flex-shrink-0 px-3.5 py-1.5 rounded-[8px] text-xs font-medium transition-colors ${
                 activeKey === key
                   ? "bg-brand-teal text-white shadow-sm"
-                  : "bg-surface text-text-secondary border border-[rgba(69,204,213,0.08)]"
+                  : "bg-surface text-text-secondary border border-brand-teal/10"
               }`}>
               {conf.name}
             </button>
@@ -63,7 +63,7 @@ export default function DrawQueryPage() {
         <div className="px-4 mt-4 space-y-4">
           {/* Latest Draw Detail */}
           {activeDraw && (
-            <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+            <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/10">
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -119,14 +119,14 @@ export default function DrawQueryPage() {
           )}
 
           {/* History List */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/10">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold">历史开奖</span>
               <span className="text-[10px] text-text-tertiary">共 {history.length} 期</span>
             </div>
             <div className="space-y-2">
               {history.map((h, i) => (
-                <div key={h.period} className={`flex items-center gap-3 py-2 ${i !== history.length - 1 ? "border-b border-[rgba(69,204,213,0.06)]" : ""}`}>
+                <div key={h.period} className={`flex items-center gap-3 py-2 ${i !== history.length - 1 ? "border-b border-brand-teal/5" : ""}`}>
                   <div className="w-14 shrink-0">
                     <div className="text-[11px] font-semibold">第{h.period}期</div>
                     <div className="text-[9px] text-text-tertiary">{h.date}</div>

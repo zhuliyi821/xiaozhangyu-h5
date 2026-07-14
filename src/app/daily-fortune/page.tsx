@@ -646,7 +646,7 @@ export default function DailyFortunePage() {
           <Link href="/ai?tab=chat" className="block bg-white rounded-[8px] p-8 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
             <div className="flex flex-col items-center gap-3">
               <div className="w-20 h-20 flex items-center justify-center text-4xl">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D85A30] to-[#F27152] flex items-center justify-center shadow-md">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-coral to-brand-coral-dark flex items-center justify-center shadow-md">
                   <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9" xmlns="http://www.w3.org/2000/svg">
                     <ellipse cx="24" cy="30" rx="6" ry="9" fill="#fff" opacity="0.9"/>
                     <ellipse cx="24" cy="20" rx="5.5" ry="4.5" fill="#fff" opacity="0.9"/>
