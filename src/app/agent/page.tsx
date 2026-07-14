@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { API_V2 } from "@/config/api";
 import { ArrowLeft, MessageCircle, Zap, Plus, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { C } from "@/lib/brand-colors";
 
 // ── 类型 ──
 
@@ -28,10 +29,10 @@ interface Skill {
 // ── Agent 配置 ──
 
 const AGENT_CONFIG: Record<string, { icon: string; name: string; color: string; desc: string }> = {
-  shrimp: { icon: "🦞", name: "小龙虾", color: "#F27152", desc: "门店AI员工，7x24在线客服" },
-  horse: { icon: "🐎", name: "赛马预测师", color: "#F2B631", desc: "赔率扫描+期望值计算" },
-  fortune: { icon: "🔮", name: "占卜师", color: "#45CCD5", desc: "周易推演+运势分析" },
-  stock: { icon: "📈", name: "股市分析师", color: "#2BAAAF", desc: "技术面+资金面分析" },
+  shrimp: { icon: "🦞", name: "小龙虾", color: C.coral, desc: "门店AI员工，7x24在线客服" },
+  horse: { icon: "🐎", name: "赛马预测师", color: C.gold, desc: "赔率扫描+期望值计算" },
+  fortune: { icon: "🔮", name: "占卜师", color: C.teal, desc: "周易推演+运势分析" },
+  stock: { icon: "📈", name: "股市分析师", color: C.tealDark, desc: "技术面+资金面分析" },
 };
 
 // ── 组件 ──

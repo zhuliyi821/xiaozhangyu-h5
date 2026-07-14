@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { C, getBrandRGB } from "@/lib/brand-colors";
 
 interface LotteryConfig {
   name: string; code: string; front_name: string; front_range: number; front_pick: number;
@@ -44,10 +45,10 @@ export default function NumberPickerArea({
   const [longPressed, setLongPressed] = useState<number | null>(null);
 
   const RENDERED_FRONT_FILTERS = [
-    { key: 'scorching', label: '超热', color: '#F27152', bg: 'rgba(242,113,82,0.1)' },
-    { key: 'hot', label: '热', color: '#F27152', bg: 'rgba(242,113,82,0.08)' },
-    { key: 'cold', label: '冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.1)' },
-    { key: 'icy', label: '极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.15)' },
+    { key: 'scorching', label: '超热', color: C.coral, bg: `rgba(${getBrandRGB("coral").r},${getBrandRGB("coral").g},${getBrandRGB("coral").b},0.1)` },
+    { key: 'hot', label: '热', color: C.coral, bg: `rgba(${getBrandRGB("coral").r},${getBrandRGB("coral").g},${getBrandRGB("coral").b},0.08)` },
+    { key: 'cold', label: '冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.1)` },
+    { key: 'icy', label: '极冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.15)` },
   ];
 
   return (
@@ -74,7 +75,7 @@ export default function NumberPickerArea({
           ))}
           <button onClick={() => setShowStatsPanel(!showStatsPanel)}
             className="text-[9px] px-1.5 py-0.5 rounded-full border border-border-tertiary/50 flex items-center gap-0.5 active:scale-90 transition-transform"
-            style={{color: showStatsPanel ? '#F27152' : undefined, borderColor: showStatsPanel ? '#F27152' : undefined}}>
+            style={{color: showStatsPanel ? C.coral : undefined, borderColor: showStatsPanel ? C.coral : undefined}}>
             <span>📊</span><span className="text-[8px]">{showStatsPanel ? '收起' : '分析'}</span>
           </button>
           <span className="text-xs font-semibold ml-0.5">{selectedFront.length}/{config.front_pick}</span>
@@ -137,10 +138,10 @@ export default function NumberPickerArea({
             const t = trendData[n] || 'normal';
             let dotColor = '#8E8E93';
             let label = '常规';
-            if (t === 'scorching') { dotColor = '#F27152'; label = '超热'; }
-            else if (t === 'hot') { dotColor = '#F27152'; label = '热'; }
-            else if (t === 'icy') { dotColor = '#45CCD5'; label = '极冷'; }
-            else if (t === 'cold') { dotColor = '#45CCD5'; label = '冷'; }
+            if (t === 'scorching') { dotColor = C.coral; label = '超热'; }
+            else if (t === 'hot') { dotColor = C.coral; label = '热'; }
+            else if (t === 'icy') { dotColor = C.teal; label = '极冷'; }
+            else if (t === 'cold') { dotColor = C.teal; label = '冷'; }
             return (
               <span key={n} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white border border-border-tertiary/60">
                 <span className="w-1.5 h-1.5 rounded-full" style={{backgroundColor: dotColor}} />
@@ -157,11 +158,11 @@ export default function NumberPickerArea({
         <div className="mt-3 rounded-[8px] border border-border-tertiary overflow-hidden bg-bg/50">
           <div className="grid grid-cols-5 gap-px bg-border-tertiary/30">
             {[
-              { key: 'scorching', label: '🔥超热', color: '#F27152', bg: 'rgba(242,113,82,0.08)' },
-              { key: 'hot', label: '🔥热', color: '#F27152', bg: 'rgba(242,113,82,0.05)' },
+              { key: 'scorching', label: '🔥超热', color: C.coral, bg: `rgba(${getBrandRGB("coral").r},${getBrandRGB("coral").g},${getBrandRGB("coral").b},0.08)` },
+              { key: 'hot', label: '🔥热', color: C.coral, bg: `rgba(${getBrandRGB("coral").r},${getBrandRGB("coral").g},${getBrandRGB("coral").b},0.05)` },
               { key: 'normal', label: '🌡️常', color: '#8E8E93', bg: 'transparent' },
-              { key: 'cold', label: '❄️冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
-              { key: 'icy', label: '❄️极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
+              { key: 'cold', label: '❄️冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.05)` },
+              { key: 'icy', label: '❄️极冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.08)` },
             ].map(g => {
               const items = frontStats.filter(s => s.status === g.key);
               return (
@@ -192,11 +193,11 @@ export default function NumberPickerArea({
         <div className="mt-2 rounded-[8px] border border-border-tertiary overflow-hidden bg-bg/50">
           <div className="grid grid-cols-5 gap-px bg-border-tertiary/30">
             {[
-              { key: 'scorching', label: '🔥超热', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-              { key: 'hot', label: '🔥热', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
+              { key: 'scorching', label: '🔥超热', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.08)` },
+              { key: 'hot', label: '🔥热', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.05)` },
               { key: 'normal', label: '🌡️常', color: '#8E8E93', bg: 'transparent' },
-              { key: 'cold', label: '❄冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
-              { key: 'icy', label: '❄极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
+              { key: 'cold', label: '❄冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.05)` },
+              { key: 'icy', label: '❄极冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.08)` },
             ].map(g => {
               const items = backStats.filter(s => s.status === g.key);
               return (
@@ -231,10 +232,10 @@ export default function NumberPickerArea({
             {[...frontStats].sort((a,b) => a.number - b.number).map(s => {
               const maxCount = Math.max(...frontStats.map(f => f.count));
               const pct = maxCount > 0 ? (s.count / maxCount) * 100 : 0;
-              const barColor = s.status === 'scorching' ? '#F27152' :
-                s.status === 'hot' ? '#F27152' :
-                s.status === 'icy' ? '#45CCD5' :
-                s.status === 'cold' ? '#45CCD5' : '#D1D5DB';
+              const barColor = s.status === 'scorching' ? C.coral :
+                s.status === 'hot' ? C.coral :
+                s.status === 'icy' ? C.teal :
+                s.status === 'cold' ? C.teal : '#D1D5DB';
               return (
                 <div key={s.number} className="flex items-center gap-1.5">
                   <span className="text-[9px] w-5 text-right font-mono text-text-secondary">{String(s.number).padStart(2,"0")}</span>
@@ -259,8 +260,8 @@ export default function NumberPickerArea({
             </div>
             <div className="flex items-center gap-1">
               {[
-                { key: 'hot', label: '热', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-                { key: 'cold', label: '冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.12)' },
+                { key: 'hot', label: '热', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.08)` },
+                { key: 'cold', label: '冷', color: C.teal, bg: `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.12)` },
               ].map(g => (
                 <button key={g.key} onClick={() => setBackFilterStatus(backFilterStatus === g.key ? null : g.key)}
                   className="text-[8px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-full active:scale-90 transition-all"

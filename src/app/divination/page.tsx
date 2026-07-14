@@ -5,6 +5,7 @@ import { ArrowLeft, Sparkles, RefreshCw, Share2, BookOpen, ChevronDown, MessageC
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 import Link from "next/link";
 import { TentacleLoader, Confetti, AnimatedNumber, GoldRipple, useDelight } from "@/lib/delight";
+import { C } from "@/lib/brand-colors";
 
 type Yaoyi = { position: number; name: string; value: number; changing: boolean; line_type: string; stem: string; branch: string; element: string; relation: string; ri_chen: string };
 
@@ -33,14 +34,14 @@ function GuaLines({ yao_pan, changing_yaos }: { yao_pan: Yaoyi[]; changing_yaos:
         return (
           <g key={i}>
             {y.value ? (
-              <line x1="4" y1={yPos} x2="44" y2={yPos} stroke="#45CCD5" strokeWidth="3.5" strokeLinecap="round"
+              <line x1="4" y1={yPos} x2="44" y2={yPos} stroke={C.teal} strokeWidth="3.5" strokeLinecap="round"
                 strokeDasharray={isChanging ? "4 3" : "none"} />
             ) : (
-              <line x1="8" y1={yPos} x2="40" y2={yPos} stroke="#F27152" strokeWidth="3.5" strokeLinecap="round"
+              <line x1="8" y1={yPos} x2="40" y2={yPos} stroke={C.coral} strokeWidth="3.5" strokeLinecap="round"
                 strokeDasharray="6 5" />
             )}
             {isChanging && (
-              <circle cx="40" cy={yPos} r="2.5" fill="#F2B631" stroke="white" strokeWidth="1" />
+              <circle cx="40" cy={yPos} r="2.5" fill={C.gold} stroke="white" strokeWidth="1" />
             )}
           </g>
         );

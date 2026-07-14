@@ -1,5 +1,6 @@
 import { StoreProvider } from "@/lib/store-context";
 import type { StoreContextValue, DecorationConfig } from "@/lib/store-context";
+import { C } from "@/lib/brand-colors";
 
 async function fetchDecoration(storeId: number): Promise<DecorationConfig | null> {
   try {
@@ -27,7 +28,7 @@ export default async function StoreLayout({
 
   // Fetch decoration config server-side
   const decoration = await fetchDecoration(storeId);
-  const themeColor = decoration?.theme_color || "#45CCD5";
+  const themeColor = decoration?.theme_color || C.teal;
 
   const contextValue: StoreContextValue = {
     storeId,

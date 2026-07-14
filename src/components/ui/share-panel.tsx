@@ -14,6 +14,7 @@
 import { useState, useEffect } from "react";
 import { X, ImageIcon, Share2, Download } from "lucide-react";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
+import { C } from "@/lib/brand-colors";
 
 interface PosterData {
   title: string;
@@ -39,9 +40,9 @@ async function generatePoster(data: PosterData): Promise<string> {
   const ctx = canvas.getContext("2d")!;
 
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, "#45CCD5");
-  bg.addColorStop(0.4, "#2BAAAF");
-  bg.addColorStop(1, "#D99A0F");
+  bg.addColorStop(0, C.teal);
+  bg.addColorStop(0.4, C.tealDark);
+  bg.addColorStop(1, C.goldDark);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
@@ -100,7 +101,7 @@ async function generatePoster(data: PosterData): Promise<string> {
   wrapText(ctx, data.title, W / 2, titleY, W - 80, 36, 2);
 
   if (data.subtitle) {
-    ctx.fillStyle = "#F2B631";
+    ctx.fillStyle = C.gold;
     ctx.font = "bold 32px system-ui";
     ctx.textAlign = "center";
     ctx.fillText(data.subtitle, W / 2, titleY + 56);

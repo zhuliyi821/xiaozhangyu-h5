@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, ReactNode } from "react";
+import { C } from "@/lib/brand-colors";
 
 export interface StoreTheme {
   color: string;
@@ -38,7 +39,7 @@ const StoreContext = createContext<StoreContextValue>({
   industry: "food",
   decoration: null,
   loading: true,
-  theme: { color: "#45CCD5", logo: "" },
+  theme: { color: C.teal, logo: "" },
 });
 
 export function useStore() {

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Share2 } from "lucide-react";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
+import { C } from "@/lib/brand-colors";
 
 interface FortuneShareProps {
   score: number;
@@ -31,9 +32,9 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
 
     // 背景渐变 — 品牌金青珊瑚色系
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#45CCD5");    // brand-teal
-    grad.addColorStop(0.5, "#2BAAAF");  // brand-teal-dark
-    grad.addColorStop(1, "#D99A0F");    // brand-gold-dark
+    grad.addColorStop(0, C.teal);      // brand-teal
+    grad.addColorStop(0.5, C.tealDark); // brand-teal-dark
+    grad.addColorStop(1, C.goldDark);   // brand-gold-dark
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
@@ -41,7 +42,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     ctx.save();
     ctx.globalAlpha = 0.08;
     const g2 = ctx.createRadialGradient(270, 200, 10, 270, 200, 250);
-    g2.addColorStop(0, "#F2B631");    // brand-gold
+    g2.addColorStop(0, C.gold);    // brand-gold
     g2.addColorStop(1, "transparent");
     ctx.fillStyle = g2;
     ctx.fillRect(0, 0, W, H);
@@ -64,7 +65,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     ctx.stroke();
 
     // 综合评分
-    ctx.fillStyle = "#F5A623";
+    ctx.fillStyle = C.gold;
     ctx.font = "bold 72px 'PingFang SC', sans-serif";
     ctx.fillText(String(score), W / 2, 210);
     ctx.fillStyle = "rgba(255,255,255,0.7)";
@@ -74,7 +75,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
     // 星星
     const stars = Math.round(score / 20);
     ctx.font = "16px sans-serif";
-    ctx.fillStyle = "#F5A623";
+    ctx.fillStyle = C.gold;
     ctx.fillText("⭐".repeat(stars) + "☆".repeat(5 - stars), W / 2, 262);
 
     // 维度卡片
@@ -98,7 +99,7 @@ export default function FortuneShare({ score, tag, dimensions, advice, lucky, be
       ctx.fillStyle = "rgba(255,255,255,0.7)";
       ctx.font = "11px 'PingFang SC', sans-serif";
       ctx.fillText(DIM_LABELS[key] || key, x + cw / 2, y + 48);
-      ctx.fillStyle = "#F5A623";
+      ctx.fillStyle = C.gold;
       ctx.font = "bold 18px 'PingFang SC', sans-serif";
       ctx.fillText(String(dim.score), x + cw / 2, y + 72);
     });

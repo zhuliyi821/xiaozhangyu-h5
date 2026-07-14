@@ -1,5 +1,6 @@
 import { StoreProvider } from "@/lib/store-context";
 import type { StoreContextValue } from "@/lib/store-context";
+import { C } from "@/lib/brand-colors";
 import FortuneCard from "@/components/fortune-card";
 import AIGuessCard from "@/components/ai-guess-card";
 
@@ -16,7 +17,7 @@ export default async function StoreHomepage({
     industry: "food",
     decoration: null,
     loading: true,
-    theme: { color: "#45CCD5", logo: "" },
+    theme: { color: C.teal, logo: "" },
   };
 
   return (
