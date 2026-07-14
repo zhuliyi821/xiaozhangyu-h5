@@ -26,7 +26,7 @@ export function useDraftManager() {
       if (!raw) return;
       const parsed: PKDraft = JSON.parse(raw);
       const elapsed = Date.now() - parsed.savedAt;
-      if (elapsed < DRAFT_TTL && parsed.form.title) {
+      if (elapsed < DRAFT_TTL && (parsed.form.title || parsed.form.options.some(o => o.trim()))) {
         setDraftState({ exists: true, draft: parsed });
       } else {
         localStorage.removeItem(DRAFT_KEY);
@@ -49,7 +49,7 @@ export function useDraftManager() {
       if (!raw) return null;
       const parsed: PKDraft = JSON.parse(raw);
       const elapsed = Date.now() - parsed.savedAt;
-      if (elapsed < DRAFT_TTL && parsed.form.title) {
+      if (elapsed < DRAFT_TTL && (parsed.form.title || parsed.form.options.some(o => o.trim()))) {
         setDraftState({ exists: false, draft: null });
         return { form: parsed.form, step: parsed.step, mode: parsed.mode };
       }

@@ -225,6 +225,15 @@ export default function PKCreator({ open, onClose, defaultCategory, entryPoint =
   // ── 品类配置 ──
   const catCfg = CATEGORY_CONFIG[form.category];
 
+  // ── 保存并关闭（确保草稿不丢失） ──
+  const handleClose = useCallback(() => {
+    // 有内容时立刻保存草稿再关闭
+    if (form.title || form.options.some(o => o.trim())) {
+      saveDraft(form, currentStep, createMode);
+    }
+    onClose();
+  }, [form, currentStep, createMode, saveDraft, onClose]);
+
   if (!open) return null;
 
   // ═══════════════════════════════════════
@@ -233,7 +242,7 @@ export default function PKCreator({ open, onClose, defaultCategory, entryPoint =
 
   return (
     <>
-      <div className="fixed inset-0 z-[900] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="fixed inset-0 z-[900] bg-black/70 flex items-center justify-center p-4" onClick={handleClose}>
         <div className="bg-white rounded-[16px] w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200"
           onClick={e => e.stopPropagation()}>
 
@@ -630,7 +639,7 @@ export default function PKCreator({ open, onClose, defaultCategory, entryPoint =
                   ← 上一步
                 </button>
               ) : (
-                <button onClick={onClose}
+                <button onClick={handleClose}
                   className="px-4 py-2.5 rounded-[10px] bg-gray-100 text-gray-500 text-xs font-medium active:scale-95 transition-transform">
                   取消
                 </button>
