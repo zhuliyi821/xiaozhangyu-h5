@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { MapPin, ShoppingCart, Phone, ChevronRight, Star, Clock, Navigation } from "lucide-react";
+import { MapPin, ShoppingCart, Phone, ChevronRight, Star, Clock, Navigation, Heart } from "lucide-react";
 import { API_BASE } from "@/config/api";
 import { Skeleton } from "@/components/layout/skeleton";
 import { ErrorState } from "@/components/layout/error-state";
+import { addFavorite, removeFavorite, getFavorites } from "@/lib/api";
 
 /** 门店配置 */
 interface StoreConfig {
@@ -85,9 +86,26 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   const [decoration, setDecoration] = useState<{ theme_color: string; modules: any[]; logo: string } | null>(null);
   const [buyProduct, setBuyProduct] = useState<any>(null);
   const [buySuccess, setBuySuccess] = useState<{ product: any; earned: number } | null>(null);
+  // 收藏状态：已收藏的 product_id 集合
+  const [favIds, setFavIds] = useState<Set<number>>(new Set());
+  const [favMsg, setFavMsg] = useState("");
+
+  // 获取当前用户ID（从localStorage）
+  const getUid = (): number => {
+    try {
+      const raw = localStorage.getItem("xiaozhangyu_user");
+      if (raw) return JSON.parse(raw).uid || 0;
+    } catch {}
+    return 0;
+  };
 
   useEffect(() => {
     async function loadStore() {
+      // 加载收藏列表
+        const uid = getUid();
+        if (uid) {
+          getFavorites(uid).then(d => setFavIds(new Set(d.list.map(f => f.product_id)))).catch(() => {});
+      }
       try {
         // 1. 获取门店信息
         const storeRes = await fetch(
@@ -146,6 +164,30 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   }, [storeId, API_BASE]);
 
   const primary = store.brand_primary || "#6BA3A3";
+
+  // 收藏切换
+  const toggleFav = async (p: any) => {
+    const uid = getUid();
+    if (!uid) { setFavMsg("请先登录"); setTimeout(() => setFavMsg(""), 2000); return; }
+    const pid = p.product_id || p.id;
+    if (favIds.has(pid)) {
+      try {
+        const d = await getFavorites(uid);
+        const item = d.list.find(f => f.product_id === pid);
+        if (item) {
+          await removeFavorite(uid, item.id);
+          setFavIds(prev => { const s = new Set(prev); s.delete(pid); return s; });
+          setFavMsg("已取消收藏"); setTimeout(() => setFavMsg(""), 1500);
+        }
+      } catch { setFavMsg("操作失败"); setTimeout(() => setFavMsg(""), 2000); }
+    } else {
+      try {
+        await addFavorite(uid, pid, p.title || p.name || "");
+        setFavIds(prev => { const s = new Set(prev); s.add(pid); return s; });
+        setFavMsg("已收藏 ❤️"); setTimeout(() => setFavMsg(""), 1500);
+      } catch { setFavMsg("收藏失败"); setTimeout(() => setFavMsg(""), 2000); }
+    }
+  };
 
   // 加载状态
   if (loading) {
@@ -294,7 +336,13 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
                   )}
                 </div>
                 <div className="p-2.5">
-                  <div className="text-[12px] font-medium truncate">{p.title||p.name}</div>
+                  <div className="text-[12px] font-medium truncate flex items-center gap-1">
+                    {p.title||p.name}
+                    <button onClick={(e) => { e.stopPropagation(); toggleFav(p); }}
+                      className="shrink-0 ml-auto active:scale-90 transition-transform">
+                      <Heart className={`w-3.5 h-3.5 ${favIds.has(p.product_id || p.id) ? "fill-brand-coral text-brand-coral" : "text-gray-300"}`} />
+                    </button>
+                  </div>
                   <div className="flex items-center justify-between mt-1.5">
                     <span className="text-sm font-bold" style={{color:primary}}>¥{p.selling_price||p.price}</span>
                     <button onClick={() => setBuyProduct(p)} className="text-[10px] text-white px-2.5 py-1 rounded-full active:scale-90 transition-transform" style={{background:primary}}>
@@ -483,6 +531,13 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
               继续逛逛
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 收藏提示 */}
+      {favMsg && (
+        <div className="fixed z-50 top-20 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white px-5 py-2.5 rounded-[10px] shadow-lg text-[12px] font-medium animate-[fadeIn_0.3s_ease-out]">
+          {favMsg}
         </div>
       )}
     </main>
