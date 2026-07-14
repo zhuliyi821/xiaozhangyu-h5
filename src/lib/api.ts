@@ -21,7 +21,9 @@ export interface LoginResult {
     credit2: number;  // 🏪 闲豆
     credit3: number;  // 🔮 水晶球
     credit4: number;  // 💰 余额
-    credit5: number;  // ⛏️ 水晶石
+    credit5: number;  // ✨ 水晶石(可用)
+    credit6: number;  // ❄️ 冻结豆
+    granted_game_coins?: number;
   };
 }
 
@@ -35,6 +37,24 @@ export async function login(mobile: string, password: string): Promise<LoginResu
   if (json.code !== 0 && json.code !== 200) throw new Error(json.message || "登录失败");
   return json.data;
 }
+
+/**
+ * 用户名+密码登录
+ * POST /api/member/login 支持 username 字段
+ */
+export async function loginByUsername(username: string, password: string): Promise<LoginResult> {
+  const res = await fetch(`${API_BASE}/api/member/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  const json = await res.json();
+  if (json.code !== 0 && json.code !== 200) throw new Error(json.message || "用户名或密码错误");
+  return json.data;
+}
+
+/** 手机号+密码登录 */
+export const loginByMobile = login;
 
 export async function register(mobile: string, password: string): Promise<{ uid: number; mobile: string }> {
   const res = await fetch(`${API_BASE}/api/member/register`, {

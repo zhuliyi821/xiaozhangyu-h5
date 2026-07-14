@@ -8,7 +8,7 @@ import { API_BASE, apiFetch, ApiError } from "@/config/api";
 import { useAuth } from "@/lib/auth-context";
 
 const ASSETS: Record<string, { icon: string; label: string; color: string; desc: string; note: string; exchange?: string }> = {
-  credit1: { icon: "🎮", label: "游戏豆", color: "from-brand-teal to-brand-teal-dark", desc: "流通币，用于投注、投票、AI 会话消耗", note: "游戏豆不可反向兑换为其他资产" },
+  credit1: { icon: "🎮", label: "游戏豆", color: "from-brand-teal to-brand-teal-dark", desc: "流通币，用于参与、投票、AI 会话消耗", note: "游戏豆不可反向兑换为其他资产" },
   credit2: { icon: "🫘", label: "闲豆", color: "from-brand-teal to-brand-gold", desc: "商城券，仅限商城内消费使用", note: "仅通过物资/服务置换获得，不可通过任务获得" },
   credit3: { icon: "🔮", label: "水晶球", color: "from-brand-coral to-brand-gold", desc: "荣誉值，享有赢家盈利分红", note: "每个赢家盈利的 5% 水晶石分给所有水晶球持有人，按持有比例分配", exchange: "1:100 → 游戏豆" },
   credit4: { icon: "💰", label: "余额", color: "from-brand-gold to-brand-gold-dark", desc: "现金资产，可用于消费和购物", note: "¥1.00 = 100 游戏豆", exchange: "1:100 → 游戏豆" },
@@ -19,7 +19,7 @@ const ASSETS: Record<string, { icon: string; label: string; color: string; desc:
 const genLedger = (asset: string) => {
   const base: Record<string, { items: { date: string; time: string; action: string; ref: string; change: string; balance: string; type: "in" | "out" }[] }> = {
     credit1: { items: [
-      { date: "今天", time: "16:30", action: "投注", ref: "双色球·第2026178期", change: "-500", balance: "967,000", type: "out" },
+      { date: "今天", time: "16:30", action: "参与", ref: "双色球·第2026178期", change: "-500", balance: "967,000", type: "out" },
       { date: "今天", time: "14:00", action: "充值", ref: "余额兑换", change: "+10,000", balance: "967,500", type: "in" },
       { date: "今天", time: "12:20", action: "AI 会话", ref: "咨询运势", change: "-100", balance: "957,500", type: "out" },
       { date: "昨天", time: "20:15", action: "PK 投票", ref: "娱乐竞技", change: "-200", balance: "957,600", type: "out" },

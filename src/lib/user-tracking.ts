@@ -14,7 +14,7 @@ interface TrackEvent {
 
 interface TrackingData {
   sessions: number;          // 会话次数
-  totalBets: number;         // 总投注数
+  totalBets: number;         // 总参与数
   modeSwitches: number;      // 模式切换次数
   quickPickCount: number;    // 机选次数
   manualPickCount: number;   // 手动选号次数
@@ -23,7 +23,7 @@ interface TrackingData {
   lastVisitDate: string;     // 上次访问日期
   visitDates: string[];      // 所有访问日期(去重用)
   totalWin: number;          // 总盈利
-  totalCost: number;         // 总投注额
+  totalCost: number;         // 总参与额
   firstVisit: number;        // 首次访问时间戳
   lastRebetTime: number;     // 上次使用"再来一注"时间
   conDay: number;            // 连续访问天数
@@ -67,7 +67,7 @@ export function trackSession() {
   save(data);
 }
 
-/** 记录投注 */
+/** 记录参与 */
 export function trackBet(cost: number, win: number) {
   const data = load();
   data.totalBets++;

@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 import LoginModal from "@/components/ui/login-modal";
 import { apiFetch } from "@/config/api";
+import AvatarPicker from "@/components/avatar-picker";
+import { getUserAvatar } from "@/lib/avatar-utils";
 
 interface Props {
   user: { uid: number; nickname: string; avatar: string } | null;
@@ -14,6 +16,16 @@ interface Props {
 
 export default function ProfileHeader({ user, loading, onLogin, onLogout }: Props) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  // 兼容 WeChat X5 浏览器：useState + custom event 替代 useSyncExternalStore
+  const [avatar, setAvatar] = useState("🐙");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setAvatar(getUserAvatar());
+    const onAvatarChange = () => setAvatar(getUserAvatar());
+    window.addEventListener("avatar-changed", onAvatarChange);
+    return () => window.removeEventListener("avatar-changed", onAvatarChange);
+  }, []);
 
   if (loading) {
     return (
@@ -34,11 +46,21 @@ export default function ProfileHeader({ user, loading, onLogin, onLogout }: Prop
     <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark px-5 pt-4 pb-9 text-white rounded-b-[28px]">
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className="w-[52px] h-[52px] rounded-full bg-white/20 flex items-center justify-center text-[26px] border-2 border-white/30 shrink-0 overflow-hidden">
-          {user?.avatar ? (
-            <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-          ) : (
-            user ? "🐙" : "👤"
+        <div className="relative w-[52px] h-[52px] shrink-0">
+          <div className="w-full h-full rounded-full bg-white/20 flex items-center justify-center text-[26px] border-2 border-white/30 overflow-hidden">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+            ) : (
+              user ? avatar : "👤"
+            )}
+          </div>
+          {/* 编辑按钮 — 点击选择多元头像 */}
+          {user && !user.avatar && (
+            <button onClick={() => setShowAvatarPicker(true)}
+              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200 text-[8px]"
+              aria-label="选择头像">
+              ✏️
+            </button>
           )}
         </div>
 
@@ -69,6 +91,9 @@ export default function ProfileHeader({ user, loading, onLogin, onLogout }: Prop
 
       {/* Streak row (已登录) */}
       {user && <StreakRow uid={user.uid} />}
+
+      {/* 🎭 多元头像选择器 */}
+      <AvatarPicker open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
 
       {/* Logout confirm modal */}
       {showLogoutConfirm && (

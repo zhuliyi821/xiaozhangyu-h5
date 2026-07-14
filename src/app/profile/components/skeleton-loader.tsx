@@ -1,10 +1,10 @@
 "use client";
 
-/** 🦴 骨架屏：页面整体加载时的占位效果 */
+/** 🦴 骨架屏：页面整体加载时的占位效果（v4 5模块） */
 export default function ProfileSkeleton() {
   return (
     <main className="pb-20">
-      {/* Header skeleton */}
+      {/* ① Header skeleton */}
       <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark px-5 pt-4 pb-9 text-white rounded-b-[28px]">
         <div className="flex items-center gap-3">
           <div className="w-[52px] h-[52px] rounded-full bg-white/20 animate-pulse shrink-0" />
@@ -16,44 +16,59 @@ export default function ProfileSkeleton() {
         </div>
       </div>
 
-      {/* Asset skeleton */}
+      {/* ② Asset skeleton (4-grid) */}
       <div className="mx-4 -mt-5">
-        <div className="grid grid-cols-3 gap-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-[10px] p-3.5 text-center shadow-sm border border-gray-100">
-              <div className="w-5 h-5 bg-gray-100 rounded-full mx-auto mb-1 animate-pulse" />
-              <div className="h-5 w-14 bg-gray-100 rounded mx-auto mb-0.5 animate-pulse" />
-              <div className="h-3 w-10 bg-gray-50 rounded mx-auto animate-pulse" />
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white rounded-[10px] py-3 text-center shadow-sm border border-gray-100 animate-pulse">
+              <div className="w-5 h-5 bg-gray-100 rounded-full mx-auto mb-1" />
+              <div className="h-4 w-12 bg-gray-100 rounded mx-auto mb-0.5" />
+              <div className="h-2.5 w-10 bg-gray-50 rounded mx-auto" />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Quick actions skeleton */}
+      {/* ③ Tasks skeleton (3 items) */}
       <div className="mx-4 mt-3">
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-[10px] p-3 text-center shadow-sm border border-gray-100">
-              <div className="w-5 h-5 bg-gray-100 rounded-full mx-auto mb-1 animate-pulse" />
-              <div className="h-3 w-14 bg-gray-100 rounded mx-auto mb-0.5 animate-pulse" />
-              <div className="h-2 w-10 bg-gray-50 rounded mx-auto animate-pulse" />
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+          <div className="h-3 w-12 bg-gray-100 rounded animate-pulse" />
         </div>
-      </div>
-
-      {/* Service list skeleton */}
-      <div className="mt-4 px-4 space-y-2">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="flex items-center gap-3 bg-white rounded-[10px] py-3.5 px-4 shadow-sm border border-gray-100">
-            <div className="w-9 h-9 rounded-[10px] bg-gray-100 animate-pulse" />
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex items-center gap-2.5 bg-white rounded-[10px] p-2.5 mb-1.5 border border-gray-100 animate-pulse">
+            <div className="w-[18px] h-[18px] rounded-full bg-gray-200" />
             <div className="flex-1 space-y-1">
-              <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-              <div className="h-2.5 w-14 bg-gray-50 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-gray-200 rounded" />
+              <div className="h-2.5 w-16 bg-gray-100 rounded" />
             </div>
-            <div className="w-3 h-3 bg-gray-100 rounded animate-pulse" />
+            <div className="h-3 w-12 bg-gray-100 rounded" />
           </div>
         ))}
+      </div>
+
+      {/* ④ Quick grid skeleton (4×2) */}
+      <div className="mx-4 mt-3">
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <div key={i} className="bg-white rounded-[10px] py-3 text-center shadow-sm border border-gray-100 animate-pulse">
+              <div className="w-5 h-5 bg-gray-100 rounded-full mx-auto mb-1" />
+              <div className="h-3 w-10 bg-gray-100 rounded mx-auto" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ⑤ Invite skeleton */}
+      <div className="mx-4 mt-3">
+        <div className="rounded-[12px] p-4 border border-gray-100 animate-pulse">
+          <div className="h-4 w-20 bg-gray-100 rounded mb-2" />
+          <div className="h-3 w-40 bg-gray-50 rounded mb-3" />
+          <div className="flex gap-2">
+            <div className="flex-1 h-8 bg-gray-100 rounded-[8px]" />
+            <div className="flex-1 h-8 bg-gray-100 rounded-[8px]" />
+          </div>
+        </div>
       </div>
     </main>
   );

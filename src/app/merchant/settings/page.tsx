@@ -18,8 +18,9 @@ export default function MerchantSettingsPage() {
   const [showAddStaff, setShowAddStaff] = useState(false);
 
   // 可编辑信息
-  const [info, setInfo] = useState({ store_name: "", address: "", phone: "", intro: "" });
-  const [editInfo, setEditInfo] = useState({ store_name: "", address: "", phone: "", intro: "" });
+  const [info, setInfo] = useState({ store_name: "", address: "", phone: "", intro: "", latitude: "", longitude: "" });
+  const [editInfo, setEditInfo] = useState({ store_name: "", address: "", phone: "", intro: "", latitude: "", longitude: "" });
+  const [locating, setLocating] = useState(false);
 
   // 新店员信息
   const [newStaff, setNewStaff] = useState({ name: "", mobile: "", role: "clerk" });
@@ -31,7 +32,7 @@ export default function MerchantSettingsPage() {
   useEffect(() => {
     if (!user || !currentStore) return;
     setOperating(currentStore.operating_state === 1);
-    setInfo({ store_name: currentStore.store_name || "", address: currentStore.address || "", phone: currentStore.phone || "", intro: currentStore.intro || "" });
+    setInfo({ store_name: currentStore.store_name || "", address: currentStore.address || "", phone: currentStore.phone || "", intro: currentStore.intro || "", latitude: currentStore.latitude || "", longitude: currentStore.longitude || "" });
   }, [user, currentStore]);
 
   const toggleOperating = async () => {
@@ -152,6 +153,12 @@ export default function MerchantSettingsPage() {
               <span className="font-medium text-right max-w-[200px] truncate">{info.address || "—"}</span>
             </div>
             <div className="flex justify-between text-[11px]">
+              <span className="text-gray-400">📍 导航定位</span>
+              <span className={`font-medium ${info.latitude ? 'text-green-600' : 'text-amber-600'}`}>
+                {info.latitude ? `已定位 (${parseFloat(info.latitude).toFixed(4)}, ${parseFloat(info.longitude).toFixed(4)})` : "⚠️ 未设置"}
+              </span>
+            </div>
+            <div className="flex justify-between text-[11px]">
               <span className="text-gray-400">联系电话</span>
               <span className="font-medium">{info.phone || "—"}</span>
             </div>
@@ -226,6 +233,70 @@ export default function MerchantSettingsPage() {
                 <label className="text-[11px] text-gray-400 block mb-1">门店地址</label>
                 <input value={editInfo.address} onChange={e => setEditInfo(p => ({ ...p, address: e.target.value }))}
                   className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#45CCD5]" placeholder="输入门店地址" />
+              </div>
+              {/* 门店定位 */}
+              <div>
+                <label className="text-[11px] text-gray-400 block mb-1">📍 门店定位</label>
+                <div className="flex flex-col gap-2">
+                  {/* 第1行：定位按钮 */}
+                  <div className="flex gap-2">
+                    <button onClick={() => {
+                      if (!navigator.geolocation) { setMsg("❌ 浏览器不支持定位"); return; }
+                      setLocating(true);
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          setEditInfo(p => ({ ...p, latitude: pos.coords.latitude.toString(), longitude: pos.coords.longitude.toString() }));
+                          setLocating(false);
+                          setMsg("✅ 定位成功");
+                          setTimeout(() => setMsg(""), 2000);
+                        },
+                        () => { setLocating(false); setMsg("❌ 定位失败，请检查GPS权限"); setTimeout(() => setMsg(""), 3000); },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                      );
+                    }} disabled={locating}
+                      className="flex-1 py-2 rounded-[8px] text-[11px] font-medium text-white active:scale-95 transition-all"
+                      style={{background: locating ? "#999" : C.teal}}>
+                      {locating ? "📍 定位中..." : "📍 获取当前位置"}
+                    </button>
+                    {editInfo.latitude && editInfo.longitude && (
+                      <a href={`https://uri.amap.com/marker?position=${editInfo.longitude},${editInfo.latitude}&name=${encodeURIComponent(editInfo.store_name || "我的门店")}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="px-3 py-2 rounded-[8px] text-[11px] font-medium text-center"
+                        style={{backgroundColor: `${C.gold}20`, color: "#B8860B"}}>
+                        查看地图
+                      </a>
+                    )}
+                  </div>
+                  {/* 第2行：根据地址自动定位 */}
+                  <button onClick={async () => {
+                    if (!editInfo.address) { setMsg("❌ 请先输入门店地址"); setTimeout(() => setMsg(""), 2000); return; }
+                    setLocating(true);
+                    try {
+                      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(editInfo.address)}&limit=1&countrycodes=cn`);
+                      const j = await r.json();
+                      if (j.length > 0) {
+                        setEditInfo(p => ({ ...p, latitude: j[0].lat, longitude: j[0].lon }));
+                        setMsg("✅ 地址定位成功");
+                      } else {
+                        setMsg("❌ 未找到该地址，请手动定位");
+                      }
+                    } catch { setMsg("❌ 定位服务异常"); }
+                    setLocating(false);
+                    setTimeout(() => setMsg(""), 2000);
+                  }} disabled={locating}
+                    className="w-full py-1.5 rounded-[8px] text-[10px] font-medium text-center"
+                    style={{backgroundColor: `${C.purple}10`, color: C.purple}}>
+                    {locating ? "⏳ 解析地址中..." : "🔍 根据输入地址自动定位"}
+                  </button>
+                </div>
+                {editInfo.latitude && editInfo.longitude ? (
+                  <div className="flex items-center gap-2 mt-1.5 text-[10px] text-green-600">
+                    <span>✅ 已定位</span>
+                    <span className="text-gray-400">{parseFloat(editInfo.latitude).toFixed(4)}, {parseFloat(editInfo.longitude).toFixed(4)}</span>
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-amber-600 mt-1">⚠️ 未设置位置，顾客将无法导航到店</div>
+                )}
               </div>
               <div>
                 <label className="text-[11px] text-gray-400 block mb-1">联系电话</label>

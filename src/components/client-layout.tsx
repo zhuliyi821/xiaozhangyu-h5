@@ -20,7 +20,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         title: "小章鱼 · AI趣预测",
         desc: "AI驱动 · 全民预测 · 有奖PK",
         link: url,
-        imgUrl: "https://ws.hi.cn/favicon.svg",
+        imgUrl: "https://ws.hi.cn/octopus-share.png",
       });
     });
   }, [pathname]);

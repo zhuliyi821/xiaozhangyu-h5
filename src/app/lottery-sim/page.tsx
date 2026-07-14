@@ -2,7 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, RefreshCw, AlertTriangle, Dices, Sparkles, Trophy, DollarSign, History, ChevronDown, Bot, MessageSquare } from "lucide-react";
+import { ArrowLeft, ChevronDown, Bot, MessageSquare } from "lucide-react";
+import LotteryHeader from "./_components/LotteryHeader";
+import BetButton from "./_components/BetButton";
+import NumberPickerArea from "./_components/NumberPickerArea";
+import BetSlip from "./_components/BetSlip";
+import DrawResult from "./_components/DrawResult";
+import DailyChallenges from "./_components/DailyChallenges";
+import BetHistory from "./_components/BetHistory";
 
 import { API_BASE } from '@/config/api';
 import { useAuth } from "@/lib/auth-context";
@@ -50,10 +57,9 @@ function LotterySimContent() {
   const predParam = searchParams.get("pred") || "";
   const { user, loading: authLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  // 长按定时器 ref（号码球长按 → 详情弹窗）
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [longPressed, setLongPressed] = useState<number | null>(null);
+  const bettingLockRef = useRef(false); // 防连击锁
   const [lotteryCode, setLotteryCode] = useState(initType);
+  const [confirmSwitch, setConfirmSwitch] = useState<string | null>(null); // 切换彩种确认
   const [config, setConfig] = useState<LotteryConfig | null>(null);
   const [balance, setBalance] = useState(0);
   const [selectedFront, setSelectedFront] = useState<number[]>([]);
@@ -78,6 +84,7 @@ function LotterySimContent() {
   const [easterEgg, setEasterEgg] = useState("");
   const [showSurvey, setShowSurvey] = useState(false);
   const [jackpot, setJackpot] = useState(0);
+  const [countdown, setCountdown] = useState(0); // 参与后开奖倒计时秒数
   // 冷热号状态: scorching/hot/normal/cold/icy
   const [trendData, setTrendData] = useState<Record<number, 'scorching'|'hot'|'normal'|'cold'|'icy'>>({});
   const [trendDataBack, setTrendDataBack] = useState<Record<number, 'scorching'|'hot'|'normal'|'cold'|'icy'>>({});
@@ -87,10 +94,6 @@ function LotterySimContent() {
   const [backStats, setBackStats] = useState<Array<{number:number; count:number; rate:number; z:number; status:string}>>([]);
   const [detailNum, setDetailNum] = useState<number | null>(null); // 弹窗的号码
   const [detailData, setDetailData] = useState<{number:number; count:number; rate:number; z:number; status:string} | null>(null);
-  const [showStatsPanel, setShowStatsPanel] = useState(false);
-  // 冷热筛选: null=全部, 否则只显示对应状态的号码
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [backFilterStatus, setBackFilterStatus] = useState<string | null>(null);
   const [showTasks, setShowTasks] = useState(false);
   // 庆祝效果
   const [celebrate, setCelebrate] = useState<{show:boolean; amount:number; label:string}>({show:false, amount:0, label:""});
@@ -107,9 +110,9 @@ function LotterySimContent() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const TUTORIAL_STEPS = [
-    { title: "🎯 欢迎来到数字碰！", desc: "这是一款选号碰运气的游戏。选择你心仪的号码，试试手气吧！每注只需 2🎮，最高可赢 500,000🎮！", highlight: "none" },
+    { title: "🎯 欢迎来到数字碰！", desc: "这是一款选号碰运气的游戏。选择你心仪的号码，试试手气吧！每注最低 100🎮，最高可赢 500,000🎮！", highlight: "none" },
     { title: "📊 冷热号助你决策", desc: "号码球上的红/青色标记显示冷热状态——红色=🔥近期热门，青色=❄️冷门蓄势。点击📊分析看完整数据！", highlight: "number-area" },
-    { title: "⚡ 一键投注，一秒开奖", desc: "点「机选」或策略按钮快速选号，点「投注」立刻开奖。先送您一注免费体验！", highlight: "bet-area" },
+    { title: "⚡ 一键参与，一秒开奖", desc: "点「机选」或策略按钮快速选号，点「参与」立刻开奖。先送您一注免费体验！", highlight: "bet-area" },
   ];
 
   // ─── 每日挑战系统 ───
@@ -118,7 +121,7 @@ function LotterySimContent() {
     // 晨间签到
     checkedIn: boolean;
     // 核心任务
-    betCount: number;       // 投注次数
+    betCount: number;       // 参与次数
     hotWin: boolean;        // 热号中奖
     earn50: boolean;        // 单局净赚≥50
     // 挑战任务
@@ -136,7 +139,7 @@ function LotterySimContent() {
     // 晨间
     { zone: "morning", id: "checkin", label: "☀️ 晨间签到", desc: "新的一天，来签到吧", reward: 10 },
     // 核心
-    { zone: "core", id: "bet3", label: "🎯 投注达人", desc: "投注 3 次", target: 3, progress: () => dailyTasks.betCount, reward: 15 },
+    { zone: "core", id: "bet3", label: "🎯 参与达人", desc: "参与 3 次", target: 3, progress: () => dailyTasks.betCount, reward: 15 },
     { zone: "core", id: "hotWin", label: "🔥 热号追踪", desc: "选热号(scorching/hot)并中奖", target: 1, progress: () => dailyTasks.hotWin ? 1 : 0, reward: 20 },
     { zone: "core", id: "earn50", label: "💰 日入百金", desc: "单局净赚 ≥50🎮", target: 1, progress: () => dailyTasks.earn50 ? 1 : 0, reward: 25 },
     // 挑战
@@ -151,12 +154,12 @@ function LotterySimContent() {
   const [achievements, setAchievements] = useState<Record<string, boolean>>({});
 
   const ACHIEVEMENT_LIST = [
-    { id: "first_bet", label: "🥉 数字新手", desc: "首次投注", reward: "10🎮" },
-    { id: "bet_100", label: "🥈 百战勇士", desc: "投注 100 次", reward: "100🎮" },
-    { id: "bet_1000", label: "🥇 千次挑战", desc: "投注 1000 次", reward: "500🎮" },
+    { id: "first_bet", label: "🥉 数字新手", desc: "首次参与", reward: "10🎮" },
+    { id: "bet_100", label: "🥈 百战勇士", desc: "参与 100 次", reward: "100🎮" },
+    { id: "bet_1000", label: "🥇 千次挑战", desc: "参与 1000 次", reward: "500🎮" },
     { id: "streak_5", label: "🔥 五连胜", desc: "连续 5 局赢", reward: "200🎮" },
     { id: "jackpot", label: "💎 天选之人", desc: "中过头彩", reward: "1000🎮" },
-    { id: "night_owl", label: "🌙 夜猫子", desc: "凌晨 1-5 点投注", reward: "50🎮" },
+    { id: "night_owl", label: "🌙 夜猫子", desc: "凌晨 1-5 点参与", reward: "50🎮" },
   ];
 
   // 会话追踪 + 奖池拉取
@@ -190,6 +193,22 @@ function LotterySimContent() {
   })();
 
   const [aiPrediction, setAiPrediction] = useState(predNumbers);
+
+  // 登录后恢复选号 (sessionStorage)
+  useEffect(() => {
+    if (!user) { 
+      try {
+        const saved = sessionStorage.getItem("lottery_tickets");
+        if (saved) setTickets(JSON.parse(saved));
+      } catch {}
+      return;
+    }
+  }, [user]);
+
+  // tickets 变化时持久化
+  useEffect(() => {
+    try { sessionStorage.setItem("lottery_tickets", JSON.stringify(tickets)); } catch {}
+  }, [tickets]);
 
   // Load config and auto-fill AI prediction
   useEffect(() => {
@@ -351,6 +370,8 @@ function LotterySimContent() {
   };
 
   const placeBet = async () => {
+    if (bettingLockRef.current) return; // 防连击锁
+    bettingLockRef.current = true;
     vibrate(8);
     if (!user) { setShowLogin(true); return; }
     if (tickets.length === 0 && (selectedFront.length > 0 || (config?.back_pick === 0 && selectedFront.length === 0))) {
@@ -362,7 +383,7 @@ function LotterySimContent() {
         setTickets([...tickets, { front: [...selectedFront], back: [] }]);
         setSelectedFront([]);
       } else {
-        setError("请选择号码或添加投注");
+        setError("请选择号码或添加参与");
         return;
       }
     }
@@ -379,16 +400,27 @@ function LotterySimContent() {
     setError("");
     setResult(null);
     setShowDraw(false);
+    setCountdown(0);
     
     try {
+      // 计算实际参与金额（修复P0: 首次参与totalCost=0的bug）
+      const betTicketsForCost = betTickets.length > 0 ? betTickets : 
+        config?.back_pick === 0 ? [{ front: selectedFront, back: [] }] : [{ front: selectedFront, back: selectedBack }];
+      const effectiveCost = betTicketsForCost.length * (config?.price || 2) * betMultiple;
+      
+      // 最低参与100游戏豆
+      if (effectiveCost < MIN_BET) {
+        throw new Error(`最低参与额 ${MIN_BET}🎮，当前仅 ${effectiveCost}🎮，请增加注数或倍数`);
+      }
+      
       // 1) 扣游戏豆
       const deductRes = await fetch(API_BASE + "/api/lotto-bet-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: user.uid, action: "bet", amount: totalCost, lottery: lotteryCode }),
+        body: JSON.stringify({ uid: user.uid, action: "bet", amount: effectiveCost, lottery: lotteryCode }),
       });
       const deductJson = await deductRes.json();
-      if (deductJson.code !== 0) throw new Error(deductJson.msg || "投注失败");
+      if (deductJson.code !== 0) throw new Error(deductJson.msg || "参与失败");
       
       // 2) Python开奖模拟
       const res = await fetch(API_BASE + "/api/lotto/bet", {
@@ -401,14 +433,14 @@ function LotterySimContent() {
       
       // 3) 结算: 赢则加水晶石
       const totalWin = json.data?.total_win || 0;
-      const winAmount = totalWin > totalCost ? totalWin - totalCost : 0;
+      const winAmount = totalWin > effectiveCost ? totalWin - effectiveCost : 0;
       if (totalWin > 0) {
         await fetch(API_BASE + "/api/lotto-bet-sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             uid: user.uid, action: "settle",
-            return_amount: totalWin >= totalCost ? totalCost : totalWin,
+            return_amount: totalWin >= effectiveCost ? effectiveCost : totalWin,
             win_amount: winAmount,
             lottery: lotteryCode,
           }),
@@ -416,9 +448,11 @@ function LotterySimContent() {
       }
       
       setResult(json.data);
-      setBalance(prev => prev - totalCost + totalWin);
+      setBalance(prev => prev - effectiveCost + totalWin);
+      // 余额后校准
+      fetch(API_BASE + "/api/member/balance?uid=" + user.uid).then(r => r.json()).then(b => { if (b.code === 0) setBalance(b.data?.credit1 || 0); }).catch(() => {});
       setHistory(prev => [json.data, ...prev].slice(0, 50));
-      trackBet(totalCost, totalWin);
+      trackBet(effectiveCost, totalWin);
       // 刷新奖池
       fetch(API_BASE + "/api/lotto/jackpot?code=" + lotteryCode)
         .then(r => r.json())
@@ -457,7 +491,7 @@ function LotterySimContent() {
     // ─── 每日挑战追踪 ───
     setDailyTasks(prev => {
       const next = { ...prev };
-      // 投注次数++
+      // 参与次数++
       next.betCount = (next.betCount || 0) + 1;
       // 热号中奖
       if (json.data.net_result > 0 && betTickets.some(t => t.front.some(n => trendData[n] === 'scorching' || trendData[n] === 'hot'))) {
@@ -501,7 +535,20 @@ function LotterySimContent() {
       return next;
     });
 
-    setTimeout(() => setShowDraw(true), 300);
+    // 启动开奖倒计时（5秒动画）
+    setCountdown(5);
+    const cd = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(cd);
+          setShowDraw(true);
+          setBetting(false);
+          bettingLockRef.current = false;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     
     // 数字精灵语录
     const msgs = SPRITE_QUOTES;
@@ -546,13 +593,16 @@ function LotterySimContent() {
     
   } catch (e: any) {
       setError(e.message);
-    } finally {
       setBetting(false);
+      bettingLockRef.current = false;
+    } finally {
+      // betting 在倒计时结束或catch中设置
     }
   };
 
-  const totalCost = tickets.length * (config?.price || 2) * betMultiple;
-  const canBet = (totalCost > 0 || selectedFront.length > 0) && balance >= (totalCost > 0 ? totalCost : (config?.price || 2) * betMultiple);
+  const totalCost = tickets.length > 0 ? tickets.length * (config?.price || 2) * betMultiple : (config?.price || 2) * betMultiple;
+  const MIN_BET = 100;
+  const canBet = (tickets.length > 0 || selectedFront.length > 0) && balance >= Math.max(totalCost, MIN_BET);
 
   // 再来一注：用同样的号码和倍数再投
   const rebet = async () => {
@@ -573,55 +623,21 @@ function LotterySimContent() {
 
   return (
     <main className="pb-20 min-h-screen bg-bg">
-      {/* Header — 金青珊瑚品牌色 */}
-      <div className="bg-gradient-to-b from-[#0F6E56] to-[#04342C] px-5 pt-6 pb-5 relative overflow-hidden">
-        <div className="absolute -top-8 -right-5 w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle,rgba(69,204,213,0.15),transparent_70%)] blur-[16px]" />
-        {/* 顶部导航行 */}
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
-            <button onClick={() => window.history.back()} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition-transform">
-              <ArrowLeft className="w-4 h-4 text-white" />
-            </button>
-            <div>
-              <h1 className="text-[15px] font-medium text-white">数字碰</h1>
-              <p className="text-[10px] text-white/60">选号碰 · 一秒开奖</p>
-            </div>
-            <a href={"/lottery?type=" + lotteryCode}
-              className="ml-2 px-2.5 py-1 rounded-full bg-white/10 text-white/70 text-[9px] font-medium flex items-center gap-1 active:scale-90 transition-transform whitespace-nowrap">
-              <span>📊</span><span>走势</span>
-            </a>
-          </div>
-          <div className="text-right text-white">
-            <div className="text-[9px] opacity-50">{user ? "游戏豆" : "未登录"}</div>
-            <div className="text-sm font-bold">{user ? balance.toLocaleString() : "—"} 🎮</div>
-          </div>
-        </div>
-        {/* 奖金池 — 视觉重心 */}
-        <div className="text-center mt-3 pt-2 border-t border-white/10 relative z-10">
-          <div className="text-[9px] text-white/40 tracking-[1px]">当前奖金池</div>
-          <div className="text-[22px] font-bold text-[#F2B631] tracking-[1px] mt-0.5">{Math.floor(jackpot).toLocaleString()} 🎮</div>
-          <div className="text-[9px] text-white/30 mt-0.5">人人可中 · 上不封顶</div>
-        </div>
-      </div>
+      {/* 头部 + 彩种切换 (拆分组件) */}
+      <LotteryHeader
+        lotteryCode={lotteryCode}
+        setLotteryCode={setLotteryCode}
+        confirmSwitch={confirmSwitch}
+        setConfirmSwitch={setConfirmSwitch}
+        trackModeSwitch={trackModeSwitch}
+        tickets={tickets}
+        setTickets={setTickets}
+        user={user}
+        balance={balance}
+        jackpot={jackpot}
+      />
 
       <div className="px-4 -mt-3 relative z-20">
-        {/* Lottery Type Selector */}
-        <div className="bg-surface rounded-[8px] p-3 shadow-sm border border-border-tertiary mb-3">
-          <div className="grid grid-cols-5 gap-1.5">
-            {LOTTERY_LIST.map(l => (
-              <button key={l.code} onClick={() => { setLotteryCode(l.code); setTickets([]); trackModeSwitch(); }}
-                className={`py-2.5 rounded-[8px] text-center active:scale-95 transition-all ${
-                  lotteryCode === l.code
-                    ? `bg-gradient-to-r ${l.color} text-white shadow-sm`
-                    : "bg-bg text-text-secondary border border-border-tertiary"
-                }`}>
-                <div className="text-lg">{l.icon}</div>
-                <div className="text-[9px] font-semibold mt-0.5">{l.name}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {config && (
           <>
             {/* AI Prediction Banner */}
@@ -647,622 +663,101 @@ function LotterySimContent() {
             )}
 
             {/* Number Picker */}
-            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{config.front_name}</span>
-                  <span className="text-[10px] text-text-tertiary">选 {config.front_pick} 个 (1-{config.front_range})</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {[
-                    { key: 'scorching', label: '超热', color: '#F27152', bg: 'rgba(242,113,82,0.1)' },
-                    { key: 'hot', label: '热', color: '#F27152', bg: 'rgba(242,113,82,0.08)' },
-                    { key: 'cold', label: '冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.1)' },
-                    { key: 'icy', label: '极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.15)' },
-                  ].map(g => (
-                    <button key={g.key} onClick={() => setFilterStatus(filterStatus === g.key ? null : g.key)}
-                      className="text-[8px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-full active:scale-90 transition-all"
-                      style={{
-                        backgroundColor: filterStatus === g.key ? g.color : g.bg,
-                        color: filterStatus === g.key ? 'white' : g.color,
-                      }}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${filterStatus === g.key ? 'bg-white/80' : ''}`} style={{backgroundColor: filterStatus === g.key ? undefined : g.color}} />
-                      {g.label}
-                      {filterStatus === g.key && <span className="ml-0.5">✕</span>}
-                    </button>
-                  ))}
-                  <button onClick={() => setShowStatsPanel(!showStatsPanel)}
-                    className="text-[9px] px-1.5 py-0.5 rounded-full border border-border-tertiary/50 flex items-center gap-0.5 active:scale-90 transition-transform"
-                    style={{color: showStatsPanel ? '#F27152' : undefined, borderColor: showStatsPanel ? '#F27152' : undefined}}>
-                    <span>📊</span><span className="text-[8px]">{showStatsPanel ? '收起' : '分析'}</span>
-                  </button>
-                  <span className="text-xs font-semibold ml-0.5">{selectedFront.length}/{config.front_pick}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-7 gap-1.5">
-                  {Array.from({ length: config.front_range }, (_, i) => i + 1).map(n => {
-                  const isSelected = selectedFront.includes(n);
-                  const trend = trendData[n];
-                  const isFiltered = filterStatus !== null && trend !== filterStatus && !isSelected;
-                  // 样式计算
-                  let ballStyle = "bg-bg text-text-secondary border border-border-tertiary";
-                  let badge: React.ReactNode = null;
-                  if (isSelected) {
-                    ballStyle = "bg-[#F27152] text-white shadow-sm scale-110 border-2 border-[#F27152]";
-                  } else if (trend === 'scorching') {
-                    ballStyle = isFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#F27152] font-bold border-2 border-[#F27152] ring-1 ring-[#F27152]/30";
-                    if (!isFiltered) badge = <span className="absolute -top-1.5 -right-1.5 text-[8px] font-bold leading-none text-white bg-[#F27152] rounded-full w-3.5 h-3.5 flex items-center justify-center shadow-sm">火</span>;
-                  } else if (trend === 'hot') {
-                    ballStyle = isFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#F27152] font-semibold border-2 border-[#F27152]/60";
-                    if (!isFiltered) badge = <span className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full bg-[#F27152]" />;
-                  } else if (trend === 'icy') {
-                    ballStyle = isFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-[#45CCD5]/10 text-[#45CCD5] font-bold border-2 border-[#45CCD5]";
-                    if (!isFiltered) badge = <span className="absolute -top-1.5 -right-1.5 text-[8px] font-bold leading-none text-white bg-[#45CCD5] rounded-full w-3.5 h-3.5 flex items-center justify-center shadow-sm">冰</span>;
-                  } else if (trend === 'cold') {
-                    ballStyle = isFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#45CCD5] font-semibold border-2 border-[#45CCD5]/60";
-                    if (!isFiltered) badge = <span className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full bg-[#45CCD5]" />;
-                  } else if (isFiltered) {
-                    ballStyle = "bg-gray-50 text-gray-300 border border-gray-200";
-                  }
-                  return (
-                    <button key={n} onClick={() => {
-                      // 如果是长按触发的，不执行 toggle
-                      if (longPressed === n) { setLongPressed(null); return; }
-                      toggleNumber(n, true);
-                    }}
-                      onPointerDown={() => {
-                        longPressRef.current = setTimeout(() => {
-                          setLongPressed(n);
-                          // 打开详情弹窗
-                          const stat = frontStats.find(s => s.number === n);
-                          if (stat) { setDetailNum(n); setDetailData(stat); }
-                        }, 400);
-                      }}
-                      onPointerUp={() => {
-                        if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null; }
-                      }}
-                      onPointerLeave={() => {
-                        if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null; }
-                      }}
-                      className={`relative w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center active:scale-90 transition-all overflow-visible ${ballStyle}`}
-                      style={{opacity: isFiltered ? 0.35 : 1}}>
-                      {String(n).padStart(2, "0")}
-                      {badge}
-                    </button>
-                  );
-                })}
-              </div>
+            <NumberPickerArea
+              config={config}
+              selectedFront={selectedFront}
+              selectedBack={selectedBack}
+              onSelectFront={setSelectedFront}
+              onSelectBack={setSelectedBack}
+              trendData={trendData}
+              trendDataBack={trendDataBack}
+              frontStats={frontStats}
+              backStats={backStats}
+              recommendations={recommendations}
+              onToggleNumber={toggleNumber}
+              onDetail={(num, data) => { setDetailNum(num); setDetailData(data); }}
+              onQuickPick={quickPick}
+              onAddTicket={addTicket}
+              onPlaceBet={placeBet}
+              onSetTickets={setTickets}
+              onSetBetMultiple={setBetMultiple}
+              lotteryCode={lotteryCode}
+              apiBase={API_BASE}
+              onSetError={setError}
+            />
 
-              {/* 已选号码冷热分析 */}
-              {selectedFront.length > 0 && (
-                <div className="mt-2 flex items-center gap-1.5 px-1 text-[10px]">
-                  <span className="text-text-tertiary shrink-0">已选:</span>
-                  {selectedFront.map(n => {
-                    const t = trendData[n];
-                    let dotColor = '#8E8E93';
-                    let label = '常规';
-                    if (t === 'scorching') { dotColor = '#F27152'; label = '超热'; }
-                    else if (t === 'hot') { dotColor = '#F27152'; label = '热'; }
-                    else if (t === 'icy') { dotColor = '#45CCD5'; label = '极冷'; }
-                    else if (t === 'cold') { dotColor = '#45CCD5'; label = '冷'; }
-                    return (
-                      <span key={n} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white border border-border-tertiary/60">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{backgroundColor: dotColor}} />
-                        <span className="text-[9px] font-medium">{String(n).padStart(2,"0")}</span>
-                        <span className="text-[8px] text-text-tertiary">{label}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
+            {/* Bet Slip + Multiple + Error */}
+            <BetSlip
+              tickets={tickets}
+              onRemoveTicket={removeTicket}
+              totalCost={totalCost}
+              betMultiple={betMultiple}
+              onSetBetMultiple={setBetMultiple}
+              error={error}
+            />
 
-              {/* 冷热分析面板 */}
-              {showStatsPanel && frontStats.length > 0 && (
-                <div className="mt-3 rounded-[8px] border border-border-tertiary overflow-hidden bg-bg/50">
-                  <div className="grid grid-cols-5 gap-px bg-border-tertiary/30">
-                    {[
-                      { key: 'scorching', label: '🔥超热', color: '#F27152', bg: 'rgba(242,113,82,0.08)' },
-                      { key: 'hot', label: '🔥热', color: '#F27152', bg: 'rgba(242,113,82,0.05)' },
-                      { key: 'normal', label: '🌡️常', color: '#8E8E93', bg: 'transparent' },
-                      { key: 'cold', label: '❄️冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
-                      { key: 'icy', label: '❄️极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-                    ].map(g => {
-                      const items = frontStats.filter(s => s.status === g.key);
-                      return (
-                        <div key={g.key} className="p-2 text-center" style={{backgroundColor: g.bg}}>
-                          <div className="text-[13px] font-bold" style={{color: g.color}}>{items.length}</div>
-                          <div className="text-[8px] text-text-tertiary mt-0.5">{g.label}</div>
-                          {items.length > 0 && (
-                            <div className="flex flex-wrap justify-center gap-0.5 mt-1">
-                              {items.slice(0, 4).map(s => (
-                                <button key={s.number} onClick={() => { setDetailNum(s.number); setDetailData(s); }}
-                                  className="text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold active:scale-90"
-                                  style={{backgroundColor: g.color+'20', color: g.color}}>
-                                  {s.number}
-                                </button>
-                              ))}
-                              {items.length > 4 && <span className="text-[8px] text-text-tertiary">+{items.length-4}</span>}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* 后区冷热分析面板 */}
-              {showStatsPanel && backStats.length > 0 && config.back_pick > 0 && (
-                <div className="mt-2 rounded-[8px] border border-border-tertiary overflow-hidden bg-bg/50">
-                  <div className="grid grid-cols-5 gap-px bg-border-tertiary/30">
-                    {[
-                      { key: 'scorching', label: '🔥超热', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-                      { key: 'hot', label: '🔥热', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
-                      { key: 'normal', label: '🌡️常', color: '#8E8E93', bg: 'transparent' },
-                      { key: 'cold', label: '❄冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.05)' },
-                      { key: 'icy', label: '❄极冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-                    ].map(g => {
-                      const items = backStats.filter(s => s.status === g.key);
-                      return (
-                        <div key={g.key} className="p-2 text-center" style={{backgroundColor: g.bg}}>
-                          <div className="text-[12px] font-bold" style={{color: g.color}}>{items.length}</div>
-                          <div className="text-[7px] text-text-tertiary mt-0.5">{g.label}</div>
-                          {items.length > 0 && (
-                            <div className="flex flex-wrap justify-center gap-0.5 mt-1">
-                              {items.slice(0, 4).map(s => (
-                                <button key={s.number} onClick={() => { setDetailNum(s.number); setDetailData(s); }}
-                                  className="text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold active:scale-90"
-                                  style={{backgroundColor: g.color+'20', color: g.color}}>
-                                  {s.number}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* 号码频率柱状图（在分析模式下显示） */}
-              {showStatsPanel && frontStats.length > 0 && (
-                <div className="mt-3 rounded-[8px] border border-border-tertiary overflow-hidden bg-bg/50 p-3">
-                  <div className="text-[10px] font-semibold text-text-secondary mb-2 flex items-center gap-1">
-                    <span>📈</span> 号码频率分布 <span className="text-[8px] text-text-tertiary">(近{frontStats.reduce((s,f)=>s+f.count,0)}次出现)</span>
-                  </div>
-                  <div className="space-y-[2px] max-h-[160px] overflow-y-auto">
-                    {[...frontStats].sort((a,b) => a.number - b.number).map(s => {
-                      const maxCount = Math.max(...frontStats.map(f => f.count));
-                      const pct = maxCount > 0 ? (s.count / maxCount) * 100 : 0;
-                      const barColor = s.status === 'scorching' ? '#F27152' :
-                        s.status === 'hot' ? '#F27152' :
-                        s.status === 'icy' ? '#45CCD5' :
-                        s.status === 'cold' ? '#45CCD5' : '#D1D5DB';
-                      return (
-                        <div key={s.number} className="flex items-center gap-1.5">
-                          <span className="text-[9px] w-5 text-right font-mono text-text-secondary">{String(s.number).padStart(2,"0")}</span>
-                          <div className="flex-1 h-3 rounded-[3px] bg-gray-100 overflow-hidden relative">
-                            <div className="h-full rounded-[3px] transition-all" style={{width: `${pct}%`, backgroundColor: barColor, opacity: pct > 50 ? 0.8 : 0.5}} />
-                          </div>
-                          <span className="text-[8px] w-5 text-right text-text-tertiary">{s.count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {config.back_pick > 0 && (
-                <>
-                  <div className="flex items-center justify-between mt-4 mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{config.back_name}</span>
-                      <span className="text-[10px] text-text-tertiary">选 {config.back_pick} 个 (1-{config.back_range})</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {[
-                        { key: 'hot', label: '热', color: '#45CCD5', bg: 'rgba(69,204,213,0.08)' },
-                        { key: 'cold', label: '冷', color: '#45CCD5', bg: 'rgba(69,204,213,0.12)' },
-                      ].map(g => (
-                        <button key={g.key} onClick={() => setBackFilterStatus(backFilterStatus === g.key ? null : g.key)}
-                          className="text-[8px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-full active:scale-90 transition-all"
-                          style={{
-                            backgroundColor: backFilterStatus === g.key ? g.color : g.bg,
-                            color: backFilterStatus === g.key ? 'white' : g.color,
-                          }}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${backFilterStatus === g.key ? 'bg-white/80' : ''}`} style={{backgroundColor: backFilterStatus === g.key ? undefined : g.color}} />
-                          {g.label}
-                          {backFilterStatus === g.key && <span className="ml-0.5">✕</span>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {Array.from({ length: config.back_range }, (_, i) => i + 1).map(n => {
-                      const isSelected = selectedBack.includes(n);
-                      const trend = trendDataBack[n];
-                      const backIsFiltered = backFilterStatus !== null && trend !== backFilterStatus && !isSelected;
-                      let backBallStyle = "bg-bg text-text-secondary border border-border-tertiary";
-                      let backBadge: React.ReactNode = null;
-                      if (isSelected) {
-                        backBallStyle = "bg-[#45CCD5] text-white shadow-sm scale-110 border-2 border-[#45CCD5]";
-                      } else if (trend === 'scorching') {
-                        backBallStyle = backIsFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#45CCD5] font-bold border-2 border-[#45CCD5]";
-                        if (!backIsFiltered) backBadge = <span className="absolute -top-1.5 -right-1.5 text-[7px] font-bold leading-none text-white bg-[#45CCD5] rounded-full w-3 h-3 flex items-center justify-center shadow-sm">火</span>;
-                      } else if (trend === 'hot') {
-                        backBallStyle = backIsFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#45CCD5] font-semibold border-2 border-[#45CCD5]/60";
-                        if (!backIsFiltered) backBadge = <span className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full bg-[#45CCD5]" />;
-                      } else if (trend === 'icy') {
-                        backBallStyle = backIsFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-[#45CCD5]/10 text-[#45CCD5] font-bold border-2 border-[#45CCD5]";
-                        if (!backIsFiltered) backBadge = <span className="absolute -top-1.5 -right-1.5 text-[7px] font-bold leading-none text-white bg-[#45CCD5] rounded-full w-3 h-3 flex items-center justify-center shadow-sm">冰</span>;
-                      } else if (trend === 'cold') {
-                        backBallStyle = backIsFiltered ? "bg-gray-50 text-gray-300 border border-gray-200" : "bg-bg text-[#45CCD5] font-semibold border-2 border-[#45CCD5]/60";
-                        if (!backIsFiltered) backBadge = <span className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full bg-[#45CCD5]" />;
-                      } else if (backIsFiltered) {
-                        backBallStyle = "bg-gray-50 text-gray-300 border border-gray-200";
-                      }
-                      return (
-                        <button key={n} onClick={() => {
-                          if (longPressed === n) { setLongPressed(null); return; }
-                          toggleNumber(n, false);
-                        }}
-                          onPointerDown={() => {
-                            longPressRef.current = setTimeout(() => {
-                              setLongPressed(n);
-                              // 后区号码详情
-                              const bStat = backStats.find(s => s.number === n);
-                              if (bStat) { setDetailNum(n); setDetailData(bStat); }
-                              else {
-                                const status = trendDataBack[n] || 'normal';
-                                setDetailNum(n); setDetailData({number: n, count: 0, rate: 0, z: 0, status});
-                              }
-                            }, 400);
-                          }}
-                          onPointerUp={() => {
-                            if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null; }
-                          }}
-                          onPointerLeave={() => {
-                            if (longPressRef.current) { clearTimeout(longPressRef.current); longPressRef.current = null; }
-                          }}
-                          className={`relative w-8 h-8 rounded-full text-xs font-medium flex items-center justify-center active:scale-90 transition-all overflow-visible ${backBallStyle}`}
-                          style={{opacity: backIsFiltered ? 0.35 : 1}}>
-                          {String(n).padStart(2, "0")}
-                          {backBadge}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-
-              {/* 智能选号建议 */}
-              {recommendations.length > 0 && (
-                <div className="mt-3 flex gap-1.5">
-                  {recommendations.map(r => {
-                    const emoji = r.strategy === 'chase_hot' ? '🔥' : r.strategy === 'chase_cold' ? '❄️' : '⚖️';
-                    const colorClass = r.strategy === 'chase_hot' ? 'bg-red-50 border-red-200 text-red-600' : 
-                      r.strategy === 'chase_cold' ? 'bg-cyan-50 border-cyan-200 text-cyan-600' : 
-                      'bg-amber-50 border-amber-200 text-amber-700';
-                    return (
-                    <button key={r.strategy} onClick={() => {
-                      setSelectedFront(r.front);
-                      setSelectedBack(r.back || []);
-                    }}
-                      className={`flex-1 py-1.5 rounded-[8px] text-[10px] font-medium active:scale-95 transition-all border ${colorClass}`}>
-                      {emoji} {r.label}
-                    </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* 快捷投注 */}
-              <div className="mt-2 flex gap-1.5">
-                <button onClick={async () => {
-                  // 机选1注并直接投注
-                  try {
-                    const q = await fetch(API_BASE + "/api/lotto/quick-pick?code=" + lotteryCode).then(r => r.json());
-                    if (q.code !== 0) return;
-                    const t = q.data.ticket;
-                    const front = t.front || t.digits || [];
-                    const back = t.back || [];
-                    setTickets([{front, back}]);
-                    setBetMultiple(1);
-                    await new Promise(r => setTimeout(r, 60));
-                    placeBet();
-                  } catch {}
-                }} className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-brand-teal/80 to-brand-teal text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1">
-                  ⚡ 机选1注
-                </button>
-                <button onClick={async () => {
-                  try {
-                    const tickets = [];
-                    for (let i = 0; i < 5; i++) {
-                      const q = await fetch(API_BASE + "/api/lotto/quick-pick?code=" + lotteryCode).then(r => r.json());
-                      if (q.code !== 0) continue;
-                      const t = q.data.ticket;
-                      tickets.push({ front: t.front || t.digits || [], back: t.back || [] });
-                    }
-                    if (tickets.length > 0) {
-                      setTickets(tickets);
-                      setBetMultiple(1);
-                      await new Promise(r => setTimeout(r, 60));
-                      placeBet();
-                    }
-                  } catch {}
-                }} className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1">
-                  ⚡ 机选5注
-                </button>
-                <button onClick={async () => {
-                  // 追热1注: 用推荐的热号
-                  const hotRec = recommendations.find(r => r.strategy === 'chase_hot');
-                  if (hotRec && hotRec.front.length > 0) {
-                    setTickets([{front: hotRec.front, back: hotRec.back || []}]);
-                    setBetMultiple(1);
-                    await new Promise(r => setTimeout(r, 60));
-                    placeBet();
-                  }
-                }} className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-red-400 to-red-500 text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1">
-                  ⚡ 追热1注
-                </button>
-              </div>
-
-              {/* Quick Pick + Add */}
-              <div className="flex gap-2 mt-4">
-                <button onClick={quickPick} className="flex-1 py-2 rounded-[8px] bg-bg text-text-secondary text-xs font-medium border border-border-tertiary flex items-center justify-center gap-1 active:scale-95 transition-transform">
-                  <Dices className="w-3.5 h-3.5" /> 机选
-                </button>
-                <button onClick={addTicket} className="flex-1 py-2 rounded-[8px] bg-[#E1F5EE] text-[#0F6E56] text-xs font-medium border border-[#1D9E75]/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
-                  + 选号 ({(config?.price || 2) * betMultiple}🎮)
-                </button>
-              </div>
-            </div>
-
-            {/* Bet Slip */}
-            {tickets.length > 0 && (
-              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
-                <div className="text-sm font-medium mb-2">投注清单 ({tickets.length}注)</div>
-                {tickets.map((t, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-border-tertiary/40 last:border-0">
-                    <div className="text-xs">
-                      <span className="text-red-500 font-medium">{t.front.join(", ")}</span>
-                      {t.back.length > 0 && <span className="text-blue-500 font-medium ml-1">+ {t.back.join(", ")}</span>}
-                    </div>
-                    <button onClick={() => removeTicket(i)} className="text-red-400 text-[10px] px-2 py-0.5 rounded-full border border-red-200 active:scale-90">删除</button>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between mt-3">
-                  <div className="text-xs text-text-tertiary">共 {tickets.length} 注</div>
-                  <div className="text-sm font-bold">{totalCost} 🎮</div>
-                </div>
-              </div>
-            )}
-
-            {/* Multiple selector */}
-            <div className="bg-surface rounded-[8px] p-3 shadow-sm border border-border-tertiary mb-3 flex items-center justify-between">
-              <span className="text-xs text-text-secondary">倍数</span>
-              <div className="flex items-center gap-2">
-                {[1, 2, 5, 10].map(m => (
-                  <button key={m} onClick={() => setBetMultiple(m)}
-                    className={`w-8 h-7 rounded-[8px] text-xs font-medium active:scale-90 ${betMultiple === m ? "bg-brand-teal text-white" : "bg-bg text-text-secondary border border-border-tertiary"}`}>
-                    {m}x
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-50 text-red-600 text-xs mb-3">
-                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                {error}
-              </div>
-            )}
-
-            {/* Place Bet — 品牌茶青渐变 */}
-            <button onClick={placeBet} disabled={betting || !canBet}
-              className={`w-full py-3 mb-3 rounded-[8px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
-                canBet ? "bg-gradient-to-r from-[#1D9E75] to-[#0F6E56] shadow-sm" : "bg-[#E5E5EA] text-gray-400"
-              }`}>
-              {betting ? "开奖中..." : !user ? "请先登录" : `投注 ${tickets.length > 0 ? totalCost : (config?.price || 2) * betMultiple} 🎮`}
-            </button>
+            {/* BetButton (拆分组件) */}
+            <BetButton
+              countdown={countdown}
+              betting={betting}
+              canBet={canBet}
+              user={user}
+              tickets={tickets}
+              totalCost={totalCost}
+              config={config}
+              betMultiple={betMultiple}
+              showDraw={showDraw}
+              setShowDraw={setShowDraw}
+              setBetting={setBetting}
+              bettingLockRef={bettingLockRef}
+              setCountdown={setCountdown}
+              placeBet={placeBet}
+            />
 
             {!user && (
               <div className="mb-3 p-3 rounded-xl bg-amber-50 text-amber-700 text-xs text-center">
-                请先 <button onClick={() => setShowLogin(true)} className="font-bold underline">登录</button> 后使用游戏豆投注
+                请先 <button onClick={() => setShowLogin(true)} className="font-bold underline">登录</button> 后使用游戏豆参与
               </div>
             )}
 
-            {/* Draw Result */}
-            {result && showDraw && (
-              <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
-                
-                {/* 🏆 开奖号码 (本期开出的号码) */}
-                <div className="flex items-center justify-center gap-1 mb-3">
-                  <Trophy className="w-4 h-4 text-brand-gold" />
-                  <span className="text-[13px] font-medium">开奖号码</span>
-                  <span className="text-[8px] text-text-tertiary ml-1">第{result.bet_id?.slice(-6) || "—"}期</span>
-                </div>
-                
-                <div className="flex justify-center gap-2 mb-3">
-                  {result.draw.front?.map((n: number, i: number) => (
-                    <div key={"f"+i}
-                      className="w-10 h-10 rounded-full bg-[#F27152] text-white flex items-center justify-center text-sm font-bold shadow-sm"
-                      style={{ animation: `ballDrop 0.4s ease-out ${i * 0.08}s both` }}>
-                      {String(n).padStart(2, "0")}
-                    </div>
-                  ))}
-                  {result.draw.back?.map((n: number, i: number) => (
-                    <div key={"b"+i}
-                      className="w-10 h-10 rounded-full bg-[#45CCD5] text-white flex items-center justify-center text-sm font-bold shadow-sm"
-                      style={{ animation: `ballDrop 0.4s ease-out ${(result.draw.front?.length || 0) * 0.08 + i * 0.08}s both` }}>
-                      {String(n).padStart(2, "0")}
-                    </div>
-                  ))}
-                  {result.draw.digits?.map((n: number, i: number) => (
-                    <div key={"d"+i}
-                      className="w-9 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-sm font-bold shadow-sm"
-                      style={{ animation: `ballDrop 0.4s ease-out ${i * 0.08}s both` }}>
-                      {n}
-                    </div>
-                  ))}
-                </div>
+            {/* Draw Result (倒计时+开奖+再来一注) */}
+            <DrawResult
+              countdown={countdown}
+              showDraw={showDraw}
+              result={result}
+              rollDisplay={rollDisplay}
+              lastTickets={lastTickets}
+              onRebet={rebet}
+            />
 
-                {/* 分割 + 比对结果 */}
-                <div className="h-px bg-gradient-to-r from-transparent via-border-tertiary to-transparent my-3" />
-
-                <div className="flex items-center justify-center gap-1 mb-3">
-                  <span className="text-[13px] font-medium">投注比对</span>
-                </div>
-
-                {/* 每注比对结果 */}
-                {result.tickets.map((t, i) => {
-                  const isWin = t.prize.won;
-                  return (
-                    <div key={i} className={`p-3 rounded-[8px] mb-2 text-left ${isWin ? "bg-[#FFF9EB] border border-[#F2B631]/30" : "bg-bg"}`}>
-                      {/* 用户的号码 */}
-                      <div className="flex items-center gap-1 mb-1.5">
-                        <span className="text-[9px] text-text-tertiary w-6 shrink-0">选号</span>
-                        <div className="flex gap-1 flex-wrap">
-                          {(t.ticket?.front || []).map((fn: number, fi: number) => {
-                            const matched = (result.draw.front || []).includes(fn);
-                            return (
-                              <span key={fi} className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold ${
-                                matched ? "bg-[#F27152] text-white" : "bg-gray-100 text-text-tertiary"
-                              }`}>
-                                {String(fn).padStart(2, "0")}
-                              </span>
-                            );
-                          })}
-                          {(t.ticket?.back || []).map((bn: number, bi: number) => {
-                            const matched = (result.draw.back || []).includes(bn);
-                            return (
-                              <span key={"b"+bi} className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold ${
-                                matched ? "bg-[#45CCD5] text-white" : "bg-gray-100 text-text-tertiary"
-                              }`}>
-                                {String(bn).padStart(2, "0")}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      {/* 中奖信息 */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-text-tertiary">
-                          匹配 {t.prize.matched_front || 0}前+{t.prize.matched_back || 0}后
-                        </span>
-                        <span className={`text-xs font-bold ${isWin ? "text-brand-gold-dark" : "text-text-tertiary"}`}>
-                          {isWin ? `🎉 ${t.prize.name}` : "😅 未中奖"}
-                        </span>
-                      </div>
-                      {isWin && (
-                        <div className="mt-1 text-right text-sm font-bold text-brand-coral">
-                          +{Number(t.prize.amount || 0).toLocaleString()} ✨
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                
-                {/* 盈亏汇总 */}
-                <div className="mt-3 pt-2 border-t border-border-tertiary/40">
-                  {result.net_result > 0 ? (
-                    <span className="text-brand-coral font-bold text-lg">
-                      +{Number(rollDisplay || result.net_result).toLocaleString()}✨ 🎉
-                    </span>
-                  ) : result.net_result === 0 ? (
-                    <span className="text-text-tertiary text-sm">收支平衡</span>
-                  ) : (
-                    <span className="text-text-tertiary text-sm">{result.net_result}🎮</span>
-                  )}
-                </div>
-                
-                {/* 再来一注 */}
-                {lastTickets.length > 0 && (
-                  <button onClick={rebet}
-                    className="mt-3 w-full py-3 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-sm font-bold active:scale-[0.97] transition-all shadow-sm">
-                    🔄 再来一注 (同号)
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* History Toggle */}
-            <details className="bg-surface rounded-[8px] overflow-hidden shadow-sm border border-border-tertiary mb-3" onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) trackHistoryView(); }}>
-              <summary className="flex items-center justify-between p-4 cursor-pointer text-sm font-semibold">
-                <div className="flex items-center gap-2">
-                  <History className="w-4 h-4 text-text-tertiary" />
-                  <span>投注历史</span>
-                  {history.length > 0 && <span className="text-[9px] text-text-tertiary font-normal">({history.length})</span>}
-                </div>
-                <ChevronDown className="w-4 h-4 text-text-tertiary" />
-              </summary>
-              <div className="px-4 pb-4 max-h-72 overflow-y-auto space-y-2">
-                {history.length === 0 && <div className="text-xs text-text-tertiary text-center py-4">暂无投注记录</div>}
-                {history.map((h, i) => {
-                  const drawFront = h.draw?.front || [];
-                  const drawBack = h.draw?.back || [];
-                  return (
-                    <div key={i} className={`p-2.5 rounded-[8px] border ${h.net_result > 0 ? 'bg-[#FFF9EB] border-[#F2B631]/20' : 'bg-bg border-border-tertiary/60'}`}>
-                      {/* 头部信息 */}
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-semibold">{h.lottery_name}</span>
-                          <span className="text-[8px] text-text-tertiary">#{h.bet_id.slice(-6)}</span>
-                        </div>
-                        <div className={`text-[10px] font-bold ${h.net_result > 0 ? 'text-brand-coral' : 'text-text-tertiary'}`}>
-                          {h.net_result > 0 ? `+${h.net_result}🎮` : h.net_result === 0 ? '0🎮' : `${h.net_result}🎮`}
-                        </div>
-                      </div>
-                      {/* 号码比对 */}
-                      {h.tickets?.slice(0, 1).map((t, ti) => (
-                        <div key={ti} className="flex items-start gap-1">
-                          <span className="text-[8px] text-text-tertiary mt-1 w-4 shrink-0">选</span>
-                          <div className="flex gap-0.5 flex-wrap">
-                            {(t.ticket?.front || []).map((fn: number, fi: number) => {
-                              const matched = drawFront.includes(fn);
-                              return <span key={fi} className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[8px] font-bold ${matched ? 'bg-[#F27152] text-white' : 'bg-gray-100 text-text-tertiary'}`}>{String(fn).padStart(2,"0")}</span>;
-                            })}
-                            {(t.ticket?.back || []).map((bn: number, bi: number) => {
-                              const matched = drawBack.includes(bn);
-                              return <span key={"b"+bi} className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[8px] font-bold ${matched ? 'bg-[#45CCD5] text-white' : 'bg-gray-100 text-text-tertiary'}`}>{String(bn).padStart(2,"0")}</span>;
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                      {/* 开奖号码 */}
-                      {drawFront.length > 0 && (
-                        <div className="flex items-start gap-1 mt-1">
-                          <span className="text-[8px] text-text-tertiary mt-1 w-4 shrink-0">开</span>
-                          <div className="flex gap-0.5 flex-wrap">
-                            {drawFront.map((fn: number, fi: number) => (
-                              <span key={fi} className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[7px] font-bold bg-gray-50 text-text-tertiary border border-gray-200">{String(fn).padStart(2,"0")}</span>
-                            ))}
-                            {drawBack.map((bn: number, bi: number) => (
-                              <span key={"b"+bi} className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[7px] font-bold bg-gray-50 text-text-tertiary border border-gray-200">{String(bn).padStart(2,"0")}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {/* 中奖信息 */}
-                      {h.tickets?.slice(0, 1).map((t, ti) => (
-                        t.prize?.won && (
-                          <div key={`p${ti}`} className="mt-1 text-[9px] font-medium text-brand-gold-dark flex items-center gap-1">
-                            <span>🎉</span> {t.prize.name} +{Number(t.prize.amount || 0).toLocaleString()}✨
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </details>
+            {/* History */}
+            <BetHistory
+              history={history}
+              onHistoryView={trackHistoryView}
+            />
           </>
         )}
       </div>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {showSurvey && <SurveyModal onClose={() => setShowSurvey(false)} />}
+
+      {/* 切换彩种确认弹窗 */}
+      {confirmSwitch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          onClick={() => setConfirmSwitch(null)}>
+          <div className="bg-white rounded-[16px] p-5 w-[280px] shadow-xl mx-4" onClick={e => e.stopPropagation()}>
+            <p className="text-[14px] font-semibold mb-2">切换彩种</p>
+            <p className="text-[12px] text-gray-400 mb-4">当前有 {tickets.length} 注待清空，确定切换吗？</p>
+            <div className="flex gap-2">
+              <button onClick={() => { setLotteryCode(confirmSwitch); setTickets([]); trackModeSwitch(); setConfirmSwitch(null); }}
+                className="flex-1 py-2 rounded-[8px] text-[12px] font-medium text-white"
+                style={{background: "#E24B4A"}}>确定切换</button>
+              <button onClick={() => setConfirmSwitch(null)}
+                className="flex-1 py-2 rounded-[8px] text-[12px] font-medium bg-gray-100 text-gray-500">取消</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 号码详情弹窗 */}
       {detailNum !== null && detailData && (
@@ -1363,241 +858,21 @@ function LotterySimContent() {
         </>
       )}
 
-      {/* ════════ 每日任务 + 成就 ════════ */}
-      <div className="px-4 mt-2 mb-2">
-        <div className="bg-surface rounded-[8px] shadow-sm border border-border-tertiary overflow-hidden">
-          <button onClick={() => setShowTasks(!showTasks)}
-            className="w-full flex items-center justify-between p-3 text-sm font-semibold active:bg-gray-50 transition-colors">
-            <span>🏆 每日挑战 · 成就</span>
-            <div className="flex items-center gap-2">
-              {(() => {
-                const doneCount = TASK_LIST.filter(t => t.progress).filter(t => {
-                  const p = t.progress!();
-                  return p >= (t.target || 1);
-                }).length;
-                const claimedCount = TASK_LIST.filter(t => (dailyTasks.claimed || []).includes(t.id)).length;
-                const totalTasks = TASK_LIST.length;
-                const displayCount = claimedCount > 0 ? claimedCount : doneCount;
-                return displayCount > 0 ? (
-                  <span className="text-[10px] bg-brand-teal/10 text-brand-teal-dark px-2 py-0.5 rounded-full">{displayCount}/{totalTasks}</span>
-                ) : null;
-              })()}
-              {dailyTasks.streakDay > 0 && (
-                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full">🔥×{dailyTasks.streakDay}</span>
-              )}
-              {Object.values(achievements).filter(Boolean).length > 0 && (
-                <span className="text-[10px] bg-brand-gold/10 text-brand-gold-dark px-2 py-0.5 rounded-full">
-                  {Object.values(achievements).filter(Boolean).length}/{ACHIEVEMENT_LIST.length}徽章
-                </span>
-              )}
-              <ChevronDown className={`w-3.5 h-3.5 text-text-tertiary transition-transform ${showTasks ? 'rotate-180' : ''}`} />
-            </div>
-          </button>
+            {user ? (
+              <DailyChallenges
+                user={user}
+                dailyTasks={dailyTasks as any}
+                onSetDailyTasks={setDailyTasks}
+                achievements={achievements}
+                onSetAchievements={setAchievements}
+                balance={balance}
+                onSetBalance={setBalance}
+                showTasks={showTasks}
+                onSetShowTasks={setShowTasks}
+                apiBase={API_BASE}
+              />
+            ) : null}
 
-          {showTasks && (
-            <div className="px-3 pb-4 space-y-3 border-t border-border-tertiary/40 pt-3">
-              {/* ── 连击状态条 ── */}
-              {dailyTasks.streakDay > 0 && (
-                <div className="flex items-center gap-2 px-2.5 py-2 rounded-[8px] bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60">
-                  <span className="text-sm">🔥</span>
-                  <div className="flex-1">
-                    <div className="text-[10px] font-semibold text-amber-700">连击 ×{dailyTasks.streakDay}</div>
-                    <div className="text-[8px] text-amber-500">
-                      {dailyTasks.streakDay <= 2 ? `奖励 +${STREAK_BONUS[dailyTasks.streakDay]*100}%` : `奖励 +${STREAK_BONUS[Math.min(dailyTasks.streakDay,4)]*100}% · 再坚持${7-dailyTasks.streakDay}天`}
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-amber-600 font-medium">连续完成任务可叠加</div>
-                </div>
-              )}
-              {/* ── 晨间签到 ── */}
-              <div>
-                <div className="text-[9px] font-medium text-text-tertiary mb-1.5">🌅 晨间</div>
-                <div className="flex items-center justify-between py-2 px-2 rounded-[8px] bg-gradient-to-r from-amber-50/50 to-white border border-amber-100/50">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">☀️</span>
-                    <div>
-                      <div className="text-xs font-medium">晨间签到</div>
-                      <div className="text-[9px] text-text-tertiary">新的一天，来签到吧</div>
-                    </div>
-                  </div>
-                  <div>
-                    {dailyTasks.checkedIn ? (
-                      <span className="text-[10px] text-text-tertiary">✅ 已签</span>
-                    ) : (
-                      <button onClick={async () => {
-                          try {
-                            await fetch(API_BASE + "/api/lotto-bet-sync", {
-                              method: "POST", headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ uid: user?.uid || 0, action: "settle", win_amount: 10, lottery: "task" }),
-                            });
-                            setDailyTasks(prev => ({ ...prev, checkedIn: true, claimed: [...prev.claimed, "checkin"] }));
-                            setBalance(prev => prev + 10);
-                          } catch {}
-                        }} className="text-[10px] bg-brand-gold text-white px-3 py-1 rounded-full font-medium active:scale-90">
-                        +10🎮 签到
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* ── 核心任务 ── */}
-              <div>
-                <div className="text-[9px] font-medium text-text-tertiary mb-1.5">🎮 核心</div>
-                {TASK_LIST.filter(t => t.zone === "core" && t.progress).map(t => {
-                  const progressVal = t.progress!();
-                  const done = progressVal >= (t.target || 1);
-                  const claimed = (dailyTasks.claimed || []).includes(t.id);
-                  const streakMult = 1 + (STREAK_BONUS[Math.min(dailyTasks.streakDay, 4)] || 0);
-                  const rewardVal = Math.floor(t.reward * streakMult);
-                  return (
-                    <div key={t.id} className="flex items-center justify-between py-2 border-b border-border-tertiary/20 last:border-0">
-                      <div className="flex-1">
-                        <div className="text-xs font-medium">{t.label}</div>
-                        <div className="text-[9px] text-text-tertiary">{t.desc}</div>
-                        {!done && t.target && t.target > 1 && (
-                          <div className="mt-1 h-1.5 bg-bg rounded-full overflow-hidden w-24">
-                            <div className="h-full bg-brand-teal rounded-full transition-all" style={{ width: `${(progressVal / t.target) * 100}%` }} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {done ? (
-                          claimed ? (
-                            <span className="text-[10px] text-text-tertiary">✅ 已领</span>
-                          ) : (
-                            <button onClick={async () => {
-                              try {
-                                await fetch(API_BASE + "/api/lotto-bet-sync", {
-                                  method: "POST", headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({ uid: user?.uid || 0, action: "settle", win_amount: rewardVal, lottery: "task" }),
-                                });
-                                setDailyTasks(prev => ({ ...prev, claimed: [...prev.claimed, t.id], chestStars: (prev.chestStars || 0) + (t.target ? 1 : 0) }));
-                                setBalance(prev => prev + rewardVal);
-                              } catch {}
-                            }} className="text-[10px] bg-brand-gold text-white px-2.5 py-1 rounded-full font-medium active:scale-90">
-                              领 {rewardVal}🎮
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-[10px] text-text-tertiary">{t.target ? `${progressVal}/${t.target}` : "未完成"}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* ── 挑战任务 ── */}
-              <div>
-                <div className="text-[9px] font-medium text-text-tertiary mb-1.5">🌙 挑战</div>
-                {TASK_LIST.filter(t => t.zone === "challenge" && t.progress).map(t => {
-                  const progressVal = t.progress!();
-                  const done = progressVal >= (t.target || 1);
-                  const claimed = (dailyTasks.claimed || []).includes(t.id);
-                  const streakMult = 1 + (STREAK_BONUS[Math.min(dailyTasks.streakDay, 4)] || 0);
-                  const rewardVal = Math.floor(t.reward * streakMult);
-                  return (
-                    <div key={t.id} className="flex items-center justify-between py-2 px-2 rounded-[8px] bg-gradient-to-r from-purple-50/50 to-white border border-purple-100/50">
-                      <div className="flex-1">
-                        <div className="text-xs font-medium">{t.label}</div>
-                        <div className="text-[9px] text-text-tertiary">{t.desc}</div>
-                        {!done && t.target && t.target > 1 && (
-                          <div className="mt-1 h-1.5 bg-bg rounded-full overflow-hidden w-24">
-                            <div className="h-full bg-purple-400 rounded-full transition-all" style={{ width: `${(progressVal / t.target) * 100}%` }} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {done ? (
-                          claimed ? (
-                            <span className="text-[10px] text-text-tertiary">✅ 已领</span>
-                          ) : (
-                            <button onClick={async () => {
-                              try {
-                                await fetch(API_BASE + "/api/lotto-bet-sync", {
-                                  method: "POST", headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({ uid: user?.uid || 0, action: "settle", win_amount: rewardVal, lottery: "task" }),
-                                });
-                                setDailyTasks(prev => ({ ...prev, claimed: [...prev.claimed, t.id], chestStars: (prev.chestStars || 0) + 2 }));
-                                setBalance(prev => prev + rewardVal);
-                              } catch {}
-                            }} className="text-[10px] bg-purple-500 text-white px-2.5 py-1 rounded-full font-medium active:scale-90">
-                              领 {rewardVal}🎮
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-[10px] text-text-tertiary">{t.target ? `${progressVal}/${t.target}` : "未完成"}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* ── 全清奖 ── */}
-              {(() => {
-                const allIds = ["checkin","bet3","hotWin","earn50","streak3"];
-                const allDone = allIds.every(id => dailyTasks.claimed.includes(id));
-                return allDone && !dailyTasks.claimed.includes("all_clear") ? (
-                  <button onClick={async () => {
-                    try {
-                      await fetch(API_BASE + "/api/lotto-bet-sync", {
-                        method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ uid: user?.uid || 0, action: "settle", win_amount: BONUS_ALL_CLEAR, lottery: "task" }),
-                      });
-                      setDailyTasks(prev => ({ ...prev, claimed: [...prev.claimed, "all_clear"] }));
-                      setBalance(prev => prev + BONUS_ALL_CLEAR);
-                    } catch {}
-                  }} className="w-full py-2 rounded-[8px] bg-gradient-to-r from-brand-gold to-amber-500 text-white text-[11px] font-bold active:scale-[0.97] transition-all flex items-center justify-center gap-1.5">
-                    🏆 全清奖励 +{BONUS_ALL_CLEAR}🎮
-                  </button>
-                ) : null;
-              })()}
-              {/* ── 宝箱 ── */}
-              <div className="flex items-center justify-between p-2.5 rounded-[8px] bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100/60">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{dailyTasks.chestOpened ? '📦' : (dailyTasks.chestStars >= CHEST_COST ? '🎁' : '📦')}</span>
-                  <div>
-                    <div className="text-[10px] font-semibold text-indigo-700">{dailyTasks.chestOpened ? '今日宝箱已开' : (dailyTasks.chestStars >= CHEST_COST ? '可以开宝箱了！' : '完成挑战积攒星星')}</div>
-                    <div className="text-[9px] text-indigo-400">⭐ {dailyTasks.chestStars || 0}/{CHEST_COST} (完成挑战+2⭐, 核心+1⭐)</div>
-                  </div>
-                </div>
-                {dailyTasks.chestStars >= CHEST_COST && !dailyTasks.chestOpened && (
-                  <button onClick={async () => {
-                    const chestReward = [10, 15, 20, 30, 50, 100, 200][Math.floor(Math.random() * 7)];
-                    try {
-                      await fetch(API_BASE + "/api/lotto-bet-sync", {
-                        method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ uid: user?.uid || 0, action: "settle", win_amount: chestReward, lottery: "task" }),
-                      });
-                      setDailyTasks(prev => ({ ...prev, chestOpened: true, chestStars: Math.max(0, (prev.chestStars || 0) - CHEST_COST) }));
-                      setBalance(prev => prev + chestReward);
-                    } catch {}
-                  }} className="text-[10px] bg-indigo-500 text-white px-3 py-1.5 rounded-full font-bold active:scale-90">
-                    开宝箱
-                  </button>
-                )}
-              </div>
-              {/* ── 成就 ── */}
-              <div>
-                <div className="text-xs font-semibold text-text-secondary mb-2">成就徽章 <span className="text-[9px] text-text-tertiary">一次性</span></div>
-                <div className="grid grid-cols-3 gap-2">
-                  {ACHIEVEMENT_LIST.map(a => {
-                    const unlocked = achievements[a.id];
-                    return (
-                      <div key={a.id} className={`p-2 rounded-[8px] text-center ${unlocked ? "bg-brand-gold/10 border border-brand-gold/30" : "bg-bg border border-border-tertiary"}`}>
-                        <div className={`text-base ${unlocked ? "" : "grayscale opacity-40"}`}>{a.label.split(" ")[0]}</div>
-                        <div className={`text-[9px] mt-0.5 font-medium ${unlocked ? "text-brand-gold-dark" : "text-text-tertiary"}`}>
-                          {unlocked ? a.label : "???"}
-                        </div>
-                        {unlocked && <div className="text-[8px] text-text-tertiary mt-0.5">{a.reward}</div>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
       
       {/* ════════ 个人统计 ════════ */}
       <div className="px-4 mt-2 mb-2">
@@ -1617,7 +892,7 @@ function LotterySimContent() {
           {showPlayerStats && (
             <div className="px-3 pb-4 border-t border-border-tertiary/40 pt-3">
               {playerStats.totalBets === 0 ? (
-                <div className="text-[11px] text-text-tertiary text-center py-4">还没有投注记录，开始玩吧！</div>
+                <div className="text-[11px] text-text-tertiary text-center py-4">还没有参与记录，开始玩吧！</div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {[

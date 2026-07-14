@@ -370,7 +370,7 @@ export default function PredictionReportPage() {
           {/* ═══════════ Disclaimer ═══════════ */}
           <div className="text-center text-[10px] text-text-tertiary px-4 py-3">
             预测结果基于历史数据的数学模型计算，仅供参考。<br />
-            彩票有风险，投注需谨慎。理性购彩，量力而行。
+            彩票有风险，参与需谨慎。理性购彩，量力而行。
           </div>
 
         </div>

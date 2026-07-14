@@ -203,10 +203,15 @@ export default function MerchantPage() {
       )}
 
       {/* 退出商户 */}
-      <div className="mx-4 mt-6">
+      <div className="mx-4 mt-6 space-y-1">
         <div onClick={() => window.location.href = "/profile"}
-          className="text-center py-3 text-[11px] text-gray-300 active:scale-95 transition-transform cursor-pointer">
+          className="text-center py-2 text-[11px] text-gray-300 active:scale-95 transition-transform cursor-pointer">
           返回「我的」个人中心 →
+        </div>
+        <div onClick={() => window.location.href = "/merchant/cancel"}
+          className="text-center py-2 text-[11px] active:scale-95 transition-transform cursor-pointer"
+          style={{color: `${C.coral}90`}}>
+          注销商户
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 /** 📋 服务列表：排行 / PK / 资产 / 成就 / 商户 / 设置 */
+import { useFontSize } from "@/lib/use-font-size";
 interface MerchantStatus {
   isMerchant: boolean;
   paid: boolean;
@@ -27,6 +28,7 @@ const MENU_ITEMS = [
 ] as const;
 
 export default function ServiceList({ isLoggedIn, merchantStatus, onLogin }: Props) {
+  const { size, toggle, isLarge } = useFontSize();
   const handleClick = (href: string) => {
     if (!isLoggedIn) { onLogin(); return; }
     window.location.href = href;
@@ -84,6 +86,21 @@ export default function ServiceList({ isLoggedIn, merchantStatus, onLogin }: Pro
         </>
       )}
 
+      {/* ── 大字模式切换 ── */}
+      <div onClick={toggle}
+        className="flex items-center gap-3 bg-white rounded-[10px] py-3.5 px-4 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform cursor-pointer">
+        <div className="w-9 h-9 rounded-[10px] bg-brand-teal/10 flex items-center justify-center text-lg">
+          {isLarge ? "🔠" : "🔤"}
+        </div>
+        <div className="flex-1">
+          <div className="text-[13px] font-medium text-text-primary">{isLarge ? "大字模式" : "标准模式"}</div>
+          <div className="text-[10px] text-text-tertiary">{isLarge ? "当前为大字体 · 点击切换回标准" : "适合长辈的大字体 · 点击切换"}</div>
+        </div>
+        <div className={`w-10 h-5 rounded-full transition-colors ${isLarge ? "bg-brand-teal" : "bg-gray-200"} relative`}>
+          <div className={`w-4 h-4 bg-white rounded-full shadow-sm absolute top-0.5 transition-transform ${isLarge ? "translate-x-5" : "translate-x-0.5"}`} />
+        </div>
+      </div>
+
       {/* ── 主菜单 ── */}
       {MENU_ITEMS.map((item, i) => (
         <div key={i} onClick={() => handleClick(item.href)}
@@ -96,6 +113,28 @@ export default function ServiceList({ isLoggedIn, merchantStatus, onLogin }: Pro
           <span className="text-text-tertiary text-sm">&gt;</span>
         </div>
       ))}
+
+      {/* ── 彩票工具（从首页迁移） ── */}
+      <div className="pt-6">
+        <div className="text-[12px] font-medium text-text-tertiary mb-2.5 px-0.5">🔧 实用工具</div>
+        <div className="flex gap-2">
+          <div onClick={() => handleClick("/draw")}
+            className="flex-1 bg-gray-50 rounded-[10px] py-3 text-center border border-gray-100 active:scale-[0.97] transition-transform cursor-pointer">
+            <div className="text-[18px] mb-1">🎫</div>
+            <div className="text-[11px] font-medium text-text-secondary">开奖查询</div>
+          </div>
+          <div onClick={() => handleClick("/scan")}
+            className="flex-1 bg-gray-50 rounded-[10px] py-3 text-center border border-gray-100 active:scale-[0.97] transition-transform cursor-pointer">
+            <div className="text-[18px] mb-1">📷</div>
+            <div className="text-[11px] font-medium text-text-secondary">扫码验奖</div>
+          </div>
+          <div onClick={() => handleClick("/calculator")}
+            className="flex-1 bg-gray-50 rounded-[10px] py-3 text-center border border-gray-100 active:scale-[0.97] transition-transform cursor-pointer">
+            <div className="text-[18px] mb-1">🧮</div>
+            <div className="text-[11px] font-medium text-text-secondary">计算器</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,19 @@
 import { useState, useEffect } from "react";
 
 const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA", green: "#10B981" };
+const ADMIN_TOKEN = "xz-admin-2026";
+
+/** 带管理员 token 的 fetch */
+function adminFetch(url: string, opts: RequestInit = {}): Promise<any> {
+  return fetch(url, {
+    ...opts,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": ADMIN_TOKEN,
+      ...(opts.headers || {}),
+    },
+  });
+}
 
 type Tab = "review" | "pending-pay" | "merchants" | "payments" | "stats";
 
@@ -26,28 +39,28 @@ export default function AdminMerchantsPage() {
   const loadApps = async () => {
     setLoading(true);
     const url = `/api/v2/admin/merchant-applications${filter !== null ? `?status=${filter}` : ""}`;
-    const r = await fetch(url).then(r => r.json());
+    const r = await adminFetch(url).then(r => r.json());
     if (r.code === 0) setApps(r.data.list);
     setLoading(false);
   };
 
   const loadMerchants = async () => {
-    const r = await fetch(`/api/v2/admin/merchants`).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchants`).then(r => r.json());
     if (r.code === 0) setMerchants(r.data || []);
   };
 
   const loadPayments = async () => {
-    const r = await fetch(`/api/v2/admin/merchant-payments`).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchant-payments`).then(r => r.json());
     if (r.code === 0) setPayments(r.data || []);
   };
 
   const loadPendingPay = async () => {
-    const r = await fetch(`/api/v2/admin/merchant-pending-pay`).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchant-pending-pay`).then(r => r.json());
     if (r.code === 0) setPendingPayList(r.data || []);
   };
 
   const loadStats = async () => {
-    const r = await fetch(`/api/v2/admin/merchant-stats`).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchant-stats`).then(r => r.json());
     if (r.code === 0 && r.data) setStats(r.data);
   };
 
@@ -58,14 +71,14 @@ export default function AdminMerchantsPage() {
   useEffect(() => { if (tab === "stats") loadStats(); }, [tab]);
 
   const reviewAction = async (id: number, action: string) => {
-    const r = await fetch(`/api/v2/admin/merchant-applications/${id}?action=${action}`, { method: "PUT" }).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchant-applications/${id}?action=${action}`, { method: "PUT" }).then(r => r.json());
     setMsg(r.msg || (r.code === 0 ? "✅ 成功" : "❌ 失败"));
     loadApps();
     setTimeout(() => setMsg(""), 3000);
   };
 
   const toggleMerchant = async (id: number, status: number) => {
-    const r = await fetch(`/api/v2/admin/merchants/${id}?status=${status}`, { method: "PUT" }).then(r => r.json());
+    const r = await adminFetch(`/api/v2/admin/merchants/${id}?status=${status}`, { method: "PUT" }).then(r => r.json());
     setMsg(r.code === 0 ? "✅ 已更新" : `❌ ${r.msg}`);
     loadMerchants();
     setTimeout(() => setMsg(""), 3000);
@@ -349,6 +362,39 @@ export default function AdminMerchantsPage() {
           <div className="bg-white rounded-[12px] w-full max-w-[340px] p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-[14px] font-semibold mb-1">{showManage.name}</h3>
             <p className="text-[11px] text-gray-400 mb-4">{showManage.plan} · 到期{showManage.expiry}</p>
+            
+            {/* 📍 门店坐标 */}
+            <div className="mb-4 p-3 rounded-[8px] bg-gray-50">
+              <div className="text-[10px] font-medium text-gray-500 mb-2">📍 门店定位</div>
+              <div className="flex gap-2 mb-2">
+                <input value={showManage.latitude || ""} onChange={e => setShowManage((p:any) => ({...p, latitude: e.target.value}))}
+                  className="flex-1 px-2 py-1.5 rounded-[6px] border border-gray-200 text-[11px] outline-none" placeholder="纬度" />
+                <input value={showManage.longitude || ""} onChange={e => setShowManage((p:any) => ({...p, longitude: e.target.value}))}
+                  className="flex-1 px-2 py-1.5 rounded-[6px] border border-gray-200 text-[11px] outline-none" placeholder="经度" />
+              </div>
+              {showManage.latitude && showManage.longitude && (
+                <a href={`https://uri.amap.com/marker?position=${showManage.longitude},${showManage.latitude}&name=${encodeURIComponent(showManage.name)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-[10px] text-brand-teal underline">查看地图</a>
+              )}
+              <p className="text-[9px] text-gray-400 mt-1">修改后点击"保存定位"生效</p>
+              <button onClick={async () => {
+                try {
+                  await adminFetch(`/api/v2/admin/merchant-location`, {
+                    method: "PUT",
+                    headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({ merchant_id: showManage.id, latitude: showManage.latitude, longitude: showManage.longitude }),
+                  });
+                  setMsg("✅ 定位已保存");
+                } catch { setMsg("❌ 保存失败"); }
+                setTimeout(() => setMsg(""), 2000);
+              }}
+                className="mt-2 w-full py-1.5 rounded-[8px] text-[10px] font-medium text-white"
+                style={{background: C.teal}}>
+                💾 保存定位
+              </button>
+            </div>
+
             <div className="space-y-2">
               <button onClick={() => { toggleMerchant(showManage.id, showManage.status ? 0 : 1); setShowManage(null); }}
                 className="w-full py-2.5 rounded-[8px] text-[12px] font-medium active:scale-95 transition-transform"

@@ -356,7 +356,7 @@ function BTCBetPanel() {
   const [recordsLoading, setRecordsLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const AMOUNTS = [10, 50, 100, 200];
+  const AMOUNTS = [100, 200, 500, 1000];
   const MULTIPLIERS: Record<string, number> = { up: 1.8, down: 1.8, flat: 3.2 };
 
   // ── 获取余额 ──
@@ -380,7 +380,7 @@ function BTCBetPanel() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [fetchBalance]);
 
-  // ── 获取投注记录 ──
+  // ── 获取参与记录 ──
   const fetchRecords = useCallback(() => {
     if (!user) return;
     setRecordsLoading(true);
@@ -394,7 +394,7 @@ function BTCBetPanel() {
   }, [user]);
   useEffect(() => { if (tab === "record") fetchRecords(); }, [tab, fetchRecords]);
 
-  // ── 投注 ──
+  // ── 参与 ──
   const handleBet = async () => {
     if (!user) { setMsg("请先登录"); setTimeout(() => setMsg(""), 1500); return; }
     if (!direction) { setMsg("请选择方向"); setTimeout(() => setMsg(""), 1500); return; }
@@ -413,11 +413,11 @@ function BTCBetPanel() {
       });
       const json = await res.json();
       if (json.result === 1) {
-        setMsg(`✅ 投注成功! 60s后结算 · ⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石`);
+        setMsg(`✅ 参与成功! 60s后结算 · ⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石`);
         setDirection(null);
         fetchBalance();
       } else {
-        setMsg(`❌ ${json.msg || "投注失败"}`);
+        setMsg(`❌ ${json.msg || "参与失败"}`);
       }
     } catch { setMsg("❌ 网络错误"); }
     setSubmitting(false);
@@ -472,8 +472,8 @@ function BTCBetPanel() {
             ))}
           </div>
 
-          {/* 投注额 */}
-          <div className="text-[11px] text-text-secondary mb-2">投注数量</div>
+          {/* 参与额 */}
+          <div className="text-[11px] text-text-secondary mb-2">参与数量</div>
           <div className="grid grid-cols-4 gap-2 mb-4">
             {AMOUNTS.map(a => (
               <button key={a} onClick={() => setAmount(a)}
@@ -488,7 +488,7 @@ function BTCBetPanel() {
           <button onClick={handleBet} disabled={submitting || !canBet}
             className="w-full py-3 rounded-[10px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[13px] font-semibold active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed">
             {!user ? "请先登录"
-              : submitting ? "投注中..."
+              : submitting ? "参与中..."
               : direction ? `消耗🎮${amount} · 赢⛏️${Math.floor(amount * MULTIPLIERS[direction] * 0.8)}石`
               : "请先选择方向"}
           </button>
@@ -506,14 +506,14 @@ function BTCBetPanel() {
         /* ── 我的记录 Tab ── */
         <div className="px-4 py-3">
           {!user ? (
-            <div className="py-8 text-center text-[12px] text-text-tertiary">登录后可查看投注记录</div>
+            <div className="py-8 text-center text-[12px] text-text-tertiary">登录后可查看参与记录</div>
           ) : recordsLoading ? (
             <div className="py-8 text-center text-[12px] text-text-tertiary">加载中...</div>
           ) : records.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-2xl mb-2">🎲</p>
-              <p className="text-[12px] text-text-tertiary">暂无投注记录</p>
-              <button onClick={() => setTab("predict")} className="mt-2 text-[11px] text-brand-teal-dark underline">去投注</button>
+              <p className="text-[12px] text-text-tertiary">暂无参与记录</p>
+              <button onClick={() => setTab("predict")} className="mt-2 text-[11px] text-brand-teal-dark underline">去参与</button>
             </div>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto">

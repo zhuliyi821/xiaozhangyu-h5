@@ -257,7 +257,7 @@ export function NewsGrid() {
           <div className="text-[9px] text-text-tertiary mt-1 leading-relaxed">选号碰撞 · 一秒开奖<br />5种玩法</div>
         </Link>
 
-        <Link href="/sim"
+        <Link href="/stock-analysis"
           className="bg-white rounded-[12px] p-3.5 text-center shadow-sm border border-brand-teal/10 relative overflow-hidden active:scale-95 transition-transform block">
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-gold to-brand-coral rounded-t-[3px]" />
           <div className="text-lg mb-1">📈</div>

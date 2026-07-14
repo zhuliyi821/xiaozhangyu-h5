@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { MapPin, ShoppingCart, Phone, ChevronRight, Star, Clock } from "lucide-react";
+import { MapPin, ShoppingCart, Phone, ChevronRight, Star, Clock, Navigation } from "lucide-react";
 import { API_BASE } from "@/config/api";
-import { apiFetch } from "@/config/api";
+import { Skeleton } from "@/components/layout/skeleton";
+import { ErrorState } from "@/components/layout/error-state";
 
 /** 门店配置 */
 interface StoreConfig {
@@ -18,6 +19,8 @@ interface StoreConfig {
   hours: string;
   intro: string;
   rating: number;
+  latitude?: string;
+  longitude?: string;
 }
 
 /** 默认门店配置（回退） */
@@ -34,6 +37,41 @@ function defaultStore(id: string): StoreConfig {
     hours: "08:00-22:00",
     intro: "",
     rating: 4.5,
+  };
+}
+
+/**
+ * 自动导航 — 一键到店
+ * 根据 UA 自动选择最佳地图 App，用户只需点击一次
+ */
+function getAutoNavUrl(lat?: string, lng?: string, name?: string): { url: string; label: string; icon: string } | null {
+  if (!lat || !lng) return null;
+  const encodedName = encodeURIComponent(name || "目的地");
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent.toLowerCase() : "";
+  const isiOS = /iphone|ipad|ipod/.test(ua);
+  const isAndroid = /android/.test(ua);
+  
+  // Android 优先高德（国内主流）
+  if (isAndroid) {
+    return {
+      label: "高德导航",
+      url: `https://uri.amap.com/navigation?to=${lng},${lat},${encodedName}&mode=car&coordinate=gaode`,
+      icon: "📍",
+    };
+  }
+  // iOS 优先 Apple Maps（系统原生）
+  if (isiOS) {
+    return {
+      label: "Apple 导航",
+      url: `http://maps.apple.com/?ll=${lat},${lng}&q=${encodedName}`,
+      icon: "🍎",
+    };
+  }
+  // 默认高德
+  return {
+    label: "高德导航",
+    url: `https://uri.amap.com/navigation?to=${lng},${lat},${encodedName}&mode=car&coordinate=gaode`,
+    icon: "🗺️",
   };
 }
 
@@ -113,21 +151,21 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
   if (loading) {
     return (
       <main className="min-h-screen bg-white pb-24">
-        <div className="h-52 bg-gray-100 animate-pulse" />
+        <Skeleton variant="banner" className="h-52 !rounded-none" />
         <div className="mx-4 -mt-6 relative z-10">
-          <div className="bg-white rounded-[12px] shadow-sm p-4 animate-pulse space-y-3">
-            <div className="h-4 bg-gray-100 rounded w-3/4" />
-            <div className="h-3 bg-gray-50 rounded w-1/2" />
+          <div className="bg-white rounded-[12px] shadow-sm p-4 space-y-3">
+            <Skeleton variant="text" className="w-3/4" />
+            <Skeleton variant="text" className="w-1/2" />
           </div>
         </div>
         <div className="px-4 mt-4">
-          <div className="grid grid-cols-2 gap-2.5 animate-pulse">
+          <div className="grid grid-cols-2 gap-2.5">
             {[1,2,3,4].map(i => (
               <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm">
-                <div className="aspect-square bg-gray-100" />
+                <Skeleton variant="card" className="!h-32 !rounded-none" />
                 <div className="p-2.5 space-y-1.5">
-                  <div className="h-3 bg-gray-100 rounded w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded w-1/2" />
+                  <Skeleton variant="text" className="w-3/4" />
+                  <Skeleton variant="text" className="w-1/2" />
                 </div>
               </div>
             ))}
@@ -158,16 +196,33 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
 
       {/* 门店信息条 */}
       <div className="mx-4 -mt-5 relative z-10">
-        <div className="bg-white rounded-[12px] shadow-sm px-4 py-3 flex items-center justify-between">
-          <a href={`tel:${store.phone}`} className="flex items-center gap-2 text-[11px] text-gray-500">
-            <Phone className="w-3.5 h-3.5" style={{color:primary}} />
-            {store.phone || "暂无电话"}
-          </a>
-          <a href={store.address ? `https://uri.amap.com/search?keyword=${encodeURIComponent(store.name+' '+store.address)}` : '#'}
-            target="_blank" rel="noopener noreferrer"
-            className="text-[10px] px-2.5 py-1 rounded-full text-white" style={{background:primary}}>
-            导航
-          </a>
+        <div className="bg-white rounded-[12px] shadow-sm px-4 py-3">
+          <div className="flex items-center justify-between">
+            <a href={`tel:${store.phone}`} className="flex items-center gap-2 text-[11px] text-gray-500">
+              <Phone className="w-3.5 h-3.5" style={{color:primary}} />
+              {store.phone || "暂无电话"}
+            </a>
+            {/* 📍 一键导航到店 — 自动选择最佳地图 */}
+            {(() => {
+              const nav = getAutoNavUrl(store.latitude, store.longitude, store.name);
+              if (!nav) return null;
+              return (
+                <a href={nav.url} target="_blank" rel="noopener noreferrer"
+                  className="text-[10px] px-2.5 py-1.5 rounded-full text-white flex items-center gap-1 active:scale-95 transition-transform"
+                  style={{background:primary}}>
+                  <Navigation className="w-3 h-3" />
+                  <span>{nav.label}</span>
+                </a>
+              );
+            })()}
+          </div>
+          {/* 地址行（可点击） */}
+          {store.address && (
+            <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-400 border-t border-gray-50 pt-2">
+              <MapPin className="w-3 h-3 shrink-0" />
+              <span className="truncate">{store.address}</span>
+            </div>
+          )}
         </div>
       </div>
 

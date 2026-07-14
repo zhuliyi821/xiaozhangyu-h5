@@ -88,7 +88,7 @@ export default function CalculatorPage() {
       <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
         <div className="flex items-center px-4 h-12 gap-2">
           <button onClick={() => window.history.back()} className="text-text-secondary"><ArrowLeft className="w-5 h-5" /></button>
-          <h1 className="text-base font-semibold flex-1">投注计算器</h1>
+          <h1 className="text-base font-semibold flex-1">参与计算器</h1>
         </div>
         {/* Type tabs */}
         <div className="flex gap-1 px-3 pb-2 overflow-x-auto scrollbar-none">
@@ -105,8 +105,8 @@ export default function CalculatorPage() {
         {/* Mode selector */}
         <div className="flex bg-surface rounded-[8px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
           {[
-            { key: "compound" as CalcMode, label: "复式投注", desc: "多选号码" },
-            { key: "bold" as CalcMode, label: "胆拖投注", desc: "胆码+拖码" },
+            { key: "compound" as CalcMode, label: "复式参与", desc: "多选号码" },
+            { key: "bold" as CalcMode, label: "胆拖参与", desc: "胆码+拖码" },
           ].map(m => (
             <button key={m.key} onClick={() => { setMode(m.key); setResult(null); }}
               className={`flex-1 py-2 text-center rounded-[11px] text-xs font-medium transition-colors ${
@@ -121,7 +121,7 @@ export default function CalculatorPage() {
         {/* Compound mode */}
         {mode === "compound" && (
           <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
-            <div className="text-xs font-semibold mb-3">📊 复式投注参数</div>
+            <div className="text-xs font-semibold mb-3">📊 复式参与参数</div>
             {/* Front */}
             <div className="mb-4">
               <div className="flex justify-between items-center mb-1.5">
@@ -169,7 +169,7 @@ export default function CalculatorPage() {
         {/* Bold-Drag mode */}
         {mode === "bold" && (
           <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
-            <div className="text-xs font-semibold mb-3">🎯 胆拖投注参数</div>
+            <div className="text-xs font-semibold mb-3">🎯 胆拖参与参数</div>
             <div className="text-[10px] text-text-tertiary mb-3">胆码：每注必选的号码 / 拖码：与胆码组合的号码</div>
 
             {/* Front bold */}
@@ -241,7 +241,7 @@ export default function CalculatorPage() {
         {/* Calculate button */}
         <button onClick={handleCalc} disabled={loading}
           className="w-full py-3.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-sm font-semibold disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 shadow-lg shadow-brand-teal/20">
-          <Calculator className="w-4 h-4" /> {loading ? "计算中..." : "计算投注金额"}
+          <Calculator className="w-4 h-4" /> {loading ? "计算中..." : "计算参与金额"}
         </button>
 
         {/* Result */}
@@ -261,7 +261,7 @@ export default function CalculatorPage() {
                 <div className="text-lg font-bold">{result.total_notes} 注</div>
               </div>
               <div className="bg-bg rounded-[8px] p-3 text-center">
-                <div className="text-[10px] text-text-tertiary">投注倍数</div>
+                <div className="text-[10px] text-text-tertiary">参与倍数</div>
                 <div className="text-lg font-bold">{bets}x</div>
               </div>
               <div className="bg-gradient-to-br from-brand-coral/10 to-brand-gold/10 rounded-[8px] p-3 text-center border border-brand-coral/20">
@@ -272,7 +272,7 @@ export default function CalculatorPage() {
 
             {/* Formulas */}
             <details className="bg-bg rounded-[8px] p-3">
-              <summary className="text-[11px] font-medium cursor-pointer">投注方案公式</summary>
+              <summary className="text-[11px] font-medium cursor-pointer">参与方案公式</summary>
               <div className="mt-2 text-[10px] text-text-tertiary space-y-1">
                 <p>前区选 {frontCount} 个 → C({frontCount},{cfg.frontPick}) = {combFormula(frontCount, cfg.frontPick)}</p>
                 {cfg.backMax > 0 && <p>后区选 {backCount} 个 → C({backCount},{cfg.backPick}) = {combFormula(backCount, cfg.backPick)}</p>}
@@ -289,9 +289,9 @@ export default function CalculatorPage() {
           <div className="mt-3 text-[10px] text-text-tertiary space-y-1.5 leading-relaxed">
             <p>• 大乐透头奖概率: 1/21,425,712</p>
             <p>• 双色球头奖概率: 1/17,721,088</p>
-            <p>• 复式投注会按选择号码数组合成多注单式票</p>
-            <p>• 胆拖投注: 胆码+拖码组合成多注 (胆码每注必含)</p>
-            <p>• 投注金额 = 组合数 × 2元/注 × 倍数</p>
+            <p>• 复式参与会按选择号码数组合成多注单式票</p>
+            <p>• 胆拖参与: 胆码+拖码组合成多注 (胆码每注必含)</p>
+            <p>• 参与金额 = 组合数 × 2元/注 × 倍数</p>
           </div>
         </details>
       </div>

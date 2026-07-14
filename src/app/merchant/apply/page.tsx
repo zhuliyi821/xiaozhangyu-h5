@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import regions from "@/lib/regions";
 
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", bg: "#F5F6FA", green: "#10B981" };
+const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA", green: "#10B981" };
 
 const STEPS = [
   { id: "form", label: "填写信息", icon: "📝" },
@@ -47,8 +48,9 @@ export default function MerchantApplyPage() {
   const [form, setForm] = useState({
     merchant_name: "", contact_name: "", mobile: "",
     province: "", city: "", district: "",
-    store_name: "", address: "",
+    store_name: "", address: "", latitude: "", longitude: "",
   });
+  const [locating, setLocating] = useState(false);
 
   // Load existing status
   useEffect(() => {
@@ -260,15 +262,54 @@ export default function MerchantApplyPage() {
 
         <div className="bg-white rounded-[10px] p-4 shadow-sm">
           <h2 className="text-[12px] font-medium mb-3" style={{color:C.teal}}>📍 区域信息</h2>
-          <Field label="省份" value={form.province} onChange={v => setForm(f=>({...f,province:v}))} placeholder="如：广东省" />
-          <Field label="城市" value={form.city} onChange={v => setForm(f=>({...f,city:v}))} placeholder="如：深圳市" />
-          <Field label="区/县" value={form.district} onChange={v => setForm(f=>({...f,district:v}))} placeholder="如：南山区" />
+          <Cascader
+            value={{ province: form.province, city: form.city, district: form.district }}
+            onChange={({ province, city, district }) => setForm(f => ({...f, province, city, district }))}
+          />
         </div>
 
         <div className="bg-white rounded-[10px] p-4 shadow-sm">
           <h2 className="text-[12px] font-medium mb-3" style={{color:C.gold}}>🏪 门店信息（可选）</h2>
           <Field label="门店名称" value={form.store_name} onChange={v => setForm(f=>({...f,store_name:v}))} placeholder="如：山房烤肉·科技园店" />
           <Field label="门店地址" value={form.address} onChange={v => setForm(f=>({...f,address:v}))} placeholder="详细地址" />
+          {/* 📍 门店定位 */}
+          <div className="mt-3">
+            <label className="text-[10px] text-gray-400 block mb-1.5">📍 门店定位（用于导航到店，可选）</label>
+            <div className="flex gap-2">
+              <button onClick={() => {
+                if (!navigator.geolocation) return;
+                setLocating(true);
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => { setForm(f=>({...f, latitude: pos.coords.latitude.toString(), longitude: pos.coords.longitude.toString()})); setLocating(false); },
+                  () => { setLocating(false); },
+                  { enableHighAccuracy: true, timeout: 10000 }
+                );
+              }} disabled={locating}
+                className="flex-1 py-1.5 rounded-[8px] text-[10px] font-medium text-white"
+                style={{background: locating ? "#999" : C.teal}}>
+                {locating ? "定位中..." : "📍 当前位置"}
+              </button>
+              <button onClick={async () => {
+                if (!form.address) return;
+                setLocating(true);
+                try {
+                  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(form.address)}&limit=1&countrycodes=cn`);
+                  const j = await r.json();
+                  if (j.length > 0) setForm(f=>({...f, latitude: j[0].lat, longitude: j[0].lon}));
+                } catch {}
+                setLocating(false);
+              }} disabled={locating}
+                className="flex-1 py-1.5 rounded-[8px] text-[10px] font-medium"
+                style={{backgroundColor: `${C.purple}10`, color: C.purple}}>
+                📌 地址定位
+              </button>
+            </div>
+            {form.latitude && form.longitude ? (
+              <div className="text-[9px] text-green-600 mt-1">✅ 已定位 ({parseFloat(form.latitude).toFixed(4)}, {parseFloat(form.longitude).toFixed(4)})</div>
+            ) : (
+              <div className="text-[9px] text-gray-300 mt-1">可选，设置后顾客可直接导航到店</div>
+            )}
+          </div>
         </div>
 
         <button onClick={handleSubmit} disabled={submitting}
@@ -282,6 +323,49 @@ export default function MerchantApplyPage() {
 
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </main>
+  );
+}
+
+/** 省市区三级联动选择器 */
+function Cascader({ value, onChange }: {
+  value: { province: string; city: string; district: string };
+  onChange: (v: { province: string; city: string; district: string }) => void;
+}) {
+  const provinces = Object.keys(regions).sort();
+  const cities = value.province ? Object.keys(regions[value.province]).sort() : [];
+  const districts = value.city && value.province ? (regions[value.province][value.city] || []) : [];
+
+  const selClass = "w-full text-[13px] px-3 py-2.5 rounded-[8px] border border-gray-200 bg-gray-50 outline-none focus:border-[#45CCD5] transition-colors appearance-none";
+
+  return (
+    <div className="space-y-2.5">
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="text-[10px] text-gray-400 block mb-1">省份</label>
+          <select value={value.province} onChange={e => onChange({ province: e.target.value, city: "", district: "" })}
+            className={selClass}>
+            <option value="">请选择省份</option>
+            {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] text-gray-400 block mb-1">城市</label>
+          <select value={value.city} onChange={e => onChange({ ...value, city: e.target.value, district: "" })}
+            className={selClass} disabled={!value.province}>
+            <option value="">请选择城市</option>
+            {cities.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="text-[10px] text-gray-400 block mb-1">区/县</label>
+        <select value={value.district} onChange={e => onChange({ ...value, district: e.target.value })}
+          className={selClass} disabled={!value.city}>
+          <option value="">请选择区/县</option>
+          {districts.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+      </div>
+    </div>
   );
 }
 

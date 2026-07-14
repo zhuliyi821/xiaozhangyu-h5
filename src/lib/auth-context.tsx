@@ -6,8 +6,8 @@
  */
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { login as apiLogin, register as apiRegister, type LoginResult } from "@/lib/api";
-import { apiFetch, API_BASE } from "@/config/api";
+import { login as apiLogin, register as apiRegister, loginByUsername as apiLoginByUsername, type LoginResult } from "@/lib/api";
+import { apiFetch, API_BASE, setOnUnauthorized } from "@/config/api";
 import { ApiError } from "@/config/api";
 
 interface UserInfo {
@@ -20,7 +20,9 @@ interface UserInfo {
     credit2: number;  // 🏪 闲豆
     credit3: number;  // 🔮 水晶球
     credit4: number;  // 💰 余额
-    credit5: number;  // ⛏️ 水晶石
+    credit5: number;  // ✨ 水晶石(可用)
+    credit6: number;  // ❄️ 冻结豆
+    granted_game_coins?: number;  // 📊 已赠游戏豆额度
   };
 }
 
@@ -28,6 +30,7 @@ interface AuthContextType {
   user: UserInfo | null;
   loading: boolean;
   login: (mobile: string, password: string) => Promise<void>;
+  loginByUsername: (username: string, password: string) => Promise<void>;
   register: (mobile: string, password: string) => Promise<void>;
   logout: () => void;
   refreshBalance: () => Promise<void>;
@@ -45,22 +48,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 初始化：从 localStorage 恢复登录状态
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      if (typeof window === "undefined") {
+        setLoading(false);
+        return;
+      }
+      const saved = window.localStorage?.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as UserInfo;
-        if (parsed.token && parsed.uid) {
+        if (parsed && parsed.token && parsed.uid) {
           setUser(parsed);
         }
       }
     } catch (e) {
+      // 微信浏览器可能 localStorage 访问异常或数据损坏
       console.warn("Failed to restore auth state:", e);
+      try { window.localStorage?.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const saveUser = useCallback((u: UserInfo) => {
-    setUser(u);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    try {
+      setUser(u);
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+      }
+    } catch (e) {
+      console.warn("Failed to save user:", e);
+    }
   }, []);
 
   const login = useCallback(async (mobile: string, password: string) => {
@@ -79,10 +95,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login(mobile, password);
   }, [login]);
 
+  const loginByUsername = useCallback(async (username: string, password: string) => {
+    const result = await apiLoginByUsername(username, password);
+    saveUser({
+      uid: result.uid,
+      nickname: result.nickname,
+      avatar: result.avatar,
+      token: result.token,
+      balance: result.balance,
+    });
+  }, [saveUser]);
+
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
+
+  // 注册 401 全局回调：API 返回 401 时自动退出
+  useEffect(() => {
+    setOnUnauthorized(logout);
+    return () => { setOnUnauthorized(null); };
+  }, [logout]);
 
   const refreshBalance = useCallback(async () => {
     if (!user) return;
@@ -102,17 +135,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /** 微信 OAuth 登录：直接用后端返回的 token + 用户信息 */
   const loginWithToken = useCallback((token: string, data: any) => {
+    // 防御：清理 + 兜底，避免 null/undefined 字段破坏下游
+    const balance = data?.balance && typeof data.balance === "object" ? {
+      credit1: Number(data.balance.credit1) || 0,
+      credit2: Number(data.balance.credit2) || 0,
+      credit3: Number(data.balance.credit3) || 0,
+      credit4: Number(data.balance.credit4) || 0,
+      credit5: Number(data.balance.credit5) || 0,
+      credit6: Number(data.balance.credit6) || 0,
+      granted_game_coins: Number(data.balance.granted_game_coins) || 0,
+    } : { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0, credit6: 0, granted_game_coins: 0 };
+
     saveUser({
-      uid: data.uid,
-      nickname: data.nickname || '微信用户',
-      avatar: data.avatar || '',
-      token: token,
-      balance: data.balance || { credit1: 0, credit2: 0, credit3: 0, credit4: 0, credit5: 0 },
+      uid: Number(data?.uid) || 0,
+      nickname: data?.nickname || "微信用户",
+      avatar: data?.avatar || "",
+      token: String(token || ""),
+      balance,
     });
   }, [saveUser]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshBalance, loginWithToken }}>
+    <AuthContext.Provider value={{ user, loading, login, loginByUsername, register, logout, refreshBalance, loginWithToken }}>
       {children}
     </AuthContext.Provider>
   );

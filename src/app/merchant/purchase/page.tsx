@@ -8,13 +8,6 @@ const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", bg: "#F5F6FA", g
 
 const PLAN_PRICE = 9800;
 
-// 模拟代金券数据
-const MOCK_VOUCHERS = [
-  { id: 1, amount: 2000, label: "新商户专享券 ¥2,000", expired: "2026-12-31" },
-  { id: 2, amount: 1000, label: "早鸟优惠券 ¥1,000", expired: "2026-09-30" },
-  { id: 3, amount: 500, label: "推荐有礼券 ¥500", expired: "2026-08-15" },
-];
-
 interface PaymentRes {
   success: boolean;
   account: string;
@@ -34,7 +27,7 @@ export default function MerchantPurchasePage() {
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay" | "transfer">("wechat");
   const [selectedVoucher, setSelectedVoucher] = useState<number | null>(null);
   const [voucherOpen, setVoucherOpen] = useState(false);
-  const [vouchers, setVouchers] = useState(MOCK_VOUCHERS);
+  const [vouchers, setVouchers] = useState<any[]>([]);
 
   const voucherAmount = selectedVoucher ? (vouchers.find(v => v.id === selectedVoucher)?.amount || 0) : 0;
   const finalPrice = Math.max(0, PLAN_PRICE - voucherAmount);
@@ -46,6 +39,7 @@ export default function MerchantPurchasePage() {
       .then(r => r.json())
       .then(d => {
         if (d.code === 0 && d.data?.length > 0) setVouchers(d.data);
+        else { /* 无可用代金券 */ }
       })
       .catch(() => {});
   }, [user]);

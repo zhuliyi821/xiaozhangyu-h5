@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { CATEGORY_CONFIG, PKTopic, APIResponse, PKFormData, VoteConfirmData, DEFAULT_PK_FORM } from "../types";
+import { CATEGORY_CONFIG, PKTopic, APIResponse, VoteConfirmData } from "../types";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
+import PKCreator from "@/components/pk/pk-creator";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
@@ -28,10 +29,9 @@ export default function CategoryPKHall() {
   const [showLogin, setShowLogin] = useState(false);
 
   // 发起PK弹窗
-  const [showCreate, setShowCreate] = useState(false);
-  const [pkForm, setPkForm] = useState<PKFormData>({ ...DEFAULT_PK_FORM });
+  const [showCreator, setShowCreator] = useState(false);
 
-  // 投注确认弹窗
+  // 参与确认弹窗
   const [confirmVote, setConfirmVote] = useState<VoteConfirmData | null>(null);
 
   // 分享弹窗
@@ -80,35 +80,10 @@ export default function CategoryPKHall() {
         body: JSON.stringify({ pk_id: pk.id, uid, option_choice: choice, bet_amount: betAmount }),
       });
       const j: APIResponse = await res.json();
-      setVoteMsg(j.msg || (j.code === 0 ? `✅ 投注${betAmount}豆成功！` : `❌ ${j.msg}`));
+      setVoteMsg(j.msg || (j.code === 0 ? `✅ 参与${betAmount}豆成功！` : `❌ ${j.msg}`));
       if (j.code === 0) loadTopics();
     } catch { setVoteMsg("❌ 网络错误"); }
     setTimeout(() => setVoteMsg(""), 3000);
-  };
-
-  // ── 发起PK ──
-  const handleCreatePK = async () => {
-    if (!uid) return;
-    const validOptions = pkForm.options.filter(o => o.trim());
-    if (!pkForm.title || validOptions.length < 2) return;
-    const endTime = pkForm.end_time === "1h" ? Math.floor(Date.now()/1000) + 3600
-      : pkForm.end_time === "3h" ? Math.floor(Date.now()/1000) + 10800
-      : pkForm.end_time === "tomorrow" ? Math.floor(Date.now()/1000) + 86400
-      : Math.floor(Date.now()/1000) + 604800;
-    try {
-      const res = await fetch(`${API_BASE}/api/pk?action=create`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid, title: pkForm.title, options: validOptions, mode: pkForm.mode, category, charity: pkForm.charity, pool_distribution: pkForm.pool_distribution, end_time: endTime, min_bet: parseInt(pkForm.min_bet) || 10 }),
-      });
-      const j: APIResponse = await res.json();
-      if (j.code === 0) {
-        setShowCreate(false);
-        setPkForm({ ...DEFAULT_PK_FORM });
-        loadTopics();
-        setVoteMsg("✅ PK话题发起成功！");
-      } else { setVoteMsg(`❌ ${j.msg}`); }
-    } catch { setVoteMsg("❌ 创建失败"); }
-    setTimeout(() => setVoteMsg(""), 2500);
   };
 
   // ── 分享 ──
@@ -211,7 +186,7 @@ export default function CategoryPKHall() {
       {/* 底部操作栏 */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 z-40">
         <div className="flex gap-3">
-          <button onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
+          <button onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreator(true); }}
             className="flex-1 bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white py-3.5 rounded-[8px] text-sm font-semibold shadow-sm active:scale-[0.97] transition-transform">
             💰 发起PK
           </button>
@@ -222,11 +197,11 @@ export default function CategoryPKHall() {
         </div>
       </div>
 
-      {/* 投注确认弹窗 */}
+      {/* 参与确认弹窗 */}
       {confirmVote && (
         <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setConfirmVote(null)}>
           <div className="bg-white rounded-[8px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold mb-3">🎯 投注确认</h3>
+            <h3 className="text-sm font-semibold mb-3">🎯 参与确认</h3>
             <div className="space-y-2.5 text-xs">
               <div className="bg-gray-50 rounded-[8px] p-3">
                 <div className="font-medium mb-1">{confirmVote.pk.title}</div>
@@ -234,7 +209,7 @@ export default function CategoryPKHall() {
                   {confirmVote.choice === 'A' ? (confirmVote.pk.option_a || confirmVote.pk.options?.[0]) : (confirmVote.pk.option_b || confirmVote.pk.options?.[1])}
                 </span>
               </div>
-              <div className="text-gray-500">选择投注数量</div>
+              <div className="text-gray-500">选择参与数量</div>
               <div className="flex gap-2">
                 {[10, 50, 100, 200].map(amt => (
                   <button key={amt} onClick={() => setConfirmVote(v => v ? {...v, betAmount: amt} : null)}
@@ -269,58 +244,29 @@ export default function CategoryPKHall() {
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmVote(null)} className="flex-1 py-2.5 bg-gray-100 rounded-[8px] text-xs font-medium">取消</button>
               <button onClick={executeVote} className="flex-1 py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium">
-                确认投注 {confirmVote.betAmount} 豆
+                确认参与 {confirmVote.betAmount} 豆
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 发起PK弹窗 */}
-      {showCreate && (
-        <div className="fixed inset-0 z-[998] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-[8px] w-full max-w-[360px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold mb-4">💰 发起PK · {cfg.name}</h3>
-            <div className="space-y-3">
-              <input type="text" placeholder="PK话题" value={pkForm.title} onChange={e => setPkForm({...pkForm, title: e.target.value})}
-                className="w-full px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-              <div className="flex gap-2">
-                <input type="text" placeholder="选项A" value={pkForm.options[0] || ""} onChange={e => { const o = [...pkForm.options]; o[0] = e.target.value; setPkForm({...pkForm, options: o}); }}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-                <span className="self-center text-xs text-gray-400">VS</span>
-                <input type="text" placeholder="选项B" value={pkForm.options[1] || ""} onChange={e => { const o = [...pkForm.options]; o[1] = e.target.value; setPkForm({...pkForm, options: o}); }}
-                  className="flex-1 px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-              </div>
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">⏱ 截止时间</div>
-                <div className="flex gap-2">
-                  {[{label:"1小时",v:"1h"},{label:"3小时",v:"3h"},{label:"明天",v:"tomorrow"},{label:"7天",v:"7d"}].map(opt => (
-                    <button key={opt.v} onClick={() => setPkForm({...pkForm, end_time: opt.v})}
-                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.end_time === opt.v ? 'bg-brand-teal/100 text-white' : 'bg-gray-50 text-gray-500'}`}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">💰 最低投注</div>
-                <div className="flex gap-2">
-                  {[10,50,100].map(amt => (
-                    <button key={amt} onClick={() => setPkForm({...pkForm, min_bet: amt.toString()})}
-                      className={`flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-all ${pkForm.min_bet === amt.toString() ? 'bg-brand-teal/100 text-white' : 'bg-gray-50 text-gray-500'}`}>
-                      {amt}豆
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button onClick={handleCreatePK} disabled={!pkForm.title || pkForm.options.filter(o => o.trim()).length < 2}
-                className="w-full py-2.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-medium disabled:opacity-50">
-                发起PK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* PKCreator 统一创建弹窗 */}
+      <PKCreator
+        open={showCreator}
+        onClose={() => setShowCreator(false)}
+        defaultCategory={category}
+        entryPoint="category_page"
+        onPublished={(topicId) => {
+          setShowCreator(false);
+          setVoteMsg("✅ PK话题发起成功！");
+          if (topicId) {
+            setTimeout(() => window.location.href = `/pk-hall/${category}/${topicId}`, 1000);
+          } else {
+            setTimeout(() => { loadTopics(); setVoteMsg(""); }, 1500);
+          }
+        }}
+      />
 
       {/* 分享弹窗 */}
       {showShare && shareTopic && (

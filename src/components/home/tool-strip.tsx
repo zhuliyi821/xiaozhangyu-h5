@@ -1,9 +1,9 @@
 import Link from "next/link";
 
+/**
+ * 首页工具条 — 纯实用工具
+ */
 const tools = [
-  { label: "购物商城", sub: "得游戏豆", href: "/marketplace", color: "bg-brand-gold-light/50 border-brand-gold", text: "text-brand-gold-dark" },
-  { label: "合作门店", sub: "得游戏豆", href: "/store", color: "bg-brand-coral-light/50 border-brand-coral", text: "text-brand-coral-dark" },
-  { label: "商家入驻", sub: "开启门店管理", href: "/merchant/apply", color: "bg-brand-teal-light/50 border-brand-teal", text: "text-brand-teal-dark" },
   { label: "开奖查询", sub: "", href: "/draw", color: "bg-gray-50", text: "text-text-secondary" },
   { label: "扫码验奖", sub: "", href: "/scan", color: "bg-gray-50", text: "text-text-secondary" },
   { label: "计算器", sub: "", href: "/calculator", color: "bg-gray-50", text: "text-text-secondary" },

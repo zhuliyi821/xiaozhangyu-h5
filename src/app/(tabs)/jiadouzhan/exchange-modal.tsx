@@ -62,13 +62,15 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
   const tab = tabs.find((t) => t.key === activeTab)!;
   const balance = tab.fromField ? (user?.balance?.[tab.fromField] ?? 0) : 0;
   const parsedAmount = parseFloat(amount) || 0;
-  // 冻结/可用水晶石 — 统一使用 70% 冻结比例
+  // 冻结/可用水晶石 — 从API获取真实数据
   const totalCrystal = Math.floor(user?.balance?.credit5 ?? 0);
-  const frozenCrystal = Math.floor(totalCrystal * 0.7);
+  const frozenCrystal = Math.floor(user?.balance?.credit6 ?? 0);
   // 激活相关状态
   const [activateAmount, setActivateAmount] = useState("");
   const parsedActivate = parseInt(activateAmount) || 0;
-  const canActivate = parsedActivate > 0 && parsedActivate <= (user?.balance?.credit1 ?? 0);
+  const canActivate = parsedActivate > 0 
+    && parsedActivate <= (user?.balance?.credit6 ?? 0)
+    && parsedActivate <= ((user as any)?.granted_game_coins ?? 0);
 
   // 计算兑换结果
   const getExchangeResult = () => {
@@ -101,8 +103,8 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
     try {
       await apiFetch("/wallet_api.php", {
         method: "POST",
-        params: { action: "activate_crystal" },
-        body: JSON.stringify({ uid: user!.uid, game_coins: parsedActivate }),
+        params: { action: "activate_frozen" },
+        body: JSON.stringify({ uid: user!.uid, amount: parsedActivate }),
       });
       await refreshBalance();
       setResult({ ok: true, msg: `✅ 激活成功！${parsedActivate} 水晶石已解锁` });
@@ -213,11 +215,11 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                 </div>
                 <div className="flex-1 bg-gray-50 rounded-[8px] px-4 py-3 text-center">
                   <div className="text-[10px] text-gray-400">可用</div>
-                  <div className="text-lg font-bold text-brand-teal mt-1">{totalCrystal - frozenCrystal}</div>
+                  <div className="text-lg font-bold text-brand-teal mt-1">{totalCrystal}</div>
                 </div>
                 <div className="flex-1 bg-gray-50 rounded-[8px] px-4 py-3 text-center">
-                  <div className="text-[10px] text-gray-400">总计</div>
-                  <div className="text-lg font-bold mt-1">{totalCrystal}</div>
+                  <div className="text-[10px] text-gray-400">额度</div>
+                  <div className="text-lg font-bold mt-1">{(user as any)?.balance?.granted_game_coins ?? 0}</div>
                 </div>
               </div>
 
@@ -237,9 +239,10 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
                     min="0"
                     max={user?.balance?.credit1 ?? 0}
                   />
-                  <span className="text-[10px] text-gray-400 w-14 text-right">游戏豆</span>
+                  <span className="text-[10px] text-gray-400 w-14 text-right">激活量</span>
                 </div>
                 <div className="text-[10px] text-amber-700 mb-1">
+                  冻结豆余额: {frozenCrystal} · 可用额度: {(user as any)?.balance?.granted_game_coins ?? 0} · 最多激活 {Math.min(frozenCrystal, (user as any)?.balance?.granted_game_coins ?? 0)}
                   消耗 1 游戏豆 = 激活 1 水晶石 · 账户余额：{(user?.balance?.credit1 ?? 0).toLocaleString()} 游戏豆
                 </div>
                 {parsedActivate > frozenCrystal && (
@@ -440,7 +443,7 @@ export default function ExchangeModal({ open, onClose, onSuccess }: Props) {
               <li>· 所有兑换即时生效，不可撤销</li>
               <li>· 最低兑换：{tab.fromAsset === "credit4" ? `¥${tab.minAmount}` : `${tab.minAmount} ${tab.fromLabel}`}</li>
               {activeTab === "beans_split" && <li>· 水晶石拆分后按 50% + 50% 自动分配</li>}
-              {activeTab !== "beans_split" && <li>· 游戏豆仅用于投注，不可逆向兑换</li>}
+              {activeTab !== "beans_split" && <li>· 游戏豆仅用于参与，不可逆向兑换</li>}
             </ul>
           </div>
           </>

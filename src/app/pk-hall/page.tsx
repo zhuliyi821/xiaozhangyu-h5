@@ -1,36 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PKTopic, PKFormData, APIResponse, DEFAULT_PK_FORM, PKMode, CharityMode, PoolMode, POOL_MODE_SCOPES, POOL_MODE_LABELS, POOL_MODE_DESCS, PK_MODE_LABELS, PK_MODE_DESCS, CHARITY_LABELS, CHARITY_PROJECTS, TIME_OPTIONS, CATEGORY_OPTIONS } from "./types";
+import { PKTopic, APIResponse, PKMode, CharityMode, PoolMode, POOL_MODE_LABELS, POOL_MODE_DESCS, PK_MODE_LABELS, PK_MODE_DESCS, DailySidelineStats, SidelineResult, AGENT_TOPICS_POOL, UserInterestProfile, type VoteConfirmData } from "./types";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
+import PKGuideOverlay from "@/components/pk-guide-overlay";
+import PKCreator from "@/components/pk/pk-creator";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
 
+// ─── 新品类Tab（情感化命名） ───
 const CATEGORIES = [
-  { key: "",      label: "全部" },
-  { key: "sports", label: "⚽ 体育" },
-  { key: "social", label: "🌐 社会" },
-  { key: "event", label: "⚡ 突发" },
-  { key: "general", label: "💬 一言不合" },
+  { key: "",      label: "🔥 全部" },
+  { key: "general", label: "🏠 家庭战场" },
+  { key: "social", label: "🌐 社会动脉" },
+  { key: "sports", label: "⚽ 竞技声浪" },
+  { key: "event", label: "⚡ 事件脉冲" },
+  { key: "consumption", label: "🏪 消费对决" },
 ];
 
-const MODES = [
-  { key: "", label: "全部模式" },
-  { key: "1v1", label: "1v1 单挑" },
-];
-
-const SORTS = [
-  { key: "hot",   label: "🔥 热门" },
-  { key: "local", label: "📍 本地" },
-  { key: "follow",label: "👤 关注" },
+// ─── 消费对决预设话题（硬编码） ───
+const CONSUMPTION_TOPICS: any[] = [
+  { id: -1, title: "沙县小吃 vs 兰州拉面 哪家好吃？", category: "consumption", options: ["沙县小吃", "兰州拉面"], option_a: "沙县小吃", option_b: "兰州拉面", vote_a: 1284, vote_b: 1023, vote_counts: [1284, 1023], total_votes: 2307, total_pool: 4560, pools: [2200, 2360], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "消费达人", creator_id: 0, time_label: "3天后截止", end_time: 0, time_remaining: 259200, comment_count: 56, spectator_count: 892, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [220, 230], created_at: "", time_ago: "1天前" },
+  { id: -2, title: "华为 vs iPhone 下一部手机买哪个？", category: "consumption", options: ["华为", "iPhone"], option_a: "华为", option_b: "iPhone", vote_a: 2456, vote_b: 1892, vote_counts: [2456, 1892], total_votes: 4348, total_pool: 8920, pools: [5000, 3920], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "数码控", creator_id: 0, time_label: "5天后截止", end_time: 0, time_remaining: 432000, comment_count: 128, spectator_count: 2341, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [500, 392], created_at: "", time_ago: "2天前" },
+  { id: -3, title: "社区火锅店 vs 商业区烤肉 周末去哪吃？", category: "consumption", options: ["老重庆火锅", "韩式烤肉"], option_a: "老重庆火锅", option_b: "韩式烤肉", vote_a: 892, vote_b: 1156, vote_counts: [892, 1156], total_votes: 2048, total_pool: 3200, pools: [1500, 1700], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "美食侦探", creator_id: 0, time_label: "2天后截止", end_time: 0, time_remaining: 172800, comment_count: 34, spectator_count: 456, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [150, 170], created_at: "", time_ago: "昨天" },
 ];
 
 // ETag cache
 let lastETag = "";
 let cachedData: PKTopic[] = [];
+
+/** 获取品类图标 */
+function catIcon(key: string): string {
+  switch(key) {
+    case "sports": return "⚽"; case "social": return "🌐"; case "event": return "⚡";
+    case "general": return "🏠"; case "consumption": return "🏪"; default: return "💬";
+  }
+}
+
+/** 品类色 */
+function catColor(key: string): string {
+  switch(key) {
+    case "sports": return "bg-brand-teal/10 text-brand-teal-dark";
+    case "social": return "bg-brand-gold-light/50 text-brand-gold-dark";
+    case "event": return "bg-brand-coral/10 text-brand-coral-dark";
+    case "general": return "bg-amber-100 text-amber-700";
+    case "consumption": return "bg-blue-50 text-blue-600";
+    default: return "bg-purple-100 text-purple-700";
+  }
+}
+
+// ── 参与追踪（localStorage）──
+function getMyPkCount(): number {
+  if (typeof window === "undefined") return 0;
+  const today = new Date().toISOString().split("T")[0];
+  const stored = localStorage.getItem("pk_participation_count");
+  if (!stored) return 0;
+  const parsed = JSON.parse(stored);
+  return parsed.date === today ? parsed.count : 0;
+}
+function setMyPkCount(count: number) {
+  if (typeof window === "undefined") return;
+  const today = new Date().toISOString().split("T")[0];
+  localStorage.setItem("pk_participation_count", JSON.stringify({ date: today, count }));
+}
+
+// 满减段位
+const TIERS = [
+  { count: 10, badge: "🏅 PK达人", color: "text-brand-gold-dark" },
+  { count: 5, badge: "🥈 老手", color: "text-brand-teal-dark" },
+  { count: 3, badge: "🥉 新手", color: "text-text-secondary" },
+];
 
 export default function PKHallPage() {
   const router = useRouter();
@@ -39,119 +82,279 @@ export default function PKHallPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeCat, setActiveCat] = useState("");
-  const [activeMode, setActiveMode] = useState("");
-  const [activeSort, setActiveSort] = useState("hot");
   const [bindMsg, setBindMsg] = useState("");
   const [showBind, setShowBind] = useState(false);
+  const [shuffleKey, setShuffleKey] = useState(0); // 沸腾榜刷新
 
-  // 发起PK
-  const [showCreate, setShowCreate] = useState(false);
-  const [pkForm, setPkForm] = useState<PKFormData>({ ...DEFAULT_PK_FORM });
+  const [showCreator, setShowCreator] = useState(false);
   const [voteMsg, setVoteMsg] = useState("");
   const [showLogin, setShowLogin] = useState(false);
 
-  const uid = (user as any)?.uid || 0;
+  // 站队状态
+  const [sidelineStats, setSidelineStats] = useState<DailySidelineStats>(() => {
+    if (typeof window === "undefined") return { date: "", free_count: 0, paid_count: 0 };
+    const stored = localStorage.getItem("pk_sideline_stats");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const today = new Date().toISOString().split("T")[0];
+      if (parsed.date === today) return parsed;
+    }
+    return { date: new Date().toISOString().split("T")[0], free_count: 0, paid_count: 0 };
+  });
+  const [sidelineLoading, setSidelineLoading] = useState<number | null>(null);
 
-  // 钱包数据
+  // 保存站队统计到localStorage
+  const saveSidelineStats = (stats: DailySidelineStats) => {
+    localStorage.setItem("pk_sideline_stats", JSON.stringify(stats));
+    setSidelineStats(stats);
+  };
+
+  // 站队操作
+  const handleSideline = async (pk: PKTopic, optionIndex: number) => {
+    if (!uid) { setShowLogin(true); return; }
+    setSidelineLoading(pk.id);
+    try {
+      const isFree = sidelineStats.free_count < 3;
+      const cost = isFree ? 0 : 10;
+      
+      // 调用后端API
+      const res = await fetch(`${API_BASE}/api/pk?action=side_line`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pk_id: pk.id, uid, option_index: optionIndex, cost }),
+      });
+      const json: APIResponse<SidelineResult> = await res.json();
+      
+      if (json.code === 0) {
+        // 更新本地站队统计
+        const newStats = {
+          ...sidelineStats,
+          free_count: isFree ? sidelineStats.free_count + 1 : sidelineStats.free_count,
+          paid_count: isFree ? sidelineStats.paid_count : sidelineStats.paid_count + 1,
+        };
+        saveSidelineStats(newStats);
+        // 记录兴趣
+        trackInterest(pk.category, 2);
+        setVoteMsg(isFree ? "✅ 站队成功！" : "✅ 站队成功！10🎮已进入公益资金池");
+      } else {
+        setVoteMsg(`❌ ${json.msg || "站队失败"}`);
+      }
+    } catch {
+      setVoteMsg("❌ 网络错误，站队失败");
+    }
+    setSidelineLoading(null);
+    setTimeout(() => setVoteMsg(""), 2000);
+  };
+
+  const uid = (user as any)?.uid || 0;
+  const [myPkCount, setMyPkCountState] = useState(getMyPkCount());
+  const trackPkParticipate = () => {
+    const newCount = myPkCount + 1;
+    setMyPkCountState(newCount);
+    setMyPkCount(newCount);
+  };
+
   const [wallet, setWallet] = useState({ credit1: 0 });
   useEffect(() => {
     if (!uid) return;
-    fetch("${API_BASE}/api/wallet/brief", {
+    fetch(`${API_BASE}/api/wallet/brief`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid }),
-    })
-      .then(r => r.json())
-      .then(d => { if (d.code === 0) setWallet(d.data); })
-      .catch(() => {});
+    }).then(r => r.json()).then(d => { if (d.code === 0) setWallet(d.data); }).catch(() => {});
   }, [uid]);
 
-  const handleCreatePK = async () => {
-    if (!uid) return;
-    const validOptions = pkForm.options.filter(o => o.trim());
-    if (!pkForm.title || validOptions.length < 2) return;
-    const endTime = pkForm.end_time === "1h" ? Math.floor(Date.now()/1000) + 3600
-      : pkForm.end_time === "3h" ? Math.floor(Date.now()/1000) + 10800
-      : pkForm.end_time === "today" ? Math.floor(Date.now()/1000) + (24 - new Date().getHours()) * 3600
-      : pkForm.end_time === "tomorrow" ? Math.floor(Date.now()/1000) + 86400
-      : pkForm.end_time === "3d" ? Math.floor(Date.now()/1000) + 259200
-      : pkForm.end_time === "7d" ? Math.floor(Date.now()/1000) + 604800
-      : Math.floor(Date.now()/1000) + 2592000;
-    try {
-      const res = await fetch(`${API_BASE}/api/pk?action=create`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid,
-          title: pkForm.title,
-          options: validOptions,
-          mode: pkForm.mode,
-          category: pkForm.category,
-          charity: pkForm.charity,
-          charity_ratio: pkForm.charity_ratio,
-          charity_project: pkForm.charity_project,
-          pool_distribution: pkForm.pool_distribution,
-          end_time: endTime,
-          min_bet: parseInt(pkForm.min_bet) || 10,
-          max_bet: parseInt(pkForm.max_bet) || 10000,
-          challenger_limit: pkForm.challenger_limit,
-          challenger_pool_limit: pkForm.challenger_pool_limit,
-        }),
-      });
-      const j: APIResponse = await res.json();
-      if (j.code === 0) {
-        setShowCreate(false);
-        setPkForm({ ...DEFAULT_PK_FORM });
-        setVoteMsg("✅ PK话题发起成功！");
-      } else { setVoteMsg(`❌ ${j.msg}`); }
-    } catch { setVoteMsg("❌ 创建失败"); }
-    setTimeout(() => setVoteMsg(""), 2500);
+  // ═══ 千人千面智能推荐引擎 ═══
+
+  /** 获取用户兴趣画像 */
+  const getInterestProfile = (): UserInterestProfile => {
+    if (typeof window === "undefined") return { categoryWeights: {}, totalActions: 0, lastUpdated: "" };
+    const stored = localStorage.getItem("pk_interest_profile");
+    if (stored) return JSON.parse(stored);
+    return { categoryWeights: {}, totalActions: 0, lastUpdated: "" };
   };
+
+  /** 记录用户对某品类的兴趣 */
+  const trackInterest = (category: string, weight: number = 1) => {
+    const profile = getInterestProfile();
+    profile.categoryWeights[category] = (profile.categoryWeights[category] || 0) + weight;
+    profile.totalActions += weight;
+    profile.lastUpdated = new Date().toISOString();
+    localStorage.setItem("pk_interest_profile", JSON.stringify(profile));
+  };
+
+  /** 计算话题对用户的匹配度（0-1） */
+  const calcMatchScore = (topic: PKTopic, profile: UserInterestProfile): number => {
+    const catWeight = profile.categoryWeights[topic.category] || 0;
+    const total = profile.totalActions || 1;
+    // 基础匹配：该品类权重占比
+    const baseMatch = Math.min(1, catWeight / Math.max(total * 0.3, 1));
+    // 热度加分：参与人数多的略高
+    const hotBonus = Math.min(0.15, (topic.total_votes || 0) / 10000 * 0.15);
+    // 多样性补偿：从未互动的品类给0.2保底分（发现新内容）
+    const diversityBonus = catWeight === 0 && profile.totalActions > 0 ? 0.2 : 0;
+    return Math.min(1, baseMatch + hotBonus + diversityBonus);
+  };
+
+  /** 获取推荐标签 */
+  const getRecommendLabel = (topic: PKTopic, matchScore: number): { icon: string; text: string; color: string } | null => {
+    if (topic.topic_source !== "agent") return null;
+    const urgent = topic.time_remaining && topic.time_remaining < 3600;
+    if (urgent) return { icon: "⏰", text: "即将截止", color: "bg-brand-coral/10 text-brand-coral-dark" };
+    if (matchScore >= 0.6) return { icon: "⭐", text: `为你推荐·${Math.round(matchScore * 100)}%匹配`, color: "bg-brand-gold-light/50 text-brand-gold-dark" };
+    if ((topic.total_votes || 0) >= 200) return { icon: "🔥", text: "热门", color: "bg-red-50 text-brand-coral-dark" };
+    if (matchScore >= 0.3) return { icon: "💡", text: `猜你喜欢`, color: "bg-brand-teal/10 text-brand-teal-dark" };
+    return { icon: "🆕", text: "新鲜话题", color: "bg-blue-50 text-blue-600" };
+  };
+
+  // 用户兴趣画像（实时）
+  const interestProfile = getInterestProfile();
 
   useEffect(() => {
     const controller = new AbortController();
     const headers: Record<string, string> = {};
     if (lastETag) headers["If-None-Match"] = lastETag;
-
     fetch(`${API_BASE}/api/pk?action=list`, { headers, signal: controller.signal })
       .then(async r => {
         const etag = r.headers.get("ETag") || "";
         if (etag) lastETag = etag;
         if (r.status === 304) { setTopics(cachedData); return; }
         const j: APIResponse<PKTopic[]> = await r.json();
-        if (j.code === 0 && j.data) {
-          cachedData = j.data;
-          setTopics(j.data);
-        }
+        if (j.code === 0 && j.data) { cachedData = j.data; setTopics(j.data); }
       })
       .catch(() => setError("网络不太给力"))
       .finally(() => setLoading(false));
   }, []);
 
-  // 筛选逻辑：4品类全支持
-  let filtered = [...topics];
-  if (activeCat) filtered = filtered.filter(t => t.category === activeCat);
-  if (activeMode) filtered = filtered.filter(t => t.mode === activeMode);
-  if (activeSort === "hot") filtered = [...filtered].sort((a, b) => (b.total_votes * 5 + b.total_pool * 3) - (a.total_votes * 5 + a.total_pool * 3));
-  if (activeSort === "local") filtered = [...filtered].sort((a, b) => (b.total_votes - a.total_votes) * 0.5 + (Math.random() - 0.5) * 10);
-  if (activeSort === "follow") filtered = [...filtered].sort((a, b) => b.total_pool - a.total_pool);
+  // 60秒自动轮询刷新
+  useEffect(() => {
+    const timer = setInterval(() => {
+      fetch(`${API_BASE}/api/pk?action=list`)
+        .then(async r => {
+          const etag = r.headers.get("ETag") || "";
+          if (etag) lastETag = etag;
+          if (r.status === 304) return;
+          const j: APIResponse<PKTopic[]> = await r.json();
+          if (j.code === 0 && j.data) { cachedData = j.data; setTopics(j.data); }
+        })
+        .catch(() => {});
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 合并消费对决话题
+  const allTopics = useMemo(() => {
+    // Agent预设话题 → 转为PKTopic格式
+    const agentTopics: PKTopic[] = AGENT_TOPICS_POOL.map((p, i) => ({
+      id: -(1001 + i),                    // 负数ID避免冲突
+      title: p.title,
+      category: p.category,
+      options: p.options,
+      mode: "NvN" as PKMode,
+      charity: "none" as CharityMode,
+      charity_ratio: 0,
+      charity_project: "",
+      pool_distribution: "winner_takes_all" as PoolMode,
+      platform_fee_ratio: 5,
+      creator_fee_ratio: 0,
+      challenger_limit: 999,
+      challenger_pool_limit: 999999,
+      vote_counts: [Math.floor(Math.random() * 200 + 50), Math.floor(Math.random() * 150 + 30)],
+      pools: [0, 0],
+      total_pool: Math.floor(Math.random() * 100000 + 10000),
+      total_votes: 0,
+      comment_count: Math.floor(Math.random() * 30),
+      spectator_count: Math.floor(Math.random() * 500 + 100),
+      end_time: Math.floor(Date.now() / 1000) + p.end_time_days * 86400,
+      time_remaining: p.end_time_days * 86400,
+      time_label: `${p.end_time_days}天后截止`,
+      min_bet: p.min_bet,
+      max_bet: 10000,
+      status: 1,
+      status_label: "进行中",
+      winner: null,
+      creator_name: "🐙 小章鱼话题官",
+      creator_id: 0,
+      created_at: new Date().toISOString(),
+      time_ago: "刚刚",
+      estimated_rewards: [0, 0],
+      max_choices: 1,
+      // Agent字段
+      topic_source: "agent",
+      agent_source: p.agent_source,
+      settlement_type: p.settlement_type,
+      sideline_counts: [0, 0],
+      sideline_total: 0,
+      charity_from_sideline: 0,
+    }));
+    return [...agentTopics, ...topics, ...CONSUMPTION_TOPICS] as PKTopic[];
+  }, [topics]);
+
+  // 千人千面排序：Agent话题按匹配度排序 + 混排用户话题
+  const rankedTopics = useMemo(() => {
+    const profile = getInterestProfile();
+    return [...allTopics].sort((a, b) => {
+      // Agent话题按匹配度降序
+      if (a.topic_source === "agent" && b.topic_source === "agent") {
+        return calcMatchScore(b, profile) - calcMatchScore(a, profile);
+      }
+      // 用户话题→按热度（总投票数）
+      if (!a.topic_source && !b.topic_source) {
+        return (b.total_votes || 0) - (a.total_votes || 0);
+      }
+      // Agent话题优先于用户话题展示
+      return a.topic_source === "agent" ? -1 : 1;
+    });
+  }, [allTopics]);
+
+  // 筛选（基于千人千面排序后）
+  let filtered = [...rankedTopics];
+  if (activeCat) filtered = filtered.filter(t => t.category === activeCat && t.status === 1);
+
+  // 沸腾榜（取前3，shuffleKey触发随机打乱）
+  const boilingList = useMemo(() =>
+    [...allTopics].filter(t => t.status === 1)
+      .sort((a, b) => (b.total_votes || 0) - (a.total_votes || 0))
+      .slice(0, 6) // 取前6作为候选池
+      .sort(() => (shuffleKey > 0 ? Math.random() - 0.5 : 0)) // 有shuffleKey时随机打乱
+      .slice(0, 3),
+  [allTopics, shuffleKey]);
+
+  // 围观大厅（取前2活跃话题）
+  const spectatorFeed = useMemo(() =>
+    allTopics.filter(t => t.status === 1).slice(0, 2),
+  [allTopics]);
 
   const stats = {
-    active: topics.filter(t => t.status === 1).length,
-    pool: topics.reduce((s, t) => s + t.total_pool, 0),
-    voters: topics.reduce((s, t) => s + t.total_votes, 0),
+    active: allTopics.filter(t => t.status === 1).length,
+    pool: allTopics.reduce((s, t) => s + (t.total_pool || 0), 0),
+    voters: allTopics.reduce((s, t) => s + (t.total_votes || 0), 0),
+  };
+
+  // 品类名映射
+  const catName: Record<string, string> = { sports: "竞技声浪", social: "社会动脉", event: "事件脉冲", general: "家庭战场", consumption: "消费对决" };
+
+  // 围观用户名池
+  const spectatorNames = ["王姐", "贵州老铁", "张大哥", "李阿姨", "陈律师", "程序员阿杰", "退休老李", "宝妈小杨"];
+
+  // 获取品类卡片底色
+  const cardBg = (key: string) => {
+    if (key === "consumption") return "border-blue-100";
+    if (key === "general") return "border-amber-100";
+    return "border-gray-100";
   };
 
   return (
     <div className="w-full max-w-[420px] mx-auto bg-white min-h-screen relative">
 
+      <PKGuideOverlay />
+
       {/* ─── Header ─── */}
-      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[24px] px-4 pt-5 pb-5 text-white">
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-gold rounded-b-[24px] px-4 pt-5 pb-4 text-white">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="text-lg font-bold">⚔️ PK大厅</div>
-              <div className="text-[10px] text-white/70 mt-0.5">选择方向，发起对战</div>
-            </div>
+          <div>
+            <div className="text-lg font-bold">⚔️ PK大厅</div>
+            <div className="text-[10px] text-white/70 mt-0.5">全民预测竞技场</div>
           </div>
           <Link href="/jiadouzhan"
             className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium active:scale-95 transition-transform">
@@ -159,23 +362,32 @@ export default function PKHallPage() {
             <span className="text-white/70">获取→</span>
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
+        <div className="grid grid-cols-4 gap-1.5">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2 text-center">
             <div className="text-sm font-bold">{stats.active}</div>
-            <div className="text-[9px] text-white/70">进行中</div>
+            <div className="text-[9px] text-white/70">正在吵</div>
           </div>
-          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2 text-center">
             <div className="text-sm font-bold">{stats.pool > 999 ? (stats.pool/1000).toFixed(1)+"k" : stats.pool}</div>
             <div className="text-[9px] text-white/70">总奖池</div>
           </div>
-          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2.5 text-center">
+          <div className="bg-white/12 backdrop-blur-sm rounded-[8px] py-2 text-center">
             <div className="text-sm font-bold">{stats.voters}</div>
-            <div className="text-[9px] text-white/70">参与者</div>
+            <div className="text-[9px] text-white/70">参与人</div>
           </div>
+          {/* P0-2: 沉没成本 — 今日已参与 */}
+          <div className="bg-white/20 backdrop-blur-sm rounded-[8px] py-2 text-center">
+            <div className="text-sm font-bold">{myPkCount}</div>
+            <div className="text-[9px] text-white/70">今日参与</div>
+          </div>
+        </div>
+        <div className="mt-2.5 text-center text-[11px] text-white/80 py-1.5 bg-white/10 rounded-[8px]">
+          📣 为你家乡呐喊 · 他们pk你也有奖励 🎁
         </div>
       </div>
 
       <div className="px-3">
+
         {/* ─── 错误提示 ─── */}
         {error && (
           <div className="mt-2 px-4 py-2.5 bg-red-50 text-red-600 text-[11px] rounded-[8px] text-center">
@@ -223,13 +435,71 @@ export default function PKHallPage() {
           </div>
         )}
 
-        {/* ─── 双列筛选: 品类 + 排序 ─── */}
-        <div className="mt-3 bg-white rounded-[8px] p-2.5 border border-gray-100 shadow-sm">
-          {/* 品类标签 */}
-          <div className="flex gap-1.5 flex-wrap mb-2">
+        {/* ─── 🔥 实时沸腾榜 ─── */}
+        {boilingList.length > 0 && (
+          <div className="bg-white rounded-[12px] border border-gray-100 p-3 mt-3 mb-3 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] font-bold text-text-primary">🔥 实时沸腾榜</span>
+              <button onClick={() => setShuffleKey(k => k + 1)} className="text-[10px] text-brand-teal font-medium" aria-label="刷新榜单">换一换</button>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {boilingList.map((t, i) => (
+                <div key={t.id} onClick={() => { trackInterest(t.category, 1); router.push(`/pk-hall/${t.category}/${t.id}`); }}
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] cursor-pointer active:scale-[0.98] transition-transform ${
+                    i === 0 ? "bg-brand-coral-light/30" : i === 1 ? "bg-brand-teal-light/30" : i === 2 ? "bg-brand-gold-light/30" : "bg-gray-50"
+                  }`}>
+                  <span className={`text-[11px] w-[18px] font-bold text-center shrink-0 ${
+                    i === 0 ? "text-brand-coral-dark" : i === 1 ? "text-brand-teal-dark" : i === 2 ? "text-brand-gold-dark" : "text-text-tertiary"
+                  }`}>{i + 1}</span>
+                  <span className="flex-1 text-[11px] text-text-primary truncate">{t.title}</span>
+                  <span className={`text-[9px] font-medium px-1.5 py-[1px] rounded-[6px] shrink-0 ${
+                    i === 0 ? "bg-brand-coral-light/50 text-brand-coral-dark" : i === 1 ? "bg-brand-teal-light/50 text-brand-teal-dark" : i === 2 ? "bg-brand-gold-light/50 text-brand-gold-dark" : "bg-gray-100 text-text-tertiary"
+                  }`}>{(t.total_votes || 0).toLocaleString()}人</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── 🏆 预测排行榜 ─── */}
+        <div className="bg-white rounded-[12px] border border-gray-100 p-3 mb-3 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[13px] font-bold text-text-primary">🏆 预测排行榜</span>
+            <Link href="/rank" className="text-[10px] text-brand-teal font-medium">查看全部 →</Link>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {(() => {
+              const seeds = shuffleKey % 100;
+              const names = ["张三", "李四", "王五", "赵六", "陈七", "刘八", "周姐", "老马", "阿杰", "小杨", "林哥", "老赵", "小陈", "王叔", "李叔"];
+              const pick = (i: number) => names[(i * 7 + seeds * 3 + 5) % names.length];
+              const items = [
+                { icon: "🎯", label: "准确率之王", name: pick(0), value: `${78 + seeds % 8}%`, sub: "命中率", color: "bg-purple-50", textColor: "text-purple-700" },
+                { icon: "💰", label: "赢豆之王", name: pick(1), value: `${(8 + seeds % 5).toFixed(0)}k`, sub: "赢得豆", color: "bg-brand-gold-light/30", textColor: "text-brand-gold-dark" },
+                { icon: "🏃", label: "活跃之王", name: pick(2), value: `${200 + seeds * 17}`, sub: "参与场次", color: "bg-brand-teal-light/30", textColor: "text-brand-teal-dark" },
+              ];
+              return items.map((item, i) => (
+              <div key={i} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] ${item.color}`}>
+                <span className="text-[16px] shrink-0">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-medium text-text-primary">{item.label}</span>
+                    <span className="text-[11px] font-semibold text-text-primary">{item.name}</span>
+                  </div>
+                  <div className="text-[9px] text-text-tertiary">{item.sub}</div>
+                </div>
+                <span className={`text-[13px] font-bold ${item.textColor}`}>{item.value}</span>
+              </div>
+              ));
+            })()}
+          </div>
+        </div>
+
+        {/* ─── 品类 Tab ─── */}
+        <div className="bg-white rounded-[10px] p-2.5 border border-gray-100 shadow-sm mb-3">
+          <div className="flex gap-1.5 flex-wrap">
             {CATEGORIES.map(cat => (
               <span key={cat.key} onClick={() => setActiveCat(cat.key)}
-                className={`px-3 py-1 rounded-full text-[10px] font-medium cursor-pointer transition-all ${
+                className={`px-3 py-1 rounded-full text-[10px] font-medium cursor-pointer transition-all select-none ${
                   activeCat === cat.key
                     ? "bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white"
                     : "bg-gray-100 text-text-secondary hover:text-text-primary"
@@ -238,33 +508,30 @@ export default function PKHallPage() {
               </span>
             ))}
           </div>
-          {/* 排序标签 */}
-          <div className="flex gap-1.5 items-center">
-            {SORTS.map(s => (
-              <span key={s.key} onClick={() => setActiveSort(s.key)}
-                className={`px-3 py-1 rounded-full text-[10px] font-medium cursor-pointer transition-all ${
-                  activeSort === s.key
-                    ? "bg-brand-gold-light text-brand-gold-dark"
-                    : "text-text-tertiary"
-                }`}>
-                {s.label}
-              </span>
-            ))}
-          </div>
         </div>
 
-        {/* ─── 实时动态条 ─── */}
-        {topics.length > 0 && (
-          <div className="bg-white rounded-[10px] px-3 py-2 mb-3 border border-[#E7E7E8] flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-ping" />
-            <div className="text-[11px] text-[#6B6B6E] truncate">
-              <span className="font-medium text-brand-teal">{topics[0]?.creator_name || "用户"}</span> 刚刚投了{" "}
-              <span className="font-medium text-brand-coral">{topics[0]?.option_a} {topics[0]?.min_bet}豆</span>
+        {/* ─── 围观大厅 ─── */}
+        {spectatorFeed.length > 0 && (
+          <div className="bg-white rounded-[10px] px-3 py-2.5 mb-3 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-ping" />
+              <span className="text-[11px] font-medium text-text-primary">围观大厅</span>
+              <span className="text-[9px] text-text-tertiary">实时</span>
             </div>
+            {spectatorFeed.map((t, i) => (
+              <div key={t.id} className="text-[10px] text-text-secondary mt-1">
+                <span className="font-medium text-brand-teal-dark">{spectatorNames[(t.id + i) % spectatorNames.length]}</span>
+                {i === 0 ? (
+                  <> 投了「{t.title}」选「{t.options?.[0] || t.option_a || "A"}」{(t.min_bet || 10)}豆 <span className="text-text-tertiary">刚刚</span></>
+                ) : (
+                  <> 发起了「{t.title}」<span className="text-text-tertiary">2分钟前</span></>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
-        {/* ─── 房间列表 ─── */}
+        {/* ─── 话题列表 ─── */}
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {[1,2,3].map(i => (
@@ -288,60 +555,89 @@ export default function PKHallPage() {
           <div className="flex flex-col gap-2.5">
             {filtered.map(pk => {
               const total = pk.total_votes || 1;
-              const pctA = Math.min(100, Math.round(((pk.vote_a || 0) / total) * 100));
-              const pctB = Math.min(100, Math.round(((pk.vote_b || 0) / total) * 100));
-              // 热度标签
+              const votes = pk.vote_counts || [pk.vote_a || 0, pk.vote_b || 0];
+              const optA = pk.options?.[0] || pk.option_a || "A";
+              const optB = pk.options?.[1] || pk.option_b || "B";
+              const pctA = Math.min(100, Math.round((votes[0] / total) * 100));
+              const pctB = Math.min(100, Math.round((votes[1] / total) * 100));
+              const isConsumption = pk.category === "consumption" && pk.id < 0;
+              const isCharity = pk.charity && pk.charity !== "none";
               const voteDiff = Math.abs(pctA - pctB);
               const heatLabel = pk.total_pool >= 5000 ? { icon: "👑", label: "大额奖池", color: "bg-amber-100 text-amber-700" }
-                : pk.total_votes >= 20 && voteDiff <= 15 ? { icon: "🔥", label: "热门", color: "bg-red-50 text-brand-coral-dark" }
-                : pk.total_votes >= 10 && voteDiff <= 25 ? { icon: "⚡", label: "激烈", color: "bg-orange-50 text-orange-600" }
+                : total >= 20 && voteDiff <= 15 ? { icon: "🔥", label: "热门", color: "bg-red-50 text-brand-coral-dark" }
+                : total >= 10 && voteDiff <= 25 ? { icon: "⚡", label: "激烈", color: "bg-orange-50 text-orange-600" }
                 : null;
+
+              // P0-1: 紧迫感 — 计算剩余时间标签
+              const isUrgent = pk.time_remaining && pk.time_remaining < 3600;
+              const isSoon = pk.time_remaining && pk.time_remaining < 10800;
+              const scarcityLabel = isUrgent ? { icon: "⏰", label: "即将截止", color: "bg-brand-coral/10 text-brand-coral-dark" }
+                : isSoon ? { icon: "⏳", label: "余3小时", color: "bg-brand-gold-light/50 text-brand-gold-dark" }
+                : null;
+
+              const isFirst = filtered.indexOf(pk) === 0;
+
               return (
               <div key={pk.id}
-                className="bg-white rounded-[8px] overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+                className={`bg-white rounded-[10px] border shadow-sm active:scale-[0.98] transition-transform overflow-hidden ${cardBg(pk.category)}`}>
 
-                {/* Card header tags */}
-                <div className="px-3.5 pt-3 flex items-center gap-1.5 flex-wrap">
-                  {heatLabel && (
-                    <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-medium ${heatLabel.color}`}>
-                      {heatLabel.icon} {heatLabel.label}
-                    </span>
-                  )}
-                  <span className={`px-2 py-0.5 rounded-[6px] text-[9px] font-medium ${
-                    pk.category === "sports" ? "bg-brand-teal/10 text-brand-teal-dark"
-                    : pk.category === "social" ? "bg-brand-gold-light/50 text-brand-gold-dark"
-                    : pk.category === "event" ? "bg-brand-coral/10 text-brand-coral-dark"
-                    : "bg-purple-100 text-purple-700"
-                  }`}>
-                    {pk.category === "sports" ? "⚽" : pk.category === "social" ? "🌐" : pk.category === "event" ? "⚡" : "💬"} {pk.category === "sports" ? "体育" : pk.category === "social" ? "社会" : pk.category === "event" ? "突发" : "一言"}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-brand-teal/10 text-brand-teal-dark">
-                    ⚔️{pk.mode === "1v1" ? "1v1" : pk.mode === "1vN" ? "打擂" : "阵营"}
-                  </span>
-                  {pk.status === 1 ? (
-                    <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-red-50 text-brand-coral-dark">
-                      ⏰ {pk.time_label || "进行中"}
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded-[6px] text-[9px] font-medium bg-gray-100 text-text-tertiary">
-                      ✅ 已结算
-                    </span>
-                  )}
-                </div>
-                {/* Title + pool info */}
-                <div className="px-3.5 pt-2 cursor-pointer" onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}>
-                  <div className="text-sm font-semibold text-text-primary leading-snug">{pk.title}</div>
-                  <div className="flex items-center gap-3 text-[10px] text-text-tertiary mt-1">
-                    <span>💰 奖池 {pk.total_pool}豆</span>
-                    <span>👥 {pk.total_votes}人参与</span>
+                {/* Card header: icon + title + tags */}
+                <div className="px-3.5 pt-3 pb-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[15px] shrink-0">{catIcon(pk.category)}</span>
+                    <span className="flex-1 text-[13px] font-semibold text-text-primary leading-snug line-clamp-1">{pk.title}</span>
+                    {heatLabel && (
+                      <span className={`shrink-0 px-1.5 py-[2px] rounded-[5px] text-[8px] font-medium ${heatLabel.color}`}>
+                        {heatLabel.icon} {heatLabel.label}
+                      </span>
+                    )}
+                    {/* P0-1: 紧迫感 — 倒数计时 */}
+                    {scarcityLabel && (
+                      <span className={`shrink-0 px-1.5 py-[2px] rounded-[5px] text-[8px] font-medium ${scarcityLabel.color}`}>
+                        {scarcityLabel.icon} {scarcityLabel.label}
+                      </span>
+                    )}
+                    {/* P1-1: 默认偏差 — 第一条推荐 */}
+                    {isFirst && (
+                      <span className="shrink-0 px-1.5 py-[2px] rounded-[5px] text-[8px] font-medium bg-brand-teal/10 text-brand-teal-dark">
+                        🔥 今日必投
+                      </span>
+                    )}
+                    {isCharity && (
+                      <span className="shrink-0 text-[8px] bg-purple-50 text-purple-700 px-1.5 py-[2px] rounded-[5px] font-medium">❤️公益</span>
+                    )}
+                    {pk.topic_source === "agent" && (
+                      <span className="shrink-0 text-[8px] bg-brand-teal/10 text-brand-teal-dark px-1.5 py-[2px] rounded-[5px] font-medium">🤖话题官</span>
+                    )}
+                    {/* 千人千面推荐标签 */}
+                    {(() => {
+                      if (pk.topic_source !== "agent") return null;
+                      const matchScore = calcMatchScore(pk, interestProfile);
+                      const label = getRecommendLabel(pk, matchScore);
+                      if (!label) return null;
+                      return (
+                        <span className={`shrink-0 px-1.5 py-[2px] rounded-[5px] text-[8px] font-medium ${label.color}`}>
+                          {label.icon} {label.text}
+                        </span>
+                      );
+                    })()}
+                    {isConsumption && (
+                      <span className="shrink-0 text-[8px] bg-blue-50 text-blue-600 px-1.5 py-[2px] rounded-[5px] font-medium">消费对决</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-[9px] text-text-tertiary mt-0.5">
+                    <span>👥 {(total).toLocaleString()}人</span>
+                    <span>💰 奖池{(pk.total_pool || 0).toLocaleString()}豆</span>
+                    <span>起投{pk.min_bet || 10}豆</span>
                   </div>
                 </div>
-                {/* Dual progress bars */}
-                <div className="px-3.5 pt-2.5 cursor-pointer" onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}>
+
+                {/* Progress bars */}
+                <div className="px-3.5 pt-2 cursor-pointer" onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}>
                   <div className="mb-1.5">
                     <div className="flex items-center justify-between text-[10px] mb-0.5">
-                      <span className="font-medium text-brand-teal-dark">{pk.option_a || pk.options?.[0] || "A"}</span>
-                      <span className="text-text-tertiary">{pctA}% · {pk.vote_a || 0}豆</span>
+                      <span className="font-medium text-brand-teal-dark truncate max-w-[140px]">{optA}</span>
+                      <span className="text-text-tertiary shrink-0">{pctA}% · {votes[0]}豆</span>
                     </div>
                     <div className="h-[18px] bg-brand-teal/10 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-full transition-all" style={{width: `${pctA}%`}} />
@@ -349,35 +645,133 @@ export default function PKHallPage() {
                   </div>
                   <div>
                     <div className="flex items-center justify-between text-[10px] mb-0.5">
-                      <span className="font-medium text-brand-coral-dark">{pk.option_b || pk.options?.[1] || "B"}</span>
-                      <span className="text-text-tertiary">{pctB}% · {pk.vote_b || 0}豆</span>
+                      <span className="font-medium text-brand-coral-dark truncate max-w-[140px]">{optB}</span>
+                      <span className="text-text-tertiary shrink-0">{pctB}% · {votes[1]}豆</span>
                     </div>
                     <div className="h-[18px] bg-brand-coral/10 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-brand-coral to-brand-coral-dark rounded-full transition-all" style={{width: `${pctB}%`}} />
                     </div>
                   </div>
                 </div>
+
+                {/* 站队区（仅Agent话题显示） */}
+                {pk.topic_source === "agent" && (
+                  <div className="px-3.5 pt-2">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[9px] text-text-tertiary flex items-center gap-1">
+                        🏴 站队 · <span className="text-brand-teal-dark">已站{pk.sideline_total || 0}人</span>
+                      </span>
+                      <span className="text-[8px] text-text-tertiary">
+                        {sidelineStats.free_count < 3 ? `免费剩${3 - sidelineStats.free_count}次` : "10🎮/次"}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      {pk.options.slice(0, 2).map((opt, oi) => {
+                        const sidelinePct = pk.sideline_total && pk.sideline_total > 0
+                          ? Math.round(((pk.sideline_counts?.[oi] || 0) / pk.sideline_total) * 100) : 0;
+                        return (
+                          <button key={oi} onClick={() => handleSideline(pk, oi)} disabled={sidelineLoading === pk.id}
+                            className="flex-1 flex items-center justify-between px-2.5 py-1.5 rounded-[8px] text-[9px] border border-dashed transition-all active:scale-[0.97]
+                              hover:bg-gray-50 disabled:opacity-50"
+                            style={{ borderColor: oi === 0 ? 'rgba(69,204,213,0.3)' : 'rgba(242,113,82,0.3)' }}>
+                            <span className="truncate max-w-[80px]">{opt}</span>
+                            <span className="font-medium ml-1" style={{ color: oi === 0 ? '#0F6E56' : '#C04A2E' }}>
+                              {sidelinePct}%
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                      <div className="h-full rounded-full" style={{
+                        width: `${pk.sideline_total && pk.sideline_total > 0 ? Math.round(((pk.sideline_counts?.[0] || 0) / pk.sideline_total) * 100) : 50}%`,
+                        background: 'linear-gradient(90deg, #45CCD5, #F27152)',
+                      }} />
+                    </div>
+                  </div>
+                )}
+
                 {/* CTA row */}
                 <div className="px-3.5 py-2.5 flex items-center justify-between border-t border-gray-50 mt-2.5">
-                  <span className="text-[10px] text-text-tertiary">起投 {pk.min_bet}豆</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
-                      className="text-[10px] px-3 py-1.5 rounded-full border border-gray-200 text-text-secondary active:scale-95 transition-transform">👀 围观</button>
-                    <button onClick={() => router.push(`/pk-hall/${pk.category}/${pk.id}`)}
-                      className="text-[10px] px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-medium active:scale-95 transition-transform shadow-sm">🎮消耗{pk.min_bet}豆 · 赢⛏️</button>
+                  <div className="flex items-center gap-2.5 text-[9px] text-text-tertiary">
+                    <span className="cursor-pointer hover:text-brand-teal transition-colors">💬 {(pk.comment_count || 0)}</span>
+                    <span onClick={async (e) => { e.stopPropagation(); await shareToWeChat(buildShareText(`⚔️ ${pk.title}`, `选【${optA}】VS【${optB}】· 💰奖池${(pk.total_pool || 0).toLocaleString()}豆·👥${(pk.total_votes || 0).toLocaleString()}人参与`, typeof window !== "undefined" ? `${window.location.origin}/pk-hall/${pk.category}/${pk.id}` : "")); setVoteMsg("✅ 已复制，去微信粘贴"); setTimeout(() => setVoteMsg(""), 2000); }} className="cursor-pointer hover:text-brand-gold-dark transition-colors">↗ 转发拉票</span>
+                    {isCharity && <span className="text-purple-600">❤️输家80%捐赠</span>}
                   </div>
+                  <button onClick={() => { trackPkParticipate(); trackInterest(pk.category, 3); router.push(`/pk-hall/${pk.category}/${pk.id}`); }}
+                    className="text-[10px] px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white font-medium active:scale-95 transition-transform shadow-sm"
+                    aria-label={`参与PK：${pk.title}`}>
+                    参与 · {pk.min_bet || 10}豆
+                  </button>
                 </div>
+
+                {/* 消费对决：附近门店标签 */}
+                {isConsumption && (
+                  <div className="px-3.5 pb-2.5 flex gap-2">
+                    {[
+                      { name: "沙县小吃(800m)", id: 1 }, { name: "兰州拉面(1.2km)", id: 2 },
+                      { name: "华为授权店(500m)", id: 3 }, { name: "Apple Store(2km)", id: 4 },
+                      { name: "老重庆火锅(300m)", id: 5 }, { name: "韩式烤肉(900m)", id: 6 },
+                    ].slice((pk.id * -1 - 1) * 2, (pk.id * -1 - 1) * 2 + 2).map(s => (
+                      <span key={s.id} className="text-[8px] bg-blue-50 text-blue-600 px-2 py-[2px] rounded-[4px] cursor-pointer hover:bg-blue-100 transition-colors">
+                        🏪 {s.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               );
             })}
           </div>
         )}
 
+        {/* ─── CTA ─── */}
+        <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark rounded-[10px] p-3 text-center mb-2 mt-3 cursor-pointer active:scale-[0.98] transition-transform shadow-sm">
+          <div className="text-[13px] font-semibold text-white" onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreator(true); }}>
+            🔥 发起pk · 赢输家的豆-5%
+          </div>
+          <div className="text-[9px] text-white/70 mt-0.5">
+            围观分享奖-5% · 门店奖-5% · 招商奖-3% · 公益PK输家80%捐赠
+          </div>
+        </div>
+
+        {/* ─── 底部快捷入口 + P1-2: 段位徽章 ─── */}
+        <div className="flex gap-2 mb-6">
+          <Link href="/charity-fund"
+            className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center active:scale-[0.98] transition-transform shadow-sm">
+            <div className="text-[10px] text-purple-600 font-medium">❤️ 公益资金池</div>
+            <div className="text-[8px] text-text-tertiary mt-0.5">284,560豆</div>
+          </Link>
+          <Link href="/pk-rank"
+            className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center active:scale-[0.98] transition-transform shadow-sm">
+            <div className="text-[10px] text-text-secondary font-medium">📊 我的战绩</div>
+            <div className="text-[8px] text-text-tertiary mt-0.5">段位 · 胜率 · 排行</div>
+          </Link>
+          {/* P1-2: 目标梯度 — 参与段位 */}
+          <div className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center shadow-sm">
+            {(() => {
+              const tier = TIERS.find(t => myPkCount >= t.count);
+              if (tier) {
+                return <>
+                  <div className={`text-[10px] font-medium ${tier.color}`}>{tier.badge}</div>
+                  <div className="text-[8px] text-text-tertiary mt-0.5">已参与 {myPkCount} 场</div>
+                </>;
+              }
+              const nextTier = [...TIERS].reverse().find(t => myPkCount < t.count);
+              const nextCount = nextTier?.count || 3;
+              return <>
+                <div className="text-[10px] text-text-tertiary font-medium">🥚 初来乍到</div>
+                <div className="text-[8px] text-brand-gold-dark mt-0.5">再参与 {nextCount - myPkCount} 场升级</div>
+              </>;
+            })()}
+          </div>
+        </div>
+
       </div>
 
       {/* ─── FAB按钮 ─── */}
-      <div onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreate(true); }}
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white flex items-center justify-center flex-col text-xl font-light shadow-[0_4px_16px_rgba(69,204,213,0.35)] cursor-pointer z-[100] leading-none">
+      <div onClick={() => { if (!uid) { setShowLogin(true); return; } setShowCreator(true); }}
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white flex items-center justify-center flex-col text-xl font-light shadow-[0_4px_16px_rgba(69,204,213,0.35)] cursor-pointer z-[100] leading-none active:scale-90 transition-transform">
         <span className="-mt-0.5">+</span>
         <span className="text-[9px]">PK</span>
       </div>
@@ -387,232 +781,29 @@ export default function PKHallPage() {
         @keyframes pulse { 0%,100% { opacity:1 } 50%{ opacity:.5 } }
       `}</style>
 
-      {/* ─── 发起PK弹窗 ─── */}
-      {showCreate && (
-        <div className="fixed inset-0 z-[999] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-white rounded-[8px] w-full max-w-[400px] p-5 shadow-2xl overflow-y-auto" style={{ maxHeight: "85vh" }} onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold mb-4">📝 发起事件</h3>
-            <div className="space-y-3.5">
-
-              {/* 1. PK 形态选择 */}
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">⚔️ PK形态</div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(["1v1", "1vN", "NvN"] as const).map(m => (
-                    <button key={m} onClick={() => {
-                      const poolKey = (Object.keys(POOL_MODE_SCOPES) as PoolMode[]).find(k => POOL_MODE_SCOPES[k].includes(m as any)) || "winner_takes_all";
-                      setPkForm(f => ({ ...f, mode: m as PKMode, pool_distribution: poolKey }));
-                    }}
-                      className={`p-2 rounded-[10px] text-[10px] font-medium text-center transition-all ${
-                        pkForm.mode === m
-                          ? "bg-brand-teal-dark text-white shadow-sm"
-                          : "bg-gray-50 text-gray-500 hover:bg-gray-100"
-                      }`}>
-                      <div>{PK_MODE_LABELS[m].split(" ")[1]}</div>
-                      <div className="text-[8px] opacity-80 mt-0.5">{PK_MODE_LABELS[m].split(" ")[0]}</div>
-                    </button>
-                  ))}
-                </div>
-                <div className="text-[8px] text-gray-400 mt-1">{PK_MODE_DESCS[pkForm.mode]}</div>
-              </div>
-
-              {/* 2. 话题 + 选项 */}
-              <input type="text" placeholder="PK话题" value={pkForm.title}
-                onChange={e => setPkForm({...pkForm, title: e.target.value})}
-                className="w-full px-3 py-2.5 bg-gray-50 rounded-[8px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">选项（至少2个）</div>
-                {pkForm.options.map((opt, i) => (
-                  <div key={i} className="flex items-center gap-1.5 mb-1.5">
-                    <input type="text" placeholder={`选项${String.fromCharCode(65 + i)}`} value={opt}
-                      onChange={e => {
-                        const opts = [...pkForm.options];
-                        opts[i] = e.target.value;
-                        setPkForm({...pkForm, options: opts});
-                      }}
-                      className="flex-1 px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-                    {pkForm.options.length > 2 && (
-                      <button onClick={() => setPkForm({...pkForm, options: pkForm.options.filter((_, j) => j !== i)})}
-                        className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">✕</button>
-                    )}
-                  </div>
-                ))}
-                {pkForm.options.length < 6 && (
-                  <button onClick={() => setPkForm({...pkForm, options: [...pkForm.options, ""]})}
-                    className="text-[10px] text-brand-teal-dark font-medium mt-1">+ 添加选项</button>
-                )}
-              </div>
-
-              {/* 3. 公益模式 */}
-              <div className="border-t border-gray-100 pt-2.5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-gray-400 font-medium">❤️ 公益模式</span>
-                  <button onClick={() => setPkForm(f => ({ ...f, charity: f.charity === "none" ? "all_donate" : "none" }))}
-                    className={`text-[10px] px-3 py-1 rounded-[8px] font-medium transition-all ${
-                      pkForm.charity !== "none"
-                        ? "bg-red-50 text-red-600"
-                        : "bg-gray-50 text-gray-400"
-                    }`}>
-                    {pkForm.charity !== "none" ? "❤️ 已开启" : "关闭"}
-                  </button>
-                </div>
-                {pkForm.charity !== "none" && (
-                  <div className="bg-red-50/50 rounded-[8px] p-3 space-y-2">
-                    <div className="flex gap-1.5">
-                      {(["all_donate", "percentage"] as CharityMode[]).filter(c => c !== "none" && c !== "brand_match").map(c => (
-                        <button key={c} onClick={() => setPkForm(f => ({ ...f, charity: c }))}
-                          className={`flex-1 py-1.5 rounded-[8px] text-[9px] font-medium transition-all ${
-                            pkForm.charity === c ? "bg-brand-coral text-white" : "bg-white text-gray-500"
-                          }`}>
-                          {CHARITY_LABELS[c].replace("❤️ ", "")}
-                        </button>
-                      ))}
-                    </div>
-                    {pkForm.charity === "percentage" && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-gray-400">抽成比例</span>
-                        <input type="number" value={pkForm.charity_ratio}
-                          onChange={e => setPkForm(f => ({ ...f, charity_ratio: parseInt(e.target.value) || 10 }))}
-                          className="w-16 px-2 py-1 bg-white rounded-[6px] text-xs text-center outline-none" min={1} max={50} />
-                        <span className="text-[9px] text-gray-400">%</span>
-                      </div>
-                    )}
-                    <select value={pkForm.charity_project} onChange={e => setPkForm(f => ({ ...f, charity_project: e.target.value }))}
-                      className="w-full px-2 py-1.5 bg-white rounded-[8px] text-[10px] outline-none text-gray-500">
-                      <option value="">选择受益项目</option>
-                      {CHARITY_PROJECTS.map(p => (
-                        <option key={p.value} value={p.value}>{p.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              {/* 4. 奖池分配 */}
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">💰 奖池分配</div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {(Object.keys(POOL_MODE_SCOPES) as PoolMode[])
-                    .filter(k => POOL_MODE_SCOPES[k].includes(pkForm.mode))
-                    .map(k => (
-                    <button key={k} onClick={() => setPkForm(f => ({ ...f, pool_distribution: k }))}
-                      className={`p-2 rounded-[10px] text-[10px] text-left transition-all ${
-                        pkForm.pool_distribution === k
-                          ? "bg-brand-teal/10 border border-brand-teal/30"
-                          : "bg-gray-50 border border-transparent"
-                      }`}>
-                      <div className="font-medium">{POOL_MODE_LABELS[k]}</div>
-                      <div className="text-[8px] text-gray-400 mt-0.5 leading-relaxed">{POOL_MODE_DESCS[k].slice(0, 30)}...</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 5. 品类 */}
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">📂 品类</div>
-                <div className="flex gap-1.5 flex-wrap">
-                  {CATEGORY_OPTIONS.map(opt => (
-                    <button key={opt.key} onClick={() => setPkForm(f => ({ ...f, category: opt.key }))}
-                      className={`px-3 py-1.5 rounded-[8px] text-[10px] font-medium transition-all ${
-                        pkForm.category === opt.key ? "bg-brand-teal-dark text-white" : "bg-gray-50 text-gray-500"
-                      }`}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 6. 时间 */}
-              <div>
-                <div className="text-[10px] text-gray-400 mb-1.5">⏱ 截止时间</div>
-                <div className="flex gap-1.5 flex-wrap">
-                  {TIME_OPTIONS.map(opt => (
-                    <button key={opt.value} onClick={() => setPkForm(f => ({ ...f, end_time: opt.value }))}
-                      className={`px-3 py-1.5 rounded-[8px] text-[10px] font-medium transition-all ${
-                        pkForm.end_time === opt.value ? "bg-brand-teal-dark text-white" : "bg-gray-50 text-gray-500"
-                      }`}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 7. 投注限制 */}
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <div className="text-[10px] text-gray-400 mb-1">最低投注</div>
-                  <div className="flex gap-1">
-                    {[10, 50, 100].map(amt => (
-                      <button key={amt} onClick={() => setPkForm(f => ({ ...f, min_bet: amt.toString() }))}
-                        className={`flex-1 py-1.5 rounded-[8px] text-[10px] font-medium transition-all ${
-                          pkForm.min_bet === amt.toString() ? "bg-brand-teal-dark text-white" : "bg-gray-50 text-gray-500"
-                        }`}>
-                        {amt}豆
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-[10px] text-gray-400 mb-1">最高投注</div>
-                  <div className="flex gap-1">
-                    {[1000, 5000, 10000].map(amt => (
-                      <button key={amt} onClick={() => setPkForm(f => ({ ...f, max_bet: amt.toString() }))}
-                        className={`flex-1 py-1.5 rounded-[8px] text-[10px] font-medium transition-all ${
-                          pkForm.max_bet === amt.toString() ? "bg-brand-teal-dark text-white" : "bg-gray-50 text-gray-500"
-                        }`}>
-                        {amt >= 1000 ? `${(amt/1000).toFixed(0)}k` : amt}豆
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* 8. 1vN 擂台限制 */}
-              {pkForm.mode === "1vN" && (
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <div className="text-[10px] text-gray-400 mb-1">挑战人数上限</div>
-                    <input type="number" value={pkForm.challenger_limit}
-                      onChange={e => setPkForm(f => ({ ...f, challenger_limit: parseInt(e.target.value) || 100 }))}
-                      className="w-full px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] text-gray-400 mb-1">总豆上限</div>
-                    <input type="number" value={pkForm.challenger_pool_limit}
-                      onChange={e => setPkForm(f => ({ ...f, challenger_pool_limit: parseInt(e.target.value) || 10000 }))}
-                      className="w-full px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none" />
-                  </div>
-                </div>
-              )}
-
-              {/* 9. 1v1 @邀请 */}
-              {pkForm.mode === "1v1" && (
-                <div>
-                  <div className="text-[10px] text-gray-400 mb-1">@邀请好友（选填）</div>
-                  <input type="text" placeholder="输入好友昵称或UID" value={pkForm.invite_user}
-                    onChange={e => setPkForm(f => ({ ...f, invite_user: e.target.value }))}
-                    className="w-full px-3 py-2 bg-gray-50 rounded-[10px] text-xs outline-none focus:ring-2 focus:ring-brand-teal/30" />
-                </div>
-              )}
-
-              {/* 提交 */}
-              <button onClick={handleCreatePK}
-                disabled={!pkForm.title || pkForm.options.filter(o => o.trim()).length < 2}
-                className="w-full py-3 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-[8px] text-xs font-semibold shadow-[0_4px_16px_rgba(69,204,213,0.3)] disabled:opacity-50 active:scale-[0.98] transition-transform">
-                发布事件
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {voteMsg && (
         <div className="fixed bottom-28 left-4 right-4 px-4 py-2 text-center text-[11px] font-medium bg-green-50 text-green-700 rounded-[8px] z-50 shadow-lg">
           {voteMsg}
         </div>
       )}
+
+      {/* PKCreator 统一创建弹窗 */}
+      <PKCreator
+        open={showCreator}
+        onClose={() => setShowCreator(false)}
+        entryPoint="fab"
+        onPublished={(topicId) => {
+          setShowCreator(false);
+          setVoteMsg("✅ PK话题发起成功！");
+          if (topicId) {
+            const cat = activeCat || 'general';
+            setTimeout(() => router.push(`/pk-hall/${cat}/${topicId}`), 1000);
+          } else {
+            setTimeout(() => window.location.reload(), 1500);
+          }
+          setTimeout(() => setVoteMsg(""), 3000);
+        }}
+      />
 
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </div>
