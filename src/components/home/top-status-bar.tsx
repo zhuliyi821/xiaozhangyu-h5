@@ -46,7 +46,7 @@ export function TopStatusBar() {
   const coins = wallet.credit1 || 0;
 
   return (
-    <div className="bg-white border-b border-[rgba(69,204,213,0.12)]">
+    <div className="bg-white border-b border-brand-teal/10">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
