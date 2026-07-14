@@ -78,7 +78,7 @@ function AssetGrid({ credits }: { credits: WalletBrief }) {
   const frozen = Math.floor(totalCrystal * CRYSTAL_FROZEN_RATIO);
   return (
     <section className="mx-4 mt-4">
-      <div className="bg-white rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.08)]">
+      <div className="bg-white rounded-[8px] p-4 shadow-sm border border-brand-teal/10">
         <div className="grid grid-cols-5 gap-2">
           <AssetCell icon="🎮" value={formatAsset(credits.credit1)} label="游戏豆" />
           <AssetCell icon="⛏️" value={formatAsset(totalCrystal)} label="水晶石" sub={frozen > 0 ? `🔒${frozen}冻结` : ""} subColor="text-brand-coral" />
@@ -212,13 +212,13 @@ function QuickLinks() {
     <section className="mx-4 mt-3">
       <div className="grid grid-cols-2 gap-2">
         <a href="/marketplace"
-          className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] text-center active:scale-[0.98] transition-transform">
+          className="bg-surface rounded-[8px] p-3 shadow-sm border border-brand-teal/10 text-center active:scale-[0.98] transition-transform">
           <div className="w-8 h-8 rounded-[10px] bg-brand-gold-light/60 flex items-center justify-center mx-auto mb-1.5 text-base">🏪</div>
           <div className="text-[11px] font-semibold text-text">全网商品</div>
           <div className="text-[9px] text-text-tertiary mt-0.5">平台·置换·附近</div>
         </a>
         <a href="/store"
-          className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.08)] text-center active:scale-[0.98] transition-transform">
+          className="bg-surface rounded-[8px] p-3 shadow-sm border border-brand-teal/10 text-center active:scale-[0.98] transition-transform">
           <div className="w-8 h-8 rounded-[10px] bg-brand-coral-light/60 flex items-center justify-center mx-auto mb-1.5 text-base">📍</div>
           <div className="text-[11px] font-semibold text-text">合作门店</div>
           <div className="text-[9px] text-text-tertiary mt-0.5">到店送豆</div>
@@ -267,7 +267,7 @@ function RecentFlow({ uid }: { uid: number }) {
         </div>
       </div>
 
-      <div className="bg-surface rounded-[8px] border border-[rgba(69,204,213,0.08)] overflow-hidden">
+      <div className="bg-surface rounded-[8px] border border-brand-teal/10 overflow-hidden">
         {loading ? (
           <div className="p-4 text-center text-[11px] text-text-tertiary animate-pulse">加载中...</div>
         ) : error ? (
@@ -283,7 +283,7 @@ function RecentFlow({ uid }: { uid: number }) {
             <div className="text-[10px] text-text-tertiary mt-1">去玩一局预测? 或者逛逛商城?</div>
           </div>
         ) : (
-          <div className="divide-y divide-[rgba(69,204,213,0.06)]">
+          <div className="divide-y divide-brand-teal/5">
             {flows.slice(0, 5).map((f) => (
               <div key={f.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="text-lg">{flowIcon[f.biz_type] || "💎"}</span>
@@ -347,7 +347,7 @@ export default function JiadouzhanPage() {
           <div className="h-4 w-40 bg-gray-100 rounded mx-auto" />
         </div>
       ) : !user ? (
-        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[8px] border border-[rgba(69,204,213,0.08)]">
+        <div className="mx-4 mt-8 p-8 text-center bg-surface rounded-[8px] border border-brand-teal/10">
           <div className="text-4xl mb-3">🐙</div>
           <p className="text-sm text-text-secondary mb-1">来啦! 先登录解锁全部玩法</p>
           <p className="text-[11px] text-text-tertiary mb-4">游戏豆送新用户哦</p>

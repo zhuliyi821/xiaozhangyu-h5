@@ -31,7 +31,7 @@ function StoreCard({ store }: { store: StoreItem }) {
     : "";
 
   return (
-    <div className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)]">
+    <div className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-brand-teal/10">
       <a href={`/store/${store.id}`} className="flex active:scale-[0.98] transition-transform">
         {/* 左侧缩略图 - 品牌色渐变背景 */}
         <div className="w-[100px] shrink-0 flex items-center justify-center overflow-hidden" style={{background:`linear-gradient(135deg,${color}22,${color}44)`}}>
@@ -79,7 +79,7 @@ function SkeletonGrid() {
   return (
     <div className="grid grid-cols-1 gap-3 mt-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] animate-pulse flex">
+        <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-brand-teal/10 animate-pulse flex">
           <div className="w-[100px] h-[100px] bg-gray-100 shrink-0" />
           <div className="flex-1 p-3 space-y-2">
             <div className="h-4 bg-gray-100 rounded w-3/4" />
@@ -137,7 +137,7 @@ export default function StorePage() {
       {/* Content */}
       <div className="px-4 -mt-3 relative z-10">
         {!user && !authLoading ? (
-          <div className="p-8 text-center bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm mt-1">
+          <div className="p-8 text-center bg-white rounded-[12px] border border-brand-teal/10 shadow-sm mt-1">
             <div className="text-4xl mb-3">🏪</div>
             <p className="text-sm text-text-secondary mb-1">登录后查看合作门店</p>
             <p className="text-[11px] text-text-tertiary mb-4">发现附近门店 · 消费送游戏豆</p>
@@ -147,7 +147,7 @@ export default function StorePage() {
             </button>
           </div>
         ) : error ? (
-          <div className="p-8 text-center bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm mt-1">
+          <div className="p-8 text-center bg-white rounded-[12px] border border-brand-teal/10 shadow-sm mt-1">
             <div className="text-4xl mb-3">😅</div>
             <p className="text-sm text-text-secondary mb-1">加载失败</p>
             <p className="text-[11px] text-text-tertiary mb-4">请检查网络后重试</p>
@@ -159,7 +159,7 @@ export default function StorePage() {
         ) : (
           <>
             {filtered.length === 0 && !loading ? (
-              <div className="p-8 text-center bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm mt-1">
+              <div className="p-8 text-center bg-white rounded-[12px] border border-brand-teal/10 shadow-sm mt-1">
                 <div className="text-4xl mb-3">🔍</div>
                 <p className="text-sm text-text-secondary">未找到匹配的门店</p>
                 <p className="text-[11px] text-text-tertiary mt-1">试试其他关键词</p>
