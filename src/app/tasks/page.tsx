@@ -101,6 +101,19 @@ function getTaskLink(taskKey: string): string {
   return links[taskKey] || "/tasks";
 }
 
+function getAchievementLink(achId: string): string {
+  const links: Record<string, string> = {
+    first_bet: "/pk-hall", bet_50: "/pk-hall", bet_500: "/pk-hall",
+    first_pk: "/pk-hall", pk_10: "/pk-hall",
+    invite_1: "/invite", social_butterfly: "/invite",
+    checkin_7: "/tasks?tab=challenge", checkin_30: "/tasks?tab=challenge",
+    level_5: "/profile", level_10: "/profile",
+    tasks_done: "/tasks",
+    ai_chat_50: "/ai-predictions",
+  };
+  return links[achId] || "/tasks";
+}
+
 function rewardStr(task: TaskItem): string {
   const parts: string[] = [];
   if (task.reward_coins > 0) parts.push(`${task.reward_coins}🎮`);
@@ -520,40 +533,51 @@ export default function TasksPage() {
                 </div>
               ))
             ) : (
-              achieveStates.filter(s => achieveFilter === "all" || s.def.category === achieveFilter).map(s => (
-                <div key={s.id} className={`bg-surface rounded-[12px] p-4 shadow-sm border transition-all ${
-                  s.done ? 'border-brand-teal/30 bg-brand-teal/5' : 'border-border'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[18px] shrink-0 ${
-                      s.done ? 'bg-brand-teal/20' : 'bg-gray-50'
-                    }`}>{s.claimed ? '✅' : s.done ? '🔓' : s.def.icon}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-medium">{s.def.name}</div>
-                      <div className="text-[10px] text-text-tertiary">{s.def.desc}</div>
-                      <div className={`text-[9px] mt-0.5 ${s.claimed ? 'text-brand-teal-dark' : s.done ? 'text-brand-gold-dark' : 'text-text-tertiary'}`}>
-                        {s.claimed ? '✅ 已领取' : s.done ? '🔓 可领取' : s.label}
+              achieveStates.filter(s => achieveFilter === "all" || s.def.category === achieveFilter).map(s => {
+                const cardInner = (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[18px] shrink-0 ${
+                        s.done ? 'bg-brand-teal/20' : 'bg-gray-50'
+                      }`}>{s.claimed ? '✅' : s.done ? '🔓' : s.def.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-medium">{s.def.name}</div>
+                        <div className="text-[10px] text-text-tertiary">{s.def.desc}</div>
+                        <div className={`text-[9px] mt-0.5 ${s.claimed ? 'text-brand-teal-dark' : s.done ? 'text-brand-gold-dark' : 'text-text-tertiary'}`}>
+                          {s.claimed ? '✅ 已领取' : s.done ? '🔓 可领取' : s.label}
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-[10px] text-text-tertiary">奖励</div>
+                        <div className="text-[11px] font-medium">{s.def.reward}</div>
+                        {s.done && !s.claimed && (
+                          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); claimAchievement(s); }} disabled={achieveClaiming === s.id}
+                            className="mt-1 text-[9px] bg-brand-gold text-white px-2 py-0.5 rounded-full font-medium active:scale-90">
+                            {achieveClaiming === s.id ? "领取中..." : "领取"}
+                          </button>
+                        )}
+                        {s.claimed && <div className="mt-1 text-[9px] text-brand-teal-dark">✅ 已领</div>}
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <div className="text-[10px] text-text-tertiary">奖励</div>
-                      <div className="text-[11px] font-medium">{s.def.reward}</div>
-                      {s.done && !s.claimed && (
-                        <button onClick={() => claimAchievement(s)} disabled={achieveClaiming === s.id}
-                          className="mt-1 text-[9px] bg-brand-gold text-white px-2 py-0.5 rounded-full font-medium active:scale-90">
-                          {achieveClaiming === s.id ? "领取中..." : "领取"}
-                        </button>
-                      )}
-                      {s.claimed && <div className="mt-1 text-[9px] text-brand-teal-dark">✅ 已领</div>}
-                    </div>
-                  </div>
-                  {!s.done && s.max > 1 && (
-                    <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-brand-teal rounded-full" style={{ width: `${Math.round(s.progress / s.max * 100)}%` }} />
-                    </div>
-                  )}
-                </div>
-              ))
+                    {!s.done && s.max > 1 && (
+                      <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-brand-teal rounded-full" style={{ width: `${Math.round(s.progress / s.max * 100)}%` }} />
+                      </div>
+                    )}
+                  </>
+                );
+                const baseClass = `block bg-surface rounded-[12px] p-4 shadow-sm border transition-all ${
+                  s.done ? 'border-brand-teal/30 bg-brand-teal/5' : 'border-border hover:border-brand-teal/20'
+                }`;
+                // 已领取 → 普通div; 未完成 → 整张卡片可点击跳转; 已完成可领取 → 整张卡片可点（带领取按钮）
+                return s.claimed ? (
+                  <div key={s.id} className={baseClass}>{cardInner}</div>
+                ) : (
+                  <Link key={s.id} href={getAchievementLink(s.id)} className={`${baseClass} active:scale-[0.98] transition-transform`}>
+                    {cardInner}
+                  </Link>
+                );
+              })
             )}
             {!achieveLoading && achieveStates.filter(s => achieveFilter === "all" || s.def.category === achieveFilter).length === 0 && (
               <div className="bg-surface rounded-[12px] p-6 text-center text-[12px] text-text-tertiary border border-border">
