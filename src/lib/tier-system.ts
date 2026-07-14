@@ -11,14 +11,16 @@
  * 👑 王者   5000
  */
 
+import { API_BASE } from "@/config/api";
+
 export interface TierDef {
   id: string;
   emoji: string;
   label: string;
-  xpRequired: number;  // 进入此段位所需最小XP
-  reward: number;      // 升到此段位的奖励🎮
-  color: string;       // Tailwind text color class
-  barColor: string;    // 进度条样式
+  xpRequired: number;
+  reward: number;
+  color: string;
+  barColor: string;
 }
 
 export const TIERS: TierDef[] = [
@@ -61,7 +63,56 @@ export function getTierProgress(xp: number): number {
   return Math.min(1, (xp - current.xpRequired) / range);
 }
 
-/** 本地存储的XP读写 */
+/** 通过API读取段位数据 */
+export interface TierStats {
+  xp: number;
+  current_tier: string;
+  current_label: string;
+  next_tier: string | null;
+  next_label: string | null;
+  next_xp_required: number | null;
+  claimed_tiers: string[];
+  claimable: { id: string; label: string; reward: number }[];
+}
+
+export async function fetchTierStats(uid: number): Promise<TierStats | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/tier/stats?action=stats&uid=${uid}`);
+    const d = await r.json();
+    if (d.code === 0) return d.data;
+  } catch {}
+  return null;
+}
+
+/** 通过API添加经验值 */
+export async function addXpApi(uid: number, delta: number, source: string = ""): Promise<number | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/tier/add-xp?action=add-xp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, delta, source }),
+    });
+    const d = await r.json();
+    if (d.code === 0) return d.data.xp;
+  } catch {}
+  return null;
+}
+
+/** 通过API领取段位奖励 */
+export async function claimTierRewardApi(uid: number, tierId: string): Promise<{ reward: number } | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/tier/claim?action=claim`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, tier_id: tierId }),
+    });
+    const d = await r.json();
+    if (d.code === 0) return d.data;
+  } catch {}
+  return null;
+}
+
+/** 本地存储的XP读写（离线fallback） */
 const XP_KEY = "xiaozhangyu_tier_xp";
 const CLAIMED_KEY = "xiaozhangyu_tier_claimed";
 
@@ -76,24 +127,8 @@ export function saveXp(xp: number): void {
   catch {}
 }
 
-export function addXp(delta: number): number {
-  const current = loadXp();
-  const newXp = current + delta;
-  saveXp(newXp);
-  return newXp;
-}
-
 export function loadClaimed(): string[] {
   if (typeof window === "undefined") return [];
   try { return JSON.parse(localStorage.getItem(CLAIMED_KEY) || "[]"); }
   catch { return []; }
-}
-
-export function markClaimed(tierId: string): void {
-  const claimed = loadClaimed();
-  if (!claimed.includes(tierId)) {
-    claimed.push(tierId);
-    try { localStorage.setItem(CLAIMED_KEY, JSON.stringify(claimed)); }
-    catch {}
-  }
 }
