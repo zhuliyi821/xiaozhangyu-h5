@@ -228,7 +228,7 @@ export default function FortunePage() {
               请先 <button onClick={() => setShowLogin(true)} className="text-brand-teal-dark font-medium">登录</button> 后使用运势分析
             </div>
           )}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] space-y-4">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1 h-4 rounded-sm bg-gradient-to-b from-brand-teal to-brand-gold" />
               <span className="text-xs font-semibold text-text">填写出生信息</span>
@@ -289,7 +289,7 @@ export default function FortunePage() {
             )}
           </button>
 
-          <div className="p-3.5 rounded-[8px] bg-white shadow-sm border border-[rgba(69,204,213,0.06)] text-[10px] text-text-tertiary/70 leading-relaxed flex items-start gap-2">
+          <div className="p-3.5 rounded-[8px] bg-white shadow-sm border border-brand-teal/5 text-[10px] text-text-tertiary/70 leading-relaxed flex items-start gap-2">
             <Info className="w-3 h-3 mt-0.5 shrink-0" />
             <span>八字推演基于传统子平术，号码推荐结合五行生克与数据模型，结果仅供参考，不构成参与建议</span>
           </div>
@@ -352,7 +352,7 @@ export default function FortunePage() {
           </div>
 
           {/* 八字排盘 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">📅</span>
               <span className="text-xs font-semibold text-text">八字排盘</span>
@@ -376,7 +376,7 @@ export default function FortunePage() {
           </div>
 
           {/* 五行分析 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">🌿</span>
               <span className="text-xs font-semibold text-text">五行分析</span>
@@ -400,7 +400,7 @@ export default function FortunePage() {
           </div>
 
           {/* 号码详情 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">🏆</span>
               <span className="text-xs font-semibold text-text">号码评分排行</span>
@@ -431,7 +431,7 @@ export default function FortunePage() {
           </div>
 
           {/* 报告 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <div className="flex items-center gap-1.5 mb-3">
               <span className="text-sm">📄</span>
               <span className="text-xs font-semibold text-text">综合报告</span>

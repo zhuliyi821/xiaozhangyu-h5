@@ -176,13 +176,13 @@ export default function ProChartPage() {
   return (
     <main className="pb-24 min-h-screen bg-bg">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12 gap-2">
           <button onClick={() => router.back()} className="text-text-secondary"><ArrowLeft className="w-5 h-5" /></button>
           <h1 className="text-base font-semibold flex-1">{cfg.name} 专业分析</h1>
           {/* Type selector */}
           <select value={type} onChange={e => router.push(`/lottery/${e.target.value}/chart`)}
-            className="text-xs bg-surface rounded-[10px] px-2 py-1 border border-[rgba(69,204,213,0.1)]">
+            className="text-xs bg-surface rounded-[10px] px-2 py-1 border border-brand-teal/10">
             {Object.entries(LOTTERY_TYPES).map(([k, v]) => (
               <option key={k} value={k}>{v.name}</option>
             ))}
@@ -208,7 +208,7 @@ export default function ProChartPage() {
           />
 
           {/* 热冷号卡片：实际数据 vs AI 模型 */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-semibold">📊 数据对比</span>
               <span className="text-[10px] text-text-tertiary">
@@ -216,7 +216,7 @@ export default function ProChartPage() {
               </span>
             </div>
             {/* 实际数据热号 */}
-            <div className="mb-3 pb-3 border-b border-[rgba(69,204,213,0.08)]">
+            <div className="mb-3 pb-3 border-b border-brand-teal/10">
               <div className="text-[10px] font-semibold text-brand-teal-dark mb-2">📈 实际热号（近50期开奖数据）</div>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
@@ -276,7 +276,7 @@ export default function ProChartPage() {
           </div>
 
           {/* Tab Switch */}
-          <div className="flex bg-surface rounded-[8px] p-[3px] shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="flex bg-surface rounded-[8px] p-[3px] shadow-sm border border-brand-teal/5">
             {[
               { key: "trend" as const, label: "走势图" },
               { key: "freq" as const, label: "频率分析" },
@@ -297,7 +297,7 @@ export default function ProChartPage() {
             <span>分析周期:</span>
             {[5, 20, 50, 100].map(n => (
               <button key={n} onClick={() => setPeriods(n)}
-                className={`px-3 py-1 rounded-[10px] ${periods === n ? "bg-brand-teal text-white" : "bg-surface border border-[rgba(69,204,213,0.1)]"}`}>
+                className={`px-3 py-1 rounded-[10px] ${periods === n ? "bg-brand-teal text-white" : "bg-surface border border-brand-teal/10"}`}>
                 {n}期
               </button>
             ))}
@@ -305,7 +305,7 @@ export default function ProChartPage() {
 
           {/* Chart area for trend/freq/miss */}
           {(activeTab !== "predict") && (
-            <div ref={chartRef} className="bg-surface rounded-[8px] p-3 shadow-sm border border-[rgba(69,204,213,0.06)]" style={{ height: 480 }} />
+            <div ref={chartRef} className="bg-surface rounded-[8px] p-3 shadow-sm border border-brand-teal/5" style={{ height: 480 }} />
           )}
 
           {/* AI Predict — 多模型集成 */}
@@ -313,7 +313,7 @@ export default function ProChartPage() {
             <div className="space-y-3">
 
               {/* 模型贡献度 */}
-              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold">🧠 多模型集成预测</span>
                   <span className="text-[10px] text-text-tertiary">综合置信度 {prediction.stats.weightedAccuracy}%</span>
@@ -335,7 +335,7 @@ export default function ProChartPage() {
               </div>
 
               {/* 前区推荐 */}
-              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
                 <div className="text-[11px] font-semibold mb-2">前区推荐（按综合得分排序）</div>
                 <div className="flex gap-2 flex-wrap">
                   {prediction.front.slice(0, 10).map(r => (
@@ -365,7 +365,7 @@ export default function ProChartPage() {
 
               {/* 后区推荐 */}
               {cfg.back > 0 && prediction.back.length > 0 && (
-                <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+                <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
                   <div className="text-[11px] font-semibold mb-2">后区推荐</div>
                   <div className="flex gap-2 flex-wrap">
                     {prediction.back.slice(0, 5).map(r => (
@@ -396,10 +396,10 @@ export default function ProChartPage() {
               </div>
 
               {/* 各号码详情 */}
-              <details className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+              <details className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
                 <summary className="text-[11px] font-semibold cursor-pointer">📊 各模型详细评分</summary>
                 <div className="mt-3 space-y-1 text-[10px]">
-                  <div className="grid grid-cols-8 gap-1 text-text-tertiary pb-1 border-b border-[rgba(69,204,213,0.1)]">
+                  <div className="grid grid-cols-8 gap-1 text-text-tertiary pb-1 border-b border-brand-teal/10">
                     <span>号码</span><span>综合</span><span>频率</span><span>贝叶斯</span><span>马尔可夫</span><span>模式</span><span>蒙特卡洛</span><span>遗漏</span>
                   </div>
                   {prediction.front.slice(0, 15).map(r => (

@@ -30,7 +30,7 @@ export default function CouponsPage() {
 
   return (
     <main className="min-h-screen bg-bg pb-24">
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12">
           <button onClick={() => window.history.back()} className="text-text-secondary text-lg mr-3">‹</button>
           <h1 className="text-base font-semibold">卡券包</h1>
@@ -77,7 +77,7 @@ export default function CouponsPage() {
             const expired = c.expired || isExpired(c.end_at);
             return (
               <div key={c.id}
-                className={`bg-surface rounded-[8px] overflow-hidden shadow-sm border ${c.used ? "opacity-40" : expired ? "opacity-50" : "border-[rgba(69,204,213,0.08)]"}`}>
+                className={`bg-surface rounded-[8px] overflow-hidden shadow-sm border ${c.used ? "opacity-40" : expired ? "opacity-50" : "border-brand-teal/10"}`}>
 
                 {/* 券头 */}
                 <div className={`bg-gradient-to-r ${cfg.color} p-4 text-white flex items-center gap-3`}>

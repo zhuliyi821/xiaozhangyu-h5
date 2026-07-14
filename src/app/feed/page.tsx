@@ -127,7 +127,7 @@ export default function FeedPage() {
   return (
     <main className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center justify-between px-4 h-12">
           <h1 className="text-base font-semibold">💬 社区动态</h1>
           <span className="text-[10px] text-text-tertiary">{feeds.length}条动态</span>
@@ -135,7 +135,7 @@ export default function FeedPage() {
       </div>
 
       {/* Post Input */}
-      <div className="mx-4 mt-3 bg-surface rounded-[8px] p-3 border border-[rgba(69,204,213,0.08)]">
+      <div className="mx-4 mt-3 bg-surface rounded-[8px] p-3 border border-brand-teal/10">
         <textarea value={postContent} onChange={e => setPostContent(e.target.value)}
           placeholder={user ? "分享你的预测心得..." : "登录后可以发动态"}
           rows={2} maxLength={2000}
@@ -163,7 +163,7 @@ export default function FeedPage() {
       ) : (
         <div className="mx-4 mt-3 space-y-3">
           {feeds.map(feed => (
-            <div key={feed.id} className="bg-surface rounded-[8px] p-4 border border-[rgba(69,204,213,0.08)]">
+            <div key={feed.id} className="bg-surface rounded-[8px] p-4 border border-brand-teal/10">
               {/* Header */}
               <div className="flex items-center gap-2.5 mb-2.5">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-teal to-brand-teal-dark flex items-center justify-center text-sm text-white font-bold shrink-0">
