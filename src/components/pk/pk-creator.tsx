@@ -160,7 +160,8 @@ export default function PKCreator({ open, onClose, defaultCategory, entryPoint =
         body: JSON.stringify({
           uid,
           title: form.title,
-          options: validOptions,
+          option_a: validOptions[0] || "赞成",
+          option_b: validOptions[1] || "反对",
           mode: form.mode,
           category: form.category,
           charity: form.charity,
@@ -168,6 +169,7 @@ export default function PKCreator({ open, onClose, defaultCategory, entryPoint =
           end_time: endTime,
           min_bet: parseInt(form.min_bet) || 10,
           max_bet: parseInt(form.max_bet) || 10000,
+          options: validOptions,
           ...(form.charity === "percentage" ? { charity_ratio: form.charity_ratio } : {}),
           ...(form.mode === "1vN" ? { challenger_limit: form.challenger_limit, challenger_pool_limit: form.challenger_pool_limit } : {}),
         }),
