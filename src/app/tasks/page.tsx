@@ -382,10 +382,10 @@ export default function TasksPage() {
                       {groupTasks.map(task => {
                         const done = task.user_progress >= task.target_count;
                         const claimed = task.is_claimed === 1;
-                        return (
-                          <div key={task.task_key} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                        const cardContent = (
+                          <div className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                             done && !claimed ? "bg-gradient-to-r from-amber-50 to-amber-100/60 border border-brand-gold/20" :
-                            claimed ? "bg-green-50/50 border border-green-100" : "bg-bg/50 border border-transparent"
+                            claimed ? "bg-green-50/50 border border-green-100" : "bg-bg/50 border border-transparent hover:bg-gray-50/50"
                           }`}>
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0 transition-all ${
                               claimed ? "bg-green-100 text-green-600" : done ? "bg-brand-gold-light text-brand-gold-dark" : "bg-gray-100 text-text-tertiary"
@@ -414,18 +414,24 @@ export default function TasksPage() {
                             <div className="shrink-0 text-right">
                               <div className="text-[11px] font-bold text-text-primary">{rewardStr(task)}</div>
                               {done && !claimed && (
-                                <button onClick={() => handleClaim(task.task_key)} disabled={claiming === task.task_key}
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleClaim(task.task_key); }} disabled={claiming === task.task_key}
                                   className="mt-1.5 w-full min-w-[68px] bg-gradient-to-r from-brand-gold to-brand-gold-dark text-white text-[10px] font-semibold py-2 px-3 rounded-lg active:scale-95 transition-all disabled:opacity-50 shadow-sm">
                                   {claiming === task.task_key ? "..." : "领取"}
                                 </button>
                               )}
                               {!done && (
-                                <Link href={getTaskLink(task.task_key)} className="mt-1 inline-block text-[10px] text-brand-teal font-medium active:scale-95 transition-transform">
-                                  去完成 →
-                                </Link>
+                                <div className="mt-1 text-[10px] text-brand-teal font-medium">去完成 →</div>
                               )}
                             </div>
                           </div>
+                        );
+                        // 未完成 → 整张卡片可点击跳转; 已完成 → 普通卡片
+                        return !done ? (
+                          <Link key={task.task_key} href={getTaskLink(task.task_key)} className="block active:scale-[0.98] transition-transform">
+                            {cardContent}
+                          </Link>
+                        ) : (
+                          <div key={task.task_key}>{cardContent}</div>
                         );
                       })}
                     </div>
@@ -617,22 +623,29 @@ export default function TasksPage() {
                 { icon: "🤝", label: challengeInvites ? "✅ 已邀请" : "邀请好友", desc: "邀请好友注册", done: challengeInvites, link: "/jiadouzhan" },
                 { icon: "🎰", label: "数字碰投注", desc: "参与数字碰游戏", done: false, link: "/lottery-sim" },
                 { icon: "🤖", label: "AI 提问", desc: "向小章鱼AI提问", done: false, link: "/ai-predictions" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3.5">
-                  <div className="w-8 h-8 rounded-[10px] bg-bg flex items-center justify-center text-sm">{item.icon}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[11px] font-medium">{item.label}</div>
-                    <div className="text-[9px] text-text-tertiary mt-0.5">{item.desc}</div>
+              ].map((item, i) => {
+                const row = (
+                  <div className="flex items-center gap-3 px-4 py-3.5">
+                    <div className="w-8 h-8 rounded-[10px] bg-bg flex items-center justify-center text-sm">{item.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11px] font-medium">{item.label}</div>
+                      <div className="text-[9px] text-text-tertiary mt-0.5">{item.desc}</div>
+                    </div>
+                    {item.done ? (
+                      <span className="text-[10px] text-green-500 font-medium">已完成 ✅</span>
+                    ) : (
+                      <span className="px-3 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium rounded-[8px] shadow-sm">
+                        去完成
+                      </span>
+                    )}
                   </div>
-                  {item.done ? (
-                    <span className="text-[10px] text-green-500 font-medium">已完成 ✅</span>
-                  ) : (
-                    <Link href={item.link} className="px-3 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium rounded-[8px] active:scale-95 transition-transform inline-block">
-                      去完成
-                    </Link>
-                  )}
-                </div>
-              ))}
+                );
+                return item.done ? (
+                  <div key={i}>{row}</div>
+                ) : (
+                  <Link key={i} href={item.link} className="block active:scale-[0.98] transition-transform">{row}</Link>
+                );
+              })}
             </div>
 
             {/* 挑战成就进度 */}
