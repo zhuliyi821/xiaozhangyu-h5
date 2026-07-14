@@ -155,7 +155,7 @@ export default function PredictionReportPage() {
   return (
     <main className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12 gap-2">
           <button onClick={() => router.back()} className="text-text-secondary"><ArrowLeft className="w-5 h-5" /></button>
           <h1 className="text-base font-semibold flex-1">{cfg.name} 预测报告</h1>
@@ -190,7 +190,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 2. 推荐组合 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)] text-center">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5 text-center">
             <div className="text-[11px] text-text-tertiary mb-2">🎯 AI 推荐组合</div>
             <div className="text-xl font-bold tracking-widest mb-2">
               {prediction.ensemble.top5.map(n => (
@@ -212,7 +212,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 3. 模型雷达图 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold">📡 模型对比雷达图</span>
               <span className="text-[9px] text-text-tertiary">Top5号码 · 5维度评分</span>
@@ -229,7 +229,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 4. 模型贡献度 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="text-xs font-semibold mb-3">📊 模型贡献度分析</div>
             <div className="space-y-2">
               {Object.entries(prediction.stats.modelContributions)
@@ -250,11 +250,11 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 5. 号码详情条形图 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-semibold">📈 各号码多模型评分</span>
               <select value={selectedNum ?? ""} onChange={e => setSelectedNum(e.target.value ? Number(e.target.value) : null)}
-                className="text-[10px] bg-bg rounded-[8px] px-2 py-1 border border-[rgba(69,204,213,0.1)]">
+                className="text-[10px] bg-bg rounded-[8px] px-2 py-1 border border-brand-teal/10">
                 <option value="">Top 8 综合</option>
                 {prediction.front.slice(0, 15).map(r => (
                   <option key={r.number} value={r.number}>#{String(r.number).padStart(2, "0")} ({Math.round(r.confidence)}%)</option>
@@ -265,12 +265,12 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 6. 号码详细表格 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="text-xs font-semibold mb-3">📋 完整排名（前区）</div>
             <div className="overflow-x-auto">
               <table className="w-full text-[10px]">
                 <thead>
-                  <tr className="text-text-tertiary border-b border-[rgba(69,204,213,0.1)]">
+                  <tr className="text-text-tertiary border-b border-brand-teal/10">
                     <th className="py-1.5 text-left">排名</th>
                     <th className="py-1.5">号码</th>
                     <th className="py-1.5">综合</th>
@@ -285,7 +285,7 @@ export default function PredictionReportPage() {
                 </thead>
                 <tbody>
                   {prediction.front.slice(0, 20).map((r, i) => (
-                    <tr key={r.number} className={`${i < 5 ? "bg-amber-50/50" : ""} border-b border-[rgba(69,204,213,0.05)] cursor-pointer hover:bg-bg/50`}
+                    <tr key={r.number} className={`${i < 5 ? "bg-amber-50/50" : ""} border-b border-brand-teal/5 cursor-pointer hover:bg-bg/50`}
                       onClick={() => setSelectedNum(r.number)}>
                       <td className="py-1.5 font-semibold">{i + 1}</td>
                       <td className="py-1.5 text-center">
@@ -317,7 +317,7 @@ export default function PredictionReportPage() {
 
           {/* ═══════════ 7. 后区推荐 ═══════════ */}
           {cfg.back > 0 && prediction.back.length > 0 && (
-            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+            <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
               <div className="text-xs font-semibold mb-3">🎯 后区推荐</div>
               <div className="flex gap-3 flex-wrap">
                 {prediction.back.slice(0, 6).map(r => (
@@ -334,7 +334,7 @@ export default function PredictionReportPage() {
           )}
 
           {/* ═══════════ 8. 区间分析 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="text-xs font-semibold mb-3">📐 区间分析</div>
             <div className="grid grid-cols-5 gap-2">
               {["01-07", "08-14", "15-21", "22-28", "29-35"].map((zone, idx) => {
@@ -355,7 +355,7 @@ export default function PredictionReportPage() {
           </div>
 
           {/* ═══════════ 9. 模型权重 ═══════════ */}
-          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
             <div className="text-xs font-semibold mb-2">⚙️ 模型权重配置</div>
             <div className="grid grid-cols-5 gap-2 text-center text-[10px]">
               {Object.entries(prediction.ensemble.modelWeights).map(([key, val]) => (
