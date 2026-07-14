@@ -155,6 +155,7 @@ export default function PKHallPage() {
   };
 
   const [wallet, setWallet] = useState({ credit1: 0 });
+  const [rankData, setRankData] = useState<any[]>([]);
   useEffect(() => {
     if (!uid) return;
     fetch(`${API_BASE}/api/wallet/brief`, {
@@ -224,6 +225,14 @@ export default function PKHallPage() {
       })
       .catch(() => setError("网络不太给力"))
       .finally(() => setLoading(false));
+  }, []);
+
+  // ═══ 排行榜数据 ═══
+  useEffect(() => {
+    fetch(`${API_BASE}/api/leaderboard?limit=3`)
+      .then(r => r.json())
+      .then(j => { if (j.code === 0 && j.data) setRankData(j.data); })
+      .catch(() => {});
   }, []);
 
   // 60秒自动轮询刷新
@@ -469,27 +478,30 @@ export default function PKHallPage() {
           </div>
           <div className="flex flex-col gap-1.5">
             {(() => {
-              const seeds = shuffleKey % 100;
-              const names = ["张三", "李四", "王五", "赵六", "陈七", "刘八", "周姐", "老马", "阿杰", "小杨", "林哥", "老赵", "小陈", "王叔", "李叔"];
-              const pick = (i: number) => names[(i * 7 + seeds * 3 + 5) % names.length];
-              const items = [
-                { icon: "🎯", label: "准确率之王", name: pick(0), value: `${78 + seeds % 8}%`, sub: "命中率", color: "bg-purple-50", textColor: "text-purple-700" },
-                { icon: "💰", label: "赢豆之王", name: pick(1), value: `${(8 + seeds % 5).toFixed(0)}k`, sub: "赢得豆", color: "bg-brand-gold-light/30", textColor: "text-brand-gold-dark" },
-                { icon: "🏃", label: "活跃之王", name: pick(2), value: `${200 + seeds * 17}`, sub: "参与场次", color: "bg-brand-teal-light/30", textColor: "text-brand-teal-dark" },
+              const TOP3_LABELS = [
+                { icon: "🥇", label: "准确率之王", sub: "命中率", color: "bg-purple-50", textColor: "text-purple-700", key: "accuracy" },
+                { icon: "🥈", label: "赢豆之王", sub: "赢豆数", color: "bg-brand-gold-light/30", textColor: "text-brand-gold-dark", key: "earnings" },
+                { icon: "🥉", label: "场次之王", sub: "参与场次", color: "bg-brand-teal-light/30", textColor: "text-brand-teal-dark", key: "bets" },
               ];
-              return items.map((item, i) => (
-              <div key={i} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] ${item.color}`}>
-                <span className="text-[16px] shrink-0">{item.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium text-text-primary">{item.label}</span>
-                    <span className="text-[11px] font-semibold text-text-primary">{item.name}</span>
+              const top3 = (rankData || []).slice(0, 3);
+              return TOP3_LABELS.map((item, i) => {
+                const entry = top3[i];
+                return (
+                <div key={i} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] ${item.color}`}>
+                  <span className="text-[16px] shrink-0">{item.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-text-primary">{item.label}</span>
+                      <span className="text-[11px] font-semibold text-text-primary">{entry?.nickname || "—"}</span>
+                    </div>
+                    <div className="text-[9px] text-text-tertiary">{item.sub}</div>
                   </div>
-                  <div className="text-[9px] text-text-tertiary">{item.sub}</div>
+                  <span className={`text-[13px] font-bold ${item.textColor}`}>
+                    {entry ? (item.key === "accuracy" ? `${entry.accuracy}%` : item.key === "earnings" ? `${(entry.won || 0).toLocaleString()}🎮` : `${entry.total_bets}次`) : "暂无"}
+                  </span>
                 </div>
-                <span className={`text-[13px] font-bold ${item.textColor}`}>{item.value}</span>
-              </div>
-              ));
+                );
+              });
             })()}
           </div>
         </div>

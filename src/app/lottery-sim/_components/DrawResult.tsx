@@ -24,13 +24,13 @@ export default function DrawResult({ countdown, showDraw, result, rollDisplay, l
       {countdown > 0 && !showDraw && (
         <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-border-tertiary mb-3 text-center animate-in">
           <div className="flex flex-col items-center gap-3 py-2">
-            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-brand-gold to-amber-500 flex items-center justify-center animate-pulse">
+            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-brand-gold to-brand-gold-dark flex items-center justify-center animate-pulse">
               <span className="text-3xl font-bold text-white drop-shadow-lg">{countdown}</span>
             </div>
             <div className="text-xs text-text-secondary animate-pulse">🎰 号码正在生成中，请稍候...</div>
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 ease-linear"
+                className="h-full bg-gradient-to-r from-brand-gold to-brand-gold-dark rounded-full transition-all duration-1000 ease-linear"
                 style={{ width: `${((5 - countdown) / 5) * 100}%` }}
               />
             </div>
@@ -66,7 +66,7 @@ export default function DrawResult({ countdown, showDraw, result, rollDisplay, l
             ))}
             {result.draw.digits?.map((n: number, i: number) => (
               <div key={"d"+i}
-                className="w-9 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-sm font-bold shadow-sm"
+                className="w-9 h-10 rounded-lg bg-gradient-to-br from-brand-gold to-brand-gold-dark text-white flex items-center justify-center text-sm font-bold shadow-sm"
                 style={{ animation: `ballDrop 0.4s ease-out ${i * 0.08}s both` }}>
                 {n}
               </div>

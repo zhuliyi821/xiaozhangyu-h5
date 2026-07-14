@@ -406,7 +406,7 @@ function LotterySimContent() {
       // 计算实际参与金额（修复P0: 首次参与totalCost=0的bug）
       const betTicketsForCost = betTickets.length > 0 ? betTickets : 
         config?.back_pick === 0 ? [{ front: selectedFront, back: [] }] : [{ front: selectedFront, back: selectedBack }];
-      const effectiveCost = betTicketsForCost.length * (config?.price || 2) * betMultiple;
+      const effectiveCost = betTicketsForCost.length * (config?.price || 100) * betMultiple;
       
       // 最低参与100游戏豆
       if (effectiveCost < MIN_BET) {
@@ -600,7 +600,7 @@ function LotterySimContent() {
     }
   };
 
-  const totalCost = tickets.length > 0 ? tickets.length * (config?.price || 2) * betMultiple : (config?.price || 2) * betMultiple;
+  const totalCost = tickets.length > 0 ? tickets.length * (config?.price || 100) * betMultiple : (config?.price || 100) * betMultiple;
   const MIN_BET = 100;
   const canBet = (tickets.length > 0 || selectedFront.length > 0) && balance >= Math.max(totalCost, MIN_BET);
 

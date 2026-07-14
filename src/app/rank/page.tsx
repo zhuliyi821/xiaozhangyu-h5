@@ -1,6 +1,6 @@
 "use client";
 
-/** 🏆 预测排行榜 — 按命中率排名 */
+/** 🏆 预测排行榜 v2 — 支持双排序 */
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { apiFetch } from "@/config/api";
@@ -9,9 +9,13 @@ import LoginModal from "@/components/ui/login-modal";
 interface RankItem {
   rank: number;
   name: string;
+  nickname: string;
   avatar: string;
+  total_bets: number;
+  wins: number;
+  accuracy: number;
+  won: number;
   stats: string;
-  accuracy: string;
   isCrown: boolean;
   uid: number;
 }
@@ -26,11 +30,11 @@ export default function RankPage() {
   const fetchRank = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiFetch<RankItem[]>(`/api/leaderboard?limit=50`);
+      const res = await apiFetch<RankItem[]>(`/api/leaderboard?limit=50&sort_by=${tab}`);
       setData(res);
     } catch { setData([]); }
     finally { setLoading(false); }
-  }, []);
+  }, [tab]);
 
   useEffect(() => { fetchRank(); }, [fetchRank]);
 
@@ -39,8 +43,8 @@ export default function RankPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#1D9E75] to-[#167A5A] text-white px-5 pt-4 pb-6 rounded-b-[24px]">
+      {/* Header — 品牌色统一 */}
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-darkest text-white px-5 pt-4 pb-6 rounded-b-[24px]">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-bold">🏆 预测排行榜</h1>
           <span className="text-[11px] bg-white/15 rounded-[8px] px-3 py-1">
@@ -48,7 +52,7 @@ export default function RankPage() {
           </span>
         </div>
 
-        {/* 我的排名（已登录） */}
+        {/* 我的排名 */}
         {user ? (
           <div className="bg-white/10 rounded-[12px] p-3 flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${myRank?.isCrown ? 'bg-amber-300 text-amber-900' : 'bg-white/20'}`}>
@@ -59,7 +63,9 @@ export default function RankPage() {
               <div className="text-[10px] opacity-70">{myRank ? myRank.stats : '暂无预测记录'}</div>
             </div>
             {myRank && (
-              <div className="text-[14px] font-bold text-amber-200">{myRank.accuracy}</div>
+              <div className="text-[14px] font-bold text-amber-200">
+                {tab === "accuracy" ? `${myRank.accuracy}%` : `${myRank.total_bets}场`}
+              </div>
             )}
           </div>
         ) : (
@@ -105,6 +111,11 @@ export default function RankPage() {
         </div>
       ) : (
         <div className="px-4 space-y-1.5 pb-6">
+          {data.length === 0 && (
+            <div className="text-center py-10 text-text-tertiary text-[12px]">
+              暂无排行数据，快去参与预测吧！
+            </div>
+          )}
           {data.map((item) => (
             <div
               key={item.uid}
@@ -135,22 +146,24 @@ export default function RankPage() {
                     <span className="ml-1 text-[9px] bg-brand-teal/10 text-brand-teal-dark px-1.5 py-0.5 rounded-[4px]">我</span>
                   )}
                 </div>
-                <div className="text-[10px] text-text-tertiary">{item.stats}</div>
+                <div className="text-[10px] text-text-tertiary">
+                  {tab === "accuracy" ? item.stats : `参与${item.total_bets}场`}
+                </div>
               </div>
 
-              {/* Accuracy */}
+              {/* Value */}
               <div className={`text-[15px] font-bold ${
-                parseFloat(item.accuracy) >= 70 ? 'text-green-600' :
-                parseFloat(item.accuracy) >= 50 ? 'text-amber-600' : 'text-text-tertiary'
+                tab === "accuracy"
+                  ? (item.accuracy >= 70 ? 'text-green-600' : item.accuracy >= 50 ? 'text-amber-600' : 'text-text-tertiary')
+                  : 'text-brand-teal-dark'
               }`}>
-                {item.accuracy}
+                {tab === "accuracy" ? `${item.accuracy}%` : `${item.total_bets}场`}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Login Modal */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </div>
   );

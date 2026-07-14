@@ -406,8 +406,8 @@ export default function NumberPickerArea({
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg> 机选
         </button>
         <button onClick={onAddTicket}
-          className="flex-1 py-2 rounded-[8px] bg-[#E1F5EE] text-[#0F6E56] text-xs font-medium border border-[#1D9E75]/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
-          + 选号 ({(config?.price || 2) * 1}🎮)
+          className="flex-1 py-2 rounded-[8px] bg-brand-teal-light/30 text-brand-teal-dark text-xs font-medium border border-brand-teal/30 flex items-center justify-center gap-1 active:scale-95 transition-transform">
+          + 选号 ({(config?.price || 100) * 1}🎮)
         </button>
       </div>
     </div>

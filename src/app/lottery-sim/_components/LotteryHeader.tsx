@@ -29,8 +29,8 @@ export default function LotteryHeader({
 }: LotteryHeaderProps) {
   return (
     <>
-      {/* 顶部渐变头 */}
-      <div className="bg-gradient-to-br from-[#1D9E75] to-[#064E3B] px-4 pt-4 pb-5 relative overflow-hidden">
+      {/* 顶部渐变头 — 统一品牌色 */}
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-darkest text-white px-5 pt-4 pb-5 rounded-b-[28px] shadow-soft relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -mr-10 -mt-10" />
         <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 -ml-8 -mb-8" />
 
@@ -57,14 +57,14 @@ export default function LotteryHeader({
         {/* 奖金池 */}
         <div className="text-center mt-3 pt-2 border-t border-white/10 relative z-10">
           <div className="text-[9px] text-white/40 tracking-[1px]">当前奖金池</div>
-          <div className="text-[22px] font-bold text-[#F2B631] tracking-[1px] mt-0.5">{Math.floor(jackpot).toLocaleString()} 🎮</div>
+          <div className="text-[22px] font-bold text-brand-gold tracking-[1px] mt-0.5">{Math.floor(jackpot).toLocaleString()} 🎮</div>
           <div className="text-[9px] text-white/30 mt-0.5">人人可中 · 上不封顶</div>
         </div>
       </div>
 
       {/* 彩种选择栏 */}
       <div className="px-4 -mt-3 relative z-20">
-        <div className="bg-white rounded-[8px] p-3 shadow-sm border border-gray-100 mb-3">
+        <div className="bg-surface rounded-[8px] p-3 shadow-sm border border-border-tertiary mb-3">
           <div className="grid grid-cols-5 gap-1.5">
             {LOTTERY_LIST.map(l => (
               <button key={l.code} onClick={() => {
@@ -74,7 +74,7 @@ export default function LotteryHeader({
                 className={`py-2.5 rounded-[8px] text-center active:scale-95 transition-all ${
                   lotteryCode === l.code
                     ? `bg-gradient-to-r ${l.color} text-white shadow-sm`
-                    : "bg-gray-50 text-gray-500 border border-gray-100"
+                    : "bg-bg text-text-secondary border border-border-tertiary"
                 }`}>
                 <div className="text-lg">{l.icon}</div>
                 <div className="text-[9px] font-semibold mt-0.5">{l.name}</div>
