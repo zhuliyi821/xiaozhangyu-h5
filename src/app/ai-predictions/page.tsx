@@ -13,10 +13,12 @@
  */
 
 import { useState, useEffect, useMemo } from "react";
-import { RefreshCw, ExternalLink, Calendar } from "lucide-react";
+import { Calendar, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
+import AiPredictionsHeader from "./_components/AiPredictionsHeader";
+import AssetOverview from "./_components/AssetOverview";
 
 interface PredictionItem {
   id: number;
@@ -206,62 +208,15 @@ export default function AiPredictionsPage() {
   return (
     <div className="min-h-screen bg-bg pb-20">
 
-      {/* ════════════════════ ① 品牌Header ════════════════════ */}
-      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-darkest text-white px-5 pt-4 pb-5 rounded-b-[28px] shadow-soft">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[6px] bg-white/20 backdrop-blur flex items-center justify-center">
-              <span className="font-bold text-[9px]">AI</span>
-            </div>
-            <div>
-              <span className="text-[15px] font-bold">AI 预测</span>
-              {isToday && <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full font-medium ml-1.5">今日</span>}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/jiadouzhan" className="text-[10px] bg-white/15 backdrop-blur px-2.5 py-1.5 rounded-lg flex items-center gap-1">
-              获取游戏豆 →
-            </Link>
-            <button onClick={fetchData} disabled={refreshing}
-              className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition-transform">
-              <RefreshCw size={13} className={`${refreshing ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] opacity-80">{formatDate(data.latest_date)}</span>
-          {data.report.summary && (
-            <span className="text-[10px] opacity-60 truncate max-w-[180px] ml-2">{data.report.summary}</span>
-          )}
-        </div>
-      </div>
-
-      {/* 赢奖反馈（触发时展示） */}
-      {recentWinMsg && (
-        <div className="px-4 -mt-4 relative z-10 mb-2">
-          <div className="bg-gradient-to-r from-brand-gold to-brand-gold-dark rounded-[10px] py-2.5 px-4 text-center shadow-sm animate-[celebrate-pop_0.4s_ease-out]">
-            <span className="text-[13px] font-semibold text-white">{recentWinMsg}</span>
-          </div>
-        </div>
-      )}
-
-      {/* ════════════════════ ② 资产速览 ════════════════════ */}
-      <div className="px-4 -mt-4 relative z-10 mb-3">
-        <div className="grid grid-cols-3 gap-2">
-          <Link href="/assets" className="block bg-brand-teal-light/30 rounded-[10px] py-2.5 px-2 text-center border border-brand-teal/20 active:scale-[0.97] transition-transform">
-            <div className="text-[9px] text-brand-teal-dark font-medium">🎮 游戏豆</div>
-            <div className="text-[17px] font-bold text-brand-teal-darkest mt-0.5">{(wallet.credit1 || 0).toLocaleString()}</div>
-          </Link>
-          <Link href="/exchange?focus=credit5" className="block bg-brand-gold-light/30 rounded-[10px] py-2.5 px-2 text-center border border-brand-gold/20 active:scale-[0.97] transition-transform">
-            <div className="text-[9px] text-brand-gold-dark font-medium">⛏️ 水晶石</div>
-            <div className="text-[17px] font-bold text-brand-gold-dark mt-0.5">{(wallet.credit5 || 0).toLocaleString()}</div>
-          </Link>
-          <Link href="/exchange/credit3" className="block bg-brand-coral-light/30 rounded-[10px] py-2.5 px-2 text-center border border-brand-coral/20 active:scale-[0.97] transition-transform">
-            <div className="text-[9px] text-brand-coral-dark font-medium">🔮 水晶球</div>
-            <div className="text-[17px] font-bold text-brand-coral-darkest mt-0.5">{(wallet.credit3 || 0).toLocaleString()}</div>
-          </Link>
-        </div>
-      </div>
+      {/* ① 品牌Header + ② 资产速览 */}
+      <AiPredictionsHeader
+        isToday={isToday}
+        data={data}
+        refreshing={refreshing}
+        onRefresh={fetchData}
+        recentWinMsg={recentWinMsg}
+      />
+      <AssetOverview wallet={wallet} />
 
       {/* 彩蛋消息 */}
       <div className="px-4 mb-3">
