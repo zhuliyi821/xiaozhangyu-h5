@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import Link from "next/link";
+import LoginModal from "@/components/ui/login-modal";
 
 interface BackendTask {
   task_key: string;
@@ -32,6 +33,7 @@ export function DailyTasks() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<BackendTask[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const uid = (user as any)?.uid || 0;
@@ -69,6 +71,25 @@ export function DailyTasks() {
       }));
 
   return (
+    <>
+    {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+    {!user ? (
+      /* 未登录状态 — 引导登录 */
+      <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm px-4 py-3.5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[13px] font-bold text-text-primary">📋 每日任务</h2>
+        </div>
+        <div className="text-center py-3">
+          <div className="text-2xl mb-2">🔒</div>
+          <div className="text-[13px] font-medium text-text-secondary mb-1">登录后查看今日任务</div>
+          <div className="text-[11px] text-text-tertiary mb-3">完成任务可领取游戏豆、水晶石等奖励</div>
+          <button onClick={() => setShowLogin(true)}
+            className="px-5 py-2 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[12px] font-medium active:scale-95 transition-transform shadow-sm">
+            立即登录
+          </button>
+        </div>
+      </div>
+    ) : (
     <Link href="/tasks"
       className="block bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm px-4 py-3.5 active:scale-[0.98] transition-transform">
       <div className="flex items-center justify-between mb-3">
@@ -114,5 +135,7 @@ export function DailyTasks() {
         )}
       </div>
     </Link>
+    )}
+    </>
   );
 }
