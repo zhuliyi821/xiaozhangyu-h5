@@ -6,8 +6,7 @@ import { API_BASE } from "@/config/api";
 import LoginModal from "@/components/ui/login-modal";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 import { ArrowLeft, Users, Coins, Gift, Share2, Copy, Check, ChevronDown } from "lucide-react";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", bg: "#F5F6FA", green: "#10B981", purple: "#8B5CF6" };
+import { C } from "@/lib/brand-colors";
 
 interface InviteRecord {
   uid: number;

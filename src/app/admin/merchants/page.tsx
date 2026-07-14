@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA", green: "#10B981" };
+import { C } from "@/lib/brand-colors";
 const ADMIN_TOKEN = "xz-admin-2026";
 
 /** 带管理员 token 的 fetch */

@@ -19,6 +19,7 @@ import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import AiPredictionsHeader from "./_components/AiPredictionsHeader";
 import AssetOverview from "./_components/AssetOverview";
+import { C } from "@/lib/brand-colors";
 
 interface PredictionItem {
   id: number;
@@ -49,18 +50,18 @@ interface ReportData {
 }
 
 const CATEGORY_STYLE: Record<string, { color: string; accent: string; gradient: string }> = {
-  sports_domestic: { color: "#F27152", accent: "#FDE8E4", gradient: "from-brand-coral to-brand-coral-dark" },
-  lottery:          { color: "#45CCD5", accent: "#E1F5EE", gradient: "from-brand-teal to-brand-teal-dark" },
-  stock_index:      { color: "#F2B631", accent: "#FEF3C7", gradient: "from-brand-gold to-brand-gold-dark" },
-  btc:              { color: "#2BAAAF", accent: "#A0EDF2", gradient: "from-brand-teal-dark to-brand-teal" },
-  sports_global:    { color: "#D45435", accent: "#FABAA8", gradient: "from-brand-coral-dark to-brand-coral" },
+  sports_domestic: { color: C.coral, accent: "#FDE8E4", gradient: "from-brand-coral to-brand-coral-dark" },
+  lottery:          { color: C.teal, accent: "#E1F5EE", gradient: "from-brand-teal to-brand-teal-dark" },
+  stock_index:      { color: C.gold, accent: "#FEF3C7", gradient: "from-brand-gold to-brand-gold-dark" },
+  btc:              { color: C.tealDark, accent: C.tealLight, gradient: "from-brand-teal-dark to-brand-teal" },
+  sports_global:    { color: C.coralDark, accent: C.coralLight, gradient: "from-brand-coral-dark to-brand-coral" },
 };
 
 const DIRECTION_MAP: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  up:     { label: "看涨", icon: "📈", color: "#F27152", bg: "rgba(242,113,82,0.1)" },
-  down:   { label: "看跌", icon: "📉", color: "#45CCD5", bg: "rgba(69,204,213,0.1)" },
-  win:    { label: "看好", icon: "🏆", color: "#F2B631", bg: "rgba(242,182,49,0.1)" },
-  draw:   { label: "平局", icon: "🤝", color: "#2BAAAF", bg: "rgba(43,170,175,0.1)" },
+  up:     { label: "看涨", icon: "📈", color: C.coral, bg: "rgba(242,113,82,0.1)" },
+  down:   { label: "看跌", icon: "📉", color: C.teal, bg: "rgba(69,204,213,0.1)" },
+  win:    { label: "看好", icon: "🏆", color: C.gold, bg: "rgba(242,182,49,0.1)" },
+  draw:   { label: "平局", icon: "🤝", color: C.tealDark, bg: "rgba(43,170,175,0.1)" },
 };
 
 function getConfidenceColor(c: number): { text: string; bar: string } {

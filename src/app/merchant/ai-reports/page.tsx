@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import { Bot, Sparkles, Settings, Clock, CheckCircle2, XCircle, RefreshCw, Zap, Loader2 } from "lucide-react";
+import { C } from "@/lib/brand-colors";
 
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA" };
 
 const EMPLOYEES = [
   { code: "zhang-guanshi", icon: "📋", name: "章管事", desc: "经营日报/库存预警", color: C.coral, accent: "#FDE8E4" },

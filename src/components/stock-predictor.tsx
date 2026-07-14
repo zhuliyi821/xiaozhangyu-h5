@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { TrendingUp, AlertTriangle, ChevronDown, BarChart3, Activity, Shield, Target, ChevronUp, RefreshCw, Info, Coins } from "lucide-react";
 import { API_BASE } from '@/config/api';
 import { useAuth } from "@/lib/auth-context";
+import { C, getBrandRGB } from "@/lib/brand-colors";
 
 // ─── 指数配置 ───
 const INDEXES = [
@@ -357,7 +358,7 @@ export default function FuturesSim() {
     }
 
     // Price line
-    const lineColor = change >= 0 ? "#F27152" : "#45CCD5";
+    const lineColor = change >= 0 ? C.coral : C.teal;
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -403,8 +404,8 @@ export default function FuturesSim() {
     };
 
     const cData = closes;
-    drawMA(cData, 5, "rgba(242,182,49,0.6)");
-    drawMA(cData, 10, "rgba(69,204,213,0.6)");
+    drawMA(cData, 5, `rgba(${getBrandRGB("gold").r},${getBrandRGB("gold").g},${getBrandRGB("gold").b},0.6)`);
+    drawMA(cData, 10, `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.6)`);
     drawMA(cData, 20, "rgba(142,142,147,0.6)");
 
     // Teach markers

@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import { Search, Store, ShoppingBag, RefreshCw, ArrowLeft, Filter } from "lucide-react";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA" };
+import { C } from "@/lib/brand-colors";
 
 const PLATFORM_MAP: Record<string, { label: string; icon: string; color: string }> = {
   xiaozhangyu: { label: "平台商品", icon: "🐙", color: C.coral },

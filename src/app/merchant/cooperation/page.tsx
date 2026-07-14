@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { ChevronRight, Check, Shield, TrendingUp, Clock, RefreshCw, Zap, Smartphone, BarChart3, Users, Store, Bot, Image as ImageIcon } from "lucide-react";
+import { C } from "@/lib/brand-colors";
 
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", tealDark: "#0F6E56", bg: "#F5F6FA" };
 
 const FEATURES = [
   { icon: Bot, title: "AI智能员工", desc: "24小时在线接待·智能问答·自动回复", color: C.teal },

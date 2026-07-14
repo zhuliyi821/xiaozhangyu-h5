@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ArrowLeft, CheckCircle2, Loader2, Clock, X } from "lucide-react";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA" };
+import { C } from "@/lib/brand-colors";
 
 const EMPLOYEES = [
   { code: "zhang-guanshi", icon: "📋", name: "章管事", desc: "AI店长 · 经营日报/库存预警/客流分析", color: C.coral, accent: "#FDE8E4", tier: "free", features: ["📊 每日经营日报", "📦 库存预警通知", "🌙 晚间营业准备"] },

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { API_BASE } from "@/config/api";
+import { C } from "@/lib/brand-colors";
 
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA", green: "#10B981" };
 
 export default function MediaAnalyticsPage() {
   const { user, loading } = useAuth();

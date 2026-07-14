@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { ChevronRight, Check, MapPin, Shield, TrendingUp, Users, Store, Award, Target, Building, Globe } from "lucide-react";
+import { C } from "@/lib/brand-colors";
 
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", tealDark: "#0F6E56", bg: "#F5F6FA" };
 
 const REGIONS = [
   { name: "华东地区", provinces: "上海·江苏·浙江·安徽·福建·江西·山东", color: "from-blue-500 to-blue-600" },

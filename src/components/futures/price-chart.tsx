@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { BarChart3 } from "lucide-react";
 import type { KLineData } from "./use-futures-quote";
+import { C, getBrandRGB } from "@/lib/brand-colors";
 
 interface PriceChartProps {
   chartData: KLineData[];
@@ -43,7 +44,7 @@ export function PriceChart({ chartData, change, multiplier, leverage, marginPct 
     }
 
     // Price line
-    const lineColor = change >= 0 ? "#F27152" : "#45CCD5";
+    const lineColor = change >= 0 ? C.coral : C.teal;
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -88,8 +89,8 @@ export function PriceChart({ chartData, change, multiplier, leverage, marginPct 
       ctx.setLineDash([]);
     };
 
-    drawMA(closes, 5, "rgba(242,182,49,0.6)");
-    drawMA(closes, 10, "rgba(69,204,213,0.6)");
+    drawMA(closes, 5, `rgba(${getBrandRGB("gold").r},${getBrandRGB("gold").g},${getBrandRGB("gold").b},0.6)`);
+    drawMA(closes, 10, `rgba(${getBrandRGB("teal").r},${getBrandRGB("teal").g},${getBrandRGB("teal").b},0.6)`);
     drawMA(closes, 20, "rgba(142,142,147,0.6)");
 
     // Teach marker

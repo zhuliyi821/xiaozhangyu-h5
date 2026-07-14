@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight, Check, Store, Package, TrendingUp, Shield, Clock, BarChart3, Truck, Percent, Star } from "lucide-react";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", tealDark: "#0F6E56", bg: "#F5F6FA" };
+import { C } from "@/lib/brand-colors";
 
 const BENEFITS = [
   { icon: Store, title: "门店渠道", desc: "商品上架到合作门店，触达线下消费人群", color: C.teal },

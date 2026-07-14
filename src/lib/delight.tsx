@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-/* ── 喜悦彩蛋管理器 ── */
+import { C } from "@/lib/brand-colors";
 
 export function useDelight() {
   const [celebration, setCelebration] = useState<{ type: string; message: string } | null>(null);
@@ -102,7 +101,7 @@ export function EmptyState({ icon, title, subtitle, action }: { icon: string; ti
 /* ── 🎉 五彩纸屑效果 ── */
 export function Confetti({ active }: { active: boolean }) {
   if (!active) return null;
-  const colors = ["#F2B631", "#45CCD5", "#F27152", "#A0EDF2", "#FCE7A8", "#FABAA8"];
+  const colors = [C.gold, C.teal, C.coral, C.tealLight, C.goldLight, C.coralLight];
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       {[...Array(20)].map((_, i) => {

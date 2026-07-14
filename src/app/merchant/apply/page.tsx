@@ -4,8 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import regions from "@/lib/regions";
-
-const C = { coral: "#F27152", teal: "#45CCD5", gold: "#F2B631", purple: "#8B5CF6", bg: "#F5F6FA", green: "#10B981" };
+import { C } from "@/lib/brand-colors";
 
 const STEPS = [
   { id: "form", label: "填写信息", icon: "📝" },
