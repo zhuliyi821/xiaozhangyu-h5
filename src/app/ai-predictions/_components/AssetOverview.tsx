@@ -8,7 +8,7 @@ interface AssetOverviewProps {
 
 export default function AssetOverview({ wallet }: AssetOverviewProps) {
   return (
-    <div className="px-4 -mt-4 relative z-10 mb-3">
+    <div className="px-4 mt-3 mb-3 relative z-20">
       <div className="grid grid-cols-3 gap-2">
         <Link href="/assets" className="block bg-brand-teal-light/30 rounded-[10px] py-2.5 px-2 text-center border border-brand-teal/20 active:scale-[0.97] transition-transform">
           <div className="text-[9px] text-brand-teal-dark font-medium">🎮 游戏豆</div>
