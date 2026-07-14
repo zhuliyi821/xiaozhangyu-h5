@@ -82,7 +82,7 @@ export function HotTopics() {
   const filtered = getFiltered();
 
   return (
-    <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-brand-teal/10 shadow-sm overflow-hidden">
       {/* ── 标题行 ── */}
       <div className="px-4 pt-3.5 pb-1.5">
         <div className="flex items-center justify-between mb-2">
@@ -100,7 +100,7 @@ export function HotTopics() {
         </div>
 
         {/* ── 加油标语条 ── */}
-        <div className="bg-gradient-to-r from-brand-teal/10 via-brand-gold/10 to-brand-coral/10 rounded-[8px] px-3 py-2 mb-2.5 border border-[rgba(69,204,213,0.10)]">
+        <div className="bg-gradient-to-r from-brand-teal/10 via-brand-gold/10 to-brand-coral/10 rounded-lg px-3 py-2 mb-2.5 border border-brand-teal/10">
           <div className="flex items-center justify-center gap-1.5">
             <span className="text-[16px]">📣</span>
             <span className="text-[13px] font-semibold text-text-primary">为他们加油 · </span>
@@ -129,8 +129,8 @@ export function HotTopics() {
       <div className="px-4 pb-2 flex flex-col gap-2">
         {filtered.map((topic, i) => (
           <Link key={i} href={topic.href}
-            className="flex items-center gap-3 bg-gradient-to-r from-gray-50/50 to-white rounded-[10px] px-3 py-2.5 border border-[rgba(69,204,213,0.06)] active:scale-[0.98] transition-transform">
-            <div className="w-9 h-9 rounded-[9px] bg-brand-teal-light/20 flex items-center justify-center text-[18px] flex-shrink-0">
+            className="flex items-center gap-3 bg-gradient-to-r from-gray-50/50 to-white rounded-lg px-3 py-2.5 border border-brand-teal/5 active:scale-[0.98] transition-transform">
+            <div className="w-9 h-9 rounded-lg bg-brand-teal-light/20 flex items-center justify-center text-[18px] flex-shrink-0">
               {topic.icon}
             </div>
             <div className="flex-1 min-w-0">

@@ -76,7 +76,7 @@ export function FortuneCard() {
   // 骨架屏
   if (loading) {
     return (
-      <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm overflow-hidden animate-pulse">
+      <div className="bg-white rounded-xl border border-brand-teal/10 shadow-sm overflow-hidden animate-pulse">
         <div className="px-4 pt-3 pb-3.5">
           <div className="h-4 w-24 bg-gray-200 rounded mb-3" />
           <div className="flex gap-2 mb-2">
@@ -92,7 +92,7 @@ export function FortuneCard() {
   // 错误态（含重试）
   if (error) {
     return (
-      <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-brand-teal/10 shadow-sm overflow-hidden">
         <div className="px-4 pt-3 pb-3.5">
           <div className="text-[13px] font-bold text-text-primary mb-2">今日运势</div>
           <div className="text-[11px] text-text-tertiary text-center py-3">{error}</div>
@@ -114,7 +114,7 @@ export function FortuneCard() {
   const bestWuxing = topWuxing[0];
 
   return (
-    <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-brand-teal/10 shadow-sm overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-teal via-brand-gold to-brand-coral" />
       <div className="px-4 pt-3 pb-3.5">
         {/* 标题 */}
