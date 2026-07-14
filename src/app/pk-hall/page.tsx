@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
 import PKGuideOverlay from "@/components/pk-guide-overlay";
+import TierBadge from "@/components/ui/tier-badge";
+import { loadXp } from "@/lib/tier-system";
 import PKCreator from "@/components/pk/pk-creator";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://ws.hi.cn";
@@ -68,16 +70,9 @@ function setMyPkCount(count: number) {
   localStorage.setItem("pk_participation_count", JSON.stringify({ date: today, count }));
 }
 
-// 满减段位
-const TIERS = [
-  { count: 10, badge: "🏅 PK达人", color: "text-brand-gold-dark" },
-  { count: 5, badge: "🥈 老手", color: "text-brand-teal-dark" },
-  { count: 3, badge: "🥉 新手", color: "text-text-secondary" },
-];
-
 export default function PKHallPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [topics, setTopics] = useState<PKTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -759,23 +754,10 @@ export default function PKHallPage() {
             <div className="text-[10px] text-text-secondary font-medium">📊 我的战绩</div>
             <div className="text-[8px] text-text-tertiary mt-0.5">段位 · 胜率 · 排行</div>
           </Link>
-          {/* P1-2: 目标梯度 — 参与段位 */}
+          {/* 段位徽章 — 7段体系 */}
           <div className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center shadow-sm">
-            {(() => {
-              const tier = TIERS.find(t => myPkCount >= t.count);
-              if (tier) {
-                return <>
-                  <div className={`text-[10px] font-medium ${tier.color}`}>{tier.badge}</div>
-                  <div className="text-[8px] text-text-tertiary mt-0.5">已参与 {myPkCount} 场</div>
-                </>;
-              }
-              const nextTier = [...TIERS].reverse().find(t => myPkCount < t.count);
-              const nextCount = nextTier?.count || 3;
-              return <>
-                <div className="text-[10px] text-text-tertiary font-medium">🥚 初来乍到</div>
-                <div className="text-[8px] text-brand-gold-dark mt-0.5">再参与 {nextCount - myPkCount} 场升级</div>
-              </>;
-            })()}
+            <TierBadge mode="tiny" />
+            <div className="text-[8px] text-text-tertiary mt-0.5">已参与 {myPkCount} 场</div>
           </div>
         </div>
 
