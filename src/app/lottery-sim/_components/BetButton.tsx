@@ -29,6 +29,13 @@ export default function BetButton({
 
   return (
     <div className="px-4">
+      <div className="flex items-center justify-between px-1 mb-2">
+        <span className="text-[10px] text-text-tertiary">投注金额</span>
+        <span className="text-xs font-bold" style={{color: belowMin ? "#E24B4A" : "#1C1C1E"}}>
+          {cost} 🎮
+          {belowMin && <span className="text-[9px] font-normal ml-1" style={{color: "#E24B4A"}}>(未达最低限额)</span>}
+        </span>
+      </div>
       <button onClick={placeBet} disabled={betting || !canBet}
         className={`w-full py-3 mb-2 rounded-[8px] text-sm font-bold text-white active:scale-[0.97] transition-all ${
           canBet ? "bg-gradient-to-r from-[#1D9E75] to-[#0F6E56] shadow-sm" : "bg-[#E5E5EA] text-gray-400"
