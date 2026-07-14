@@ -19,13 +19,10 @@ export function useBtcCountdown() {
     return () => clearInterval(iv);
   }, [remaining]);
 
-  // 归零后自动重置
-  useEffect(() => {
-    if (remaining > 0) return;
-    setRemaining(60);
-  }, [remaining]);
+  // 归零后等待服务端同步，不再硬编码重置
+  // 页面层通过 syncFromServer(r.data.remaining) 从服务端获取真实剩余时间
 
-  const reset = useCallback(() => setRemaining(60), []);
+  const reset = useCallback(() => setRemaining(0), []);
 
   return { remaining, syncFromServer, reset };
 }

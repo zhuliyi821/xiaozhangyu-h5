@@ -3,6 +3,12 @@
 import { useState, useCallback } from "react";
 import { API_BASE } from "@/config/api";
 
+function getToken(): string {
+  if (typeof window === "undefined") return "";
+  try { const u = localStorage.getItem("xiaozhangyu_user"); if (u) return JSON.parse(u).token || ""; } catch {}
+  return "";
+}
+
 const API = (path: string, opts?: RequestInit) =>
   fetch(`${API_BASE}/api/backend/${path}`, {
     ...opts,
@@ -55,7 +61,7 @@ export function useBtcBetting(uid: number, onSettled?: (result: BetResult) => vo
 
     setLoading(true);
     const res = await API("btc-game/fast-bet", {
-      method: "POST", body: JSON.stringify({ bet_type: info.backendType, choice: info.choice, points: pts, uid }),
+      method: "POST", body: JSON.stringify({ bet_type: info.backendType, choice: info.choice, points: pts, uid, token: getToken() }),
     });
     setLoading(false);
 

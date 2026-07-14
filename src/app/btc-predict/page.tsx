@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ArrowLeft, TrendingUp, AlertTriangle, ChevronDown, BarChart3, Activity, Shield, Zap, DollarSign, RefreshCw, Clock, Coins } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -131,6 +132,20 @@ export default function BTCPredictPage() {
       </div>
 
       <div className="px-4 -mt-4 relative z-20">
+        {/* 🆕 新版入口引导 */}
+        <div className="bg-gradient-to-r from-brand-teal/10 to-brand-teal/5 rounded-[8px] p-3 border border-brand-teal/20 mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base">₿</span>
+            <div>
+              <div className="text-[11px] font-semibold text-brand-teal-dark">BTC 快节奏游戏</div>
+              <div className="text-[9px] text-text-tertiary">60秒一轮 · 涨跌/大小/单双/尾号</div>
+            </div>
+          </div>
+          <Link href="/btc" className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium rounded-[6px] active:scale-95 transition-transform shadow-sm">
+            去玩 →
+          </Link>
+        </div>
+
         {/* Signal Card */}
         {sigInfo && (
           <div className="bg-surface rounded-[8px] p-4 shadow-sm border border-border-tertiary mb-3">
