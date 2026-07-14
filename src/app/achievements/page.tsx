@@ -97,6 +97,13 @@ export default function AchievementsPage() {
         aiChats: 0,
       };
 
+      // 尝试从AI API获取聊天计数
+      try {
+        const aiRes = await fetch(`${API_BASE}/api/ai-deduct-chat?uid=${user.uid}&action=count`);
+        const aiJson = await aiRes.json();
+        if (aiJson.code === 0) stats.aiChats = aiJson.data?.count || 0;
+      } catch {}
+
       // 获取已领取的成就记录
       let claimedIds: string[] = [];
       try {
