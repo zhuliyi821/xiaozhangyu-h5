@@ -14,12 +14,16 @@ export default function QuickActions({ couponCount, isLoggedIn, onLogin }: Props
       href: "/messages", badge: false,
     },
     {
-      icon: "📋", label: "我的订单", sub: "查看订单状态",
-      href: "/orders", badge: false,
+      icon: "📋", label: "我的活动", sub: "PK发起·围观·投注",
+      href: "/activities", badge: false,
     },
     {
       icon: "🎟️", label: "卡券包", sub: couponCount > 0 ? `${couponCount}张可用` : "优惠券中心",
       href: "/coupons", badge: false,
+    },
+    {
+      icon: "📦", label: "我的订单", sub: "查看订单状态",
+      href: "/orders", badge: false,
     },
   ];
 
@@ -30,7 +34,7 @@ export default function QuickActions({ couponCount, isLoggedIn, onLogin }: Props
 
   return (
     <div className="mx-4 mt-3">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {actions.map((a, i) => (
           <div
             key={i}
