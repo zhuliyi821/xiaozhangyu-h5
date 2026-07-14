@@ -133,7 +133,18 @@ function LotterySimContent() {
     // 宝箱
     chestStars: number;     // 已积攒的星星
     chestOpened: boolean;   // 今日是否已开宝箱
-  }>({ date: "", checkedIn: false, betCount: 0, hotWin: false, earn50: false, streak3: 0, claimed: [], streakDay: 0, chestStars: 0, chestOpened: false });
+  }>(() => {
+    // 从localStorage读取持久化数据
+    try {
+      const saved = localStorage.getItem("szp_daily_tasks");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const today = new Date().toISOString().split("T")[0];
+        if (parsed.date === today) return parsed;
+      }
+    } catch {}
+    return { date: "", checkedIn: false, betCount: 0, hotWin: false, earn50: false, streak3: 0, claimed: [], streakDay: 0, chestStars: 0, chestOpened: false };
+  });
 
   const TASK_LIST = [
     // 晨间
