@@ -2,6 +2,7 @@
 
 /** 📋 任务中心 v3 — 3Tab统一架构（每日任务+成就墙+挑战签到） */
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE, apiFetch } from "@/config/api";
 import { ErrorState } from "@/components/layout/error-state";
@@ -90,6 +91,15 @@ const GROUP_CONFIG = [
 
 /* ─── 签到奖励阶梯 ─── */
 const STREAK_REWARDS = [50, 100, 150, 200, 300, 500, 1000];
+
+function getTaskLink(taskKey: string): string {
+  const links: Record<string, string> = {
+    first_bet: "/pk-hall", first_win: "/pk-hall", pk_beginner: "/pk-hall",
+    create_event: "/pk-hall", social_butterfly: "/invite",
+    daily_checkin: "/tasks?tab=challenge", all_complete: "/tasks?tab=challenge",
+  };
+  return links[taskKey] || "/tasks";
+}
 
 function rewardStr(task: TaskItem): string {
   const parts: string[] = [];
@@ -409,7 +419,11 @@ export default function TasksPage() {
                                   {claiming === task.task_key ? "..." : "领取"}
                                 </button>
                               )}
-                              {!done && <div className="mt-1 text-[10px] text-brand-teal font-medium">去完成 →</div>}
+                              {!done && (
+                                <Link href={getTaskLink(task.task_key)} className="mt-1 inline-block text-[10px] text-brand-teal font-medium active:scale-95 transition-transform">
+                                  去完成 →
+                                </Link>
+                              )}
                             </div>
                           </div>
                         );
@@ -613,9 +627,9 @@ export default function TasksPage() {
                   {item.done ? (
                     <span className="text-[10px] text-green-500 font-medium">已完成 ✅</span>
                   ) : (
-                    <a href={item.link} className="px-3 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium rounded-[8px] active:scale-95 transition-transform">
+                    <Link href={item.link} className="px-3 py-1.5 bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium rounded-[8px] active:scale-95 transition-transform inline-block">
                       去完成
-                    </a>
+                    </Link>
                   )}
                 </div>
               ))}
