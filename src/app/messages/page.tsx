@@ -1,29 +1,60 @@
 "use client";
 
-/**
- * 💬 消息中心
- *
- * 系统通知与活动消息
- */
-
-import { useState } from "react";
+/** 💬 消息中心 v2 — 真实API + 标记已读 + 品牌色统一 */
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { API_BASE } from "@/config/api";
 import LoginModal from "@/components/ui/login-modal";
 
-const MOCK_MSGS = [
-  { id: 1, icon: "🎉", title: "签到成功", desc: "连续签到 3 天，获得 300 游戏豆", time: "2 小时前", unread: false },
-  { id: 2, icon: "🏆", title: "成就解锁", desc: "恭喜达成「首战告捷」成就", time: "昨天", unread: false },
-  { id: 3, icon: "💰", title: "分红到账", desc: "水晶球今日分红 +25.3 ⛏️ 已到账", time: "昨天", unread: false },
-  { id: 4, icon: "🔥", title: "连胜提醒", desc: "你已经 3 连胜了！再来一局", time: "2 天前", unread: true },
-  { id: 5, icon: "🎁", title: "优惠券即将到期", desc: "你有 2 张优惠券将在 3 天后过期", time: "3 天前", unread: true },
-  { id: 6, icon: "🤝", title: "好友邀请", desc: "你邀请的好友已注册，获得 1,000🎮", time: "5 天前", unread: false },
-];
+interface MessageItem {
+  id: number;
+  icon: string;
+  type: string;
+  title: string;
+  desc: string;
+  time: string;
+  unread: boolean;
+}
 
 export default function MessagesPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [msgs, setMsgs] = useState<MessageItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (loading) return <main className="min-h-screen bg-bg" />;
+  const fetchMsgs = useCallback(async () => {
+    if (!user?.uid) return;
+    setLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/messages/list?action=list&uid=${user.uid}`).then(r => r.json());
+      if (r.code === 0) setMsgs(r.data || []);
+    } catch {}
+    finally { setLoading(false); }
+  }, [user?.uid]);
+
+  useEffect(() => { fetchMsgs(); }, [fetchMsgs]);
+
+  const markRead = async (id: number) => {
+    try {
+      await fetch(`${API_BASE}/api/messages/read?action=read`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setMsgs(prev => prev.map(m => m.id === id ? { ...m, unread: false } : m));
+    } catch {}
+  };
+
+  const markAllRead = async () => {
+    if (!user?.uid) return;
+    try {
+      await fetch(`${API_BASE}/api/messages/read-all?action=read-all&uid=${user.uid}`, { method: "POST" });
+      setMsgs(prev => prev.map(m => ({ ...m, unread: false })));
+    } catch {}
+  };
+
+  const unread = msgs.filter(m => m.unread).length;
+
+  if (authLoading) return <main className="min-h-screen bg-bg" />;
 
   if (!user) {
     return (
@@ -40,56 +71,68 @@ export default function MessagesPage() {
     );
   }
 
-  const unread = MOCK_MSGS.filter(m => m.unread).length;
-
   return (
     <main className="min-h-screen bg-bg pb-10">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark px-5 pt-4 pb-5 text-white rounded-b-[28px]">
-        <div className="flex items-center gap-2 mb-2">
-          <button onClick={() => window.history.back()} className="text-lg">&lt;</button>
+      {/* Header — 品牌色 */}
+      <div className="bg-gradient-to-br from-brand-teal via-brand-teal-dark to-brand-teal-darkest text-white px-5 pt-4 pb-5 rounded-b-[28px]">
+        <div className="flex items-center justify-between mb-2">
+          <button onClick={() => window.history.back()} className="text-lg leading-none">&lt;</button>
           <span className="text-base font-medium">消息中心</span>
-          {unread > 0 && (
-            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">{unread} 条未读</span>
+          {unread > 0 ? (
+            <button onClick={markAllRead} className="text-[10px] bg-white/20 px-2.5 py-1 rounded-full active:scale-90">
+              全部已读
+            </button>
+          ) : (
+            <span className="text-[10px] opacity-60">已读 {msgs.length}</span>
           )}
         </div>
-        <div className="text-[11px] opacity-80">系统通知与活动消息</div>
+        {unread > 0 && (
+          <div className="text-[11px] opacity-80">{unread} 条未读消息</div>
+        )}
       </div>
 
       {/* Message list */}
       <div className="px-4 mt-3 space-y-2">
-        {MOCK_MSGS.map(msg => (
-          <div key={msg.id} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            background: msg.unread ? 'rgba(69,204,213,0.03)' : '#fff',
-            borderRadius: 10, padding: '11px 14px',
-            border: msg.unread ? '1px solid rgba(69,204,213,0.15)' : '1px solid #E5E5EA',
-            cursor: 'pointer',
-          }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 10,
-              background: msg.unread ? 'rgba(69,204,213,0.1)' : '#F1EFE8',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, flexShrink: 0,
-            }}>
-              {msg.icon}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <div style={{ fontSize: 12, fontWeight: 500 }}>{msg.title}</div>
-                {msg.unread && (
-                  <div style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: '#F27152', flexShrink: 0,
-                  }} />
-                )}
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-[10px] p-3.5 animate-pulse border border-gray-100 flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-[8px] bg-gray-100" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 w-20 bg-gray-100 rounded" />
+                <div className="h-3 w-32 bg-gray-50 rounded" />
               </div>
-              <div style={{ fontSize: 10, color: '#636366', marginTop: 1 }}>{msg.desc}</div>
-              <div style={{ fontSize: 9, color: '#8E8E93', marginTop: 2 }}>{msg.time}</div>
             </div>
+          ))
+        ) : msgs.length === 0 ? (
+          <div className="text-center py-16 text-text-tertiary text-[12px]">
+            <div className="text-4xl mb-3">💬</div>
+            暂无消息
           </div>
-        ))}
+        ) : (
+          msgs.map(msg => (
+            <div key={msg.id} onClick={() => { if (msg.unread) markRead(msg.id); }}
+              className={`rounded-[10px] p-3.5 flex items-center gap-2.5 cursor-pointer active:scale-[0.98] transition-all ${
+                msg.unread ? 'bg-brand-teal/5 border border-brand-teal/10' : 'bg-white border border-gray-100'
+              }`}>
+              <div className={`w-8 h-8 rounded-[8px] flex items-center justify-center text-[16px] shrink-0 ${
+                msg.unread ? 'bg-brand-teal/10' : 'bg-gray-100'
+              }`}>
+                {msg.icon}
+              </div>
+              <div className="flex-1 min-w-0" onClick={() => { if (msg.unread) markRead(msg.id); }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[12px] font-medium">{msg.title}</span>
+                  {msg.unread && <span className="w-1.5 h-1.5 rounded-full bg-brand-coral shrink-0" />}
+                </div>
+                <div className="text-[10px] text-text-tertiary mt-0.5">{msg.desc}</div>
+                <div className="text-[9px] text-text-tertiary/60 mt-1">{msg.time}</div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
+
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </main>
   );
 }
