@@ -690,9 +690,8 @@ export default function PKHallPage() {
                       })}
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
-                      <div className="h-full rounded-full" style={{
+                      <div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-coral" style={{
                         width: `${pk.sideline_total && pk.sideline_total > 0 ? Math.round(((pk.sideline_counts?.[0] || 0) / pk.sideline_total) * 100) : 50}%`,
-                        background: 'linear-gradient(90deg, #45CCD5, #F27152)',
                       }} />
                     </div>
                   </div>
