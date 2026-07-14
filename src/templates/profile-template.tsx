@@ -26,6 +26,7 @@ import DailyQuests from "@/app/profile/components/daily-quests";
 import InviteBanner from "@/app/profile/components/invite-banner";
 import ProfileSkeleton from "@/app/profile/components/skeleton-loader";
 import LoginPrompt from "@/app/profile/components/login-prompt";
+import TierBadge from "@/components/ui/tier-badge";
 
 export default function ProfileTemplate() {
   const { user, loading, logout, refreshBalance } = useAuth();
@@ -80,6 +81,11 @@ export default function ProfileTemplate() {
       <ErrorBoundary label="资产">
         <AssetOverview credits={credits} />
       </ErrorBoundary>
+
+      {/* 段位徽章 */}
+      <div className="px-4 mt-3">
+        <TierBadge mode="full" />
+      </div>
 
       {/* ③ 今日任务（已修复） */}
       <ErrorBoundary label="任务">
