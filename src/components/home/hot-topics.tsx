@@ -88,7 +88,7 @@ export function HotTopics() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <h2 className="text-[13px] font-bold text-text-primary">⚡ 全民PK</h2>
-            <span className="text-[9px] bg-brand-teal text-white px-2 py-[1px] rounded-full font-medium">实时</span>
+            <span className="text-[9px] bg-brand-teal-light/30 text-brand-teal-dark px-2 py-[1px] rounded-full font-medium">热门</span>
           </div>
           <Link href="/pk-hall" className="text-[11px] text-brand-teal font-medium flex items-center gap-1">
             去PK大厅 →

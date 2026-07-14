@@ -20,8 +20,19 @@ import { DailyTasks } from "@/components/home/daily-tasks";
 import { PartnerGrid } from "@/components/home/partner-grid";
 import { OnboardingModal } from "@/components/home/onboarding-modal";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { API_BASE } from "@/config/api";
 
 export default function HomeTemplate() {
+  const [charityFund, setCharityFund] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/homepage/data`)
+      .then(r => r.json())
+      .then(d => { if (d.code === 0) setCharityFund(d.data.charity_fund); })
+      .catch(() => {});
+  }, []);
+
   return (
     <main className="pb-20">
       {/* ♿ 跳过导航链接 (WCAG 2.4.1) */}
@@ -45,13 +56,15 @@ export default function HomeTemplate() {
         {/* ④ 快捷工具 */}
         <QuickActions />
 
-        {/* 公益资金池入口（独立板块） */}
+        {/* 公益资金池入口（动态金额） */}
         <Link href="/charity-fund"
-          aria-label="公益资金池，当前284,560豆"
+          aria-label={`公益资金池，当前${(charityFund ?? 284560).toLocaleString()}豆`}
           className="block bg-gradient-to-r from-brand-coral to-brand-coral-dark rounded-[10px] py-2.5 px-4 text-center active:scale-[0.98] transition-transform shadow-sm">
           <div className="flex items-center justify-center gap-2">
             <span className="text-[13px] font-semibold text-white">❤️ 公益资金池</span>
-            <span className="text-[9px] bg-white/20 text-white px-2 py-[1px] rounded-full">284,560豆</span>
+            <span className="text-[9px] bg-white/20 text-white px-2 py-[1px] rounded-full">
+              {charityFund !== null ? `${charityFund.toLocaleString()}豆` : "加载中..."}
+            </span>
           </div>
           <div className="text-[10px] text-white/70 mt-0.5">
             公益PK · 民众捐赠 · 赞助 · 你来决定资金分配
