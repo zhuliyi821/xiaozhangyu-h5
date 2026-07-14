@@ -55,6 +55,8 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
   const [signLoading, setSignLoading] = useState(true);
   const [signing, setSigning] = useState(false);
   const [signResult, setSignResult] = useState<string | null>(null);
+  const [hasBets, setHasBets] = useState(false);
+  const [hasInvites, setHasInvites] = useState(false);
 
   // 查询签到状态
   const fetchSignStatus = useCallback(async () => {
@@ -70,7 +72,13 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
 
   useEffect(() => {
     fetchSignStatus();
-  }, [fetchSignStatus]);
+    // 查询用户是否有投注和邀请
+    apiFetch(`/api/tasks?uid=${uid}`).then((d: any) => {
+      const tasks = d?.tasks || [];
+      setHasBets(tasks.some((t: any) => t.task_key === "first_bet" && t.user_progress >= t.target_count));
+      setHasInvites(tasks.some((t: any) => t.task_key === "social_butterfly" && t.user_progress >= t.target_count));
+    }).catch(() => {});
+  }, [fetchSignStatus, uid]);
 
   // 执行签到
   const handleSign = async () => {
@@ -113,20 +121,20 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
     },
     {
       icon: <Target className="w-4 h-4 text-blue-500" />,
-      label: "预测下注",
+      label: hasBets ? "✅ 已预测" : "预测下注",
       desc: "参与任意预测并下注",
       reward: 100,
-      done: false,
+      done: hasBets,
       maxDaily: 5,
-      currentDaily: 0,
+      currentDaily: hasBets ? 1 : 0,
       link: "/pk-hall",
     },
     {
       icon: <Users className="w-4 h-4 text-purple-500" />,
-      label: "邀请好友",
+      label: hasInvites ? "✅ 已邀请" : "邀请好友",
       desc: "邀请好友注册并完成首单",
       reward: 150000,
-      done: false,
+      done: hasInvites,
       maxDaily: 999,
       currentDaily: 0,
       link: "/jiadouzhan",
