@@ -90,7 +90,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
           <div className="text-4xl mb-3">🔐</div>
           <div className="text-sm text-gray-500 mb-4">请先登录后结算</div>
           <button onClick={() => setShowLogin(true)}
-            className="px-6 py-2.5 bg-gradient-to-r from-[#F27152] to-[#E06050] text-white text-xs rounded-full">
+            className="px-6 py-2.5 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white text-xs rounded-full">
             立即登录
           </button>
           {showLogin && (
@@ -122,7 +122,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
               查看订单
             </a>
             <a href="/store"
-              className="px-5 py-2.5 bg-gradient-to-r from-[#F27152] to-[#E06050] text-white text-xs rounded-full">
+              className="px-5 py-2.5 bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white text-xs rounded-full">
               继续逛逛
             </a>
           </div>
@@ -235,7 +235,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ orderId: st
             <button
               onClick={doPay}
               disabled={paying}
-              className="w-full py-3 text-sm font-medium rounded-full bg-gradient-to-r from-[#F27152] to-[#E06050] text-white shadow-lg disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full py-3 text-sm font-medium rounded-full bg-gradient-to-r from-brand-coral to-brand-coral-dark text-white shadow-lg disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {paying ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> 支付中...</>
