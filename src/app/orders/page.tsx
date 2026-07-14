@@ -36,7 +36,7 @@ export default function OrdersPage() {
   return (
     <main className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12">
           <button onClick={() => window.history.back()} className="text-text-secondary text-lg mr-3">‹</button>
           <h1 className="text-base font-semibold">我的订单</h1>
@@ -75,7 +75,7 @@ export default function OrdersPage() {
       {!loading && !error && orders.length > 0 && (
         <div className="px-4 mt-4 space-y-3">
           {orders.map((o) => (
-            <div key={o.order_sn} className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+            <div key={o.order_sn} className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
               {/* Header row */}
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-[10px] px-2 py-0.5 rounded-[8px] font-medium ${typeColors[o.order_type] || "bg-gray-500 text-white"}`}>
@@ -87,7 +87,7 @@ export default function OrdersPage() {
               </div>
               {/* Product info */}
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-[8px] bg-bg flex items-center justify-center text-xl shrink-0 border border-[rgba(69,204,213,0.08)]">
+                <div className="w-14 h-14 rounded-[8px] bg-bg flex items-center justify-center text-xl shrink-0 border border-brand-teal/10">
                   {o.order_type === "闲豆" ? "🫘" : "📦"}
                 </div>
                 <div className="flex-1 min-w-0">

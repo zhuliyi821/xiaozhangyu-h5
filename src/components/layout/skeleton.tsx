@@ -25,7 +25,7 @@ export function Skeleton({ variant = "text", className = "" }: SkeletonProps) {
 /** 卡片骨架屏：3 行文本 + 底栏 */
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] p-4 space-y-3">
+    <div className="bg-white rounded-[12px] border border-brand-teal/10 p-4 space-y-3">
       <Skeleton variant="text" className="w-1/3" />
       <Skeleton variant="card" />
       <div className="flex gap-2">

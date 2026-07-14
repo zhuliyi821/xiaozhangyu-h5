@@ -139,7 +139,7 @@ function ProductCard({ p, i, onBuy, onShare }: {
 
   return (
     <div onClick={() => onBuy(p)}
-      className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] active:scale-[0.98] transition-transform cursor-pointer relative">
+      className="bg-surface rounded-sm pb-3.5 pt-0 overflow-hidden shadow-sm border border-brand-teal/10 active:scale-[0.98] transition-transform cursor-pointer relative">
       <div className="absolute top-2 right-2 z-10" onClick={(e) => { e.stopPropagation(); onShare(p); }}>
         <ShareButton data={{ title: `小章鱼 - ${p.name}`, text: `¥${p.selling_price} · ${p.brand || ""}`, url: `${getShareOrigin()}/store` }} />
       </div>

@@ -46,7 +46,7 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-bg pb-24">
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12">
           <button onClick={() => window.history.back()} className="text-text-secondary text-lg mr-3">‹</button>
           <h1 className="text-base font-semibold">设置</h1>
@@ -62,7 +62,7 @@ export default function SettingsPage() {
       {profile && (
         <div className="px-4 mt-6 space-y-4">
           {/* 个人资料 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <h2 className="text-sm font-semibold mb-4">个人资料</h2>
             {/* 头像 */}
             <div className="flex items-center gap-4 mb-4">
@@ -80,7 +80,7 @@ export default function SettingsPage() {
               <label className="text-[11px] text-text-secondary block mb-1">昵称</label>
               <div className="flex gap-2">
                 <input type="text" value={nickname} onChange={e => setNickname(e.target.value)}
-                  className="flex-1 bg-bg rounded-[8px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  className="flex-1 bg-bg rounded-[8px] px-3 py-2 text-xs border border-brand-teal/10 focus:outline-none focus:border-brand-teal" />
                 <button onClick={handleSave} disabled={saving || !nickname.trim()}
                   className="px-4 py-2 bg-brand-teal text-white text-xs rounded-[8px] disabled:opacity-50">
                   {saving ? "保存中..." : "保存"}
@@ -93,7 +93,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 修改密码 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">安全设置</h2>
               <button onClick={() => setShowPwd(!showPwd)}
@@ -104,9 +104,9 @@ export default function SettingsPage() {
             {showPwd && (
               <div className="space-y-3">
                 <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)}
-                  placeholder="原密码" className="w-full bg-bg rounded-[8px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  placeholder="原密码" className="w-full bg-bg rounded-[8px] px-3 py-2 text-xs border border-brand-teal/10 focus:outline-none focus:border-brand-teal" />
                 <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)}
-                  placeholder="新密码（至少6位）" className="w-full bg-bg rounded-[8px] px-3 py-2 text-xs border border-[rgba(69,204,213,0.1)] focus:outline-none focus:border-brand-teal" />
+                  placeholder="新密码（至少6位）" className="w-full bg-bg rounded-[8px] px-3 py-2 text-xs border border-brand-teal/10 focus:outline-none focus:border-brand-teal" />
                 <button onClick={handleChangePwd} disabled={pwdSaving || !oldPwd || newPwd.length < 6}
                   className="w-full py-2 bg-amber-500 text-white text-xs rounded-[8px] disabled:opacity-50">
                   {pwdSaving ? "修改中..." : "确认修改"}
@@ -116,7 +116,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 账户信息 */}
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.06)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/5">
             <h2 className="text-sm font-semibold mb-3">账户信息</h2>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="bg-bg rounded-[8px] p-3">

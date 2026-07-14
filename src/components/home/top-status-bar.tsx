@@ -100,7 +100,7 @@ export function TopStatusBar() {
         </div>
       </div>
       {/* 品牌标语条 — 可点击跳转PK大厅 */}
-      <Link href="/pk-hall" aria-label="去PK大厅，人人可发起，万事皆可预测" className="block mx-4 mb-3 bg-gradient-to-r from-brand-teal/10 via-brand-gold/10 to-brand-coral/10 rounded-[10px] px-3 py-2 text-center border border-[rgba(69,204,213,0.08)] active:scale-[0.98] transition-transform">
+      <Link href="/pk-hall" aria-label="去PK大厅，人人可发起，万事皆可预测" className="block mx-4 mb-3 bg-gradient-to-r from-brand-teal/10 via-brand-gold/10 to-brand-coral/10 rounded-[10px] px-3 py-2 text-center border border-brand-teal/10 active:scale-[0.98] transition-transform">
         <div className="text-[13px] font-medium text-text-primary">人人可发起 · 万事皆可预测</div>
         <div className="text-[10px] text-text-tertiary mt-0.5">为他们加油 · 他们pk你也有奖励</div>
       </Link>

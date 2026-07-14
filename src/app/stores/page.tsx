@@ -42,7 +42,7 @@ function getNavUrl(lat: string, lng: string, address: string, name: string): str
 function StoreCard({ store }: { store: StoreItem }) {
   const navUrl = getNavUrl(store.latitude, store.longitude, store.address, store.store_name);
   return (
-    <div className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)]">
+    <div className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-brand-teal/10">
       <a href={`/store/${store.id}`} className="block active:scale-[0.98] transition-transform">
         {/* 门店缩略图 */}
         <div className="h-32 bg-gradient-to-br from-brand-teal-light/30 to-brand-gold-light/30 flex items-center justify-center overflow-hidden">
@@ -88,7 +88,7 @@ function SkeletonGrid() {
   return (
     <div className="grid grid-cols-2 gap-3 mt-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-[rgba(69,204,213,0.08)] animate-pulse">
+        <div key={i} className="bg-white rounded-[12px] overflow-hidden shadow-sm border border-brand-teal/10 animate-pulse">
           <div className="h-32 bg-gray-100" />
           <div className="p-3 space-y-2">
             <div className="h-4 bg-gray-100 rounded w-3/4" />
@@ -144,7 +144,7 @@ export default function StoresPage() {
             </div>
           </div>
         </div>
-        <div className="mx-4 mt-8 p-8 text-center bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)]">
+        <div className="mx-4 mt-8 p-8 text-center bg-white rounded-[12px] border border-brand-teal/10">
           <div className="text-4xl mb-3">🏪</div>
           <p className="text-sm text-text-secondary mb-1">登录后查看合作门店</p>
           <p className="text-[11px] text-text-tertiary mb-4">到店消费即可获得游戏豆</p>

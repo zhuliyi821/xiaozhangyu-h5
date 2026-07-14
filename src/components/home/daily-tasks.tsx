@@ -75,7 +75,7 @@ export function DailyTasks() {
     {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     {!user ? (
       /* 未登录状态 — 引导登录 */
-      <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm px-4 py-3.5">
+      <div className="bg-white rounded-[12px] border border-brand-teal/10 shadow-sm px-4 py-3.5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[13px] font-bold text-text-primary">📋 每日任务</h2>
         </div>
@@ -91,7 +91,7 @@ export function DailyTasks() {
       </div>
     ) : (
     <Link href="/tasks"
-      className="block bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] shadow-sm px-4 py-3.5 active:scale-[0.98] transition-transform">
+      className="block bg-white rounded-[12px] border border-brand-teal/10 shadow-sm px-4 py-3.5 active:scale-[0.98] transition-transform">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-[13px] font-bold text-text-primary">📋 每日任务</h2>
         {loaded && (

@@ -17,7 +17,7 @@ const partners: PartnerItem[] = [
  */
 export function PartnerGrid() {
   return (
-    <div className="bg-white rounded-[12px] border border-[rgba(69,204,213,0.08)] px-4 py-2.5">
+    <div className="bg-white rounded-[12px] border border-brand-teal/10 px-4 py-2.5">
       <div className="flex gap-5 overflow-x-auto no-scrollbar">
         {partners.map((item, i) => (
           <Link key={i} href={item.href}

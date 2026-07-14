@@ -179,7 +179,7 @@ export default function ScanPage() {
   return (
     <main className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-bg/80 backdrop-blur-xl border-b border-[rgba(69,204,213,0.08)]">
+      <div className="sticky top-0 z-20 bg-bg/80 backdrop-blur-xl border-b border-brand-teal/10">
         <div className="flex items-center px-4 h-12 gap-2">
           <button onClick={() => window.history.back()} className="text-text-secondary"><ArrowLeft className="w-5 h-5" /></button>
           <h1 className="text-base font-semibold flex-1">扫码验奖</h1>
@@ -274,26 +274,26 @@ export default function ScanPage() {
 
         {/* ── Manual Input ── */}
         {mode === "manual" && (
-          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-[rgba(69,204,213,0.08)]">
+          <div className="bg-surface rounded-[8px] p-5 shadow-sm border border-brand-teal/10">
             <div className="text-xs font-semibold mb-3">输入彩票号码</div>
             <div className="mb-3">
               <div className="text-[10px] text-text-tertiary mb-1.5">前区号码（5个，01-35）</div>
               <input value={frontInput} onChange={e => setFrontInput(e.target.value)}
                 placeholder="例: 07,13,28,29,34"
-                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
+                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-brand-teal/10 outline-none focus:border-brand-teal transition-all" />
             </div>
             <div className="mb-3">
               <div className="text-[10px] text-text-tertiary mb-1.5">后区号码（2个，01-12）</div>
               <input value={backInput} onChange={e => setBackInput(e.target.value)}
                 placeholder="例: 06,11"
-                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-[rgba(69,204,213,0.15)] outline-none focus:border-brand-teal transition-all" />
+                className="w-full bg-bg rounded-[8px] px-4 py-3 text-sm border border-brand-teal/10 outline-none focus:border-brand-teal transition-all" />
             </div>
             <div className="flex gap-2 mb-3">
-              <button onClick={genRandom} className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)]">
+              <button onClick={genRandom} className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-brand-teal/10">
                 🎲 随机生成
               </button>
               <button onClick={() => { setFrontInput(""); setBackInput(""); setResult(null); }}
-                className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-[rgba(69,204,213,0.1)]">
+                className="flex-1 py-2 bg-bg rounded-[8px] text-xs text-text-secondary border border-brand-teal/10">
                 🗑️ 清空
               </button>
             </div>
@@ -344,7 +344,7 @@ export default function ScanPage() {
         )}
 
         {/* How to use */}
-        <details className="bg-surface rounded-[8px] p-4 shadow-sm border border-[rgba(69,204,213,0.06)]">
+        <details className="bg-surface rounded-[8px] p-4 shadow-sm border border-brand-teal/5">
           <summary className="text-[11px] font-semibold cursor-pointer">💡 使用说明</summary>
           <div className="mt-3 text-[10px] text-text-tertiary space-y-1.5 leading-relaxed">
             <p>1. 选择「扫码」模式，将彩票二维码对准扫描框，自动识别验奖</p>
