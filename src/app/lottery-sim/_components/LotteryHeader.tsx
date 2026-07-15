@@ -13,6 +13,7 @@ interface LotteryHeaderProps {
   user: any;
   balance: number;
   jackpot: number;
+  onSidePanel?: () => void;
 }
 
 const LOTTERY_LIST = [
@@ -25,7 +26,7 @@ const LOTTERY_LIST = [
 
 export default function LotteryHeader({
   lotteryCode, setLotteryCode, confirmSwitch, setConfirmSwitch,
-  trackModeSwitch, tickets, setTickets, user, balance, jackpot,
+  trackModeSwitch, tickets, setTickets, user, balance, jackpot, onSidePanel,
 }: LotteryHeaderProps) {
   return (
     <>
@@ -47,6 +48,12 @@ export default function LotteryHeader({
               className="ml-2 px-2.5 py-1 rounded-full bg-white/10 text-white/70 text-[9px] font-medium flex items-center gap-1 active:scale-90 transition-transform whitespace-nowrap">
               <span>📊</span><span>走势</span>
             </a>
+            {onSidePanel && (
+              <button onClick={onSidePanel}
+                className="ml-1 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/70 text-xs active:scale-90 transition-transform">
+                ☰
+              </button>
+            )}
           </div>
           <div className="text-right text-white">
             <div className="text-[9px] opacity-50">{user ? "游戏豆" : "未登录"}</div>

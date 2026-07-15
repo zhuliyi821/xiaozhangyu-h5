@@ -10,6 +10,7 @@ import BetSlip from "./_components/BetSlip";
 import DrawResult from "./_components/DrawResult";
 import DailyChallenges from "./_components/DailyChallenges";
 import BetHistory from "./_components/BetHistory";
+import GuestPreview from "./_components/GuestPreview";
 
 import { API_BASE } from '@/config/api';
 import { useAuth } from "@/lib/auth-context";
@@ -57,6 +58,9 @@ function LotterySimContent() {
   const predParam = searchParams.get("pred") || "";
   const { user, loading: authLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [consecutiveLosses, setConsecutiveLosses] = useState(0);
+  const [showLossTip, setShowLossTip] = useState(false);
   const bettingLockRef = useRef(false); // 防连击锁
   const [lotteryCode, setLotteryCode] = useState(initType);
   const [confirmSwitch, setConfirmSwitch] = useState<string | null>(null); // 切换彩种确认
@@ -573,6 +577,19 @@ function LotterySimContent() {
       else setSpriteMsg(msgs.miss[Math.floor(Math.random()*msgs.miss.length)]);
     }
     
+    // 连续未中追踪 → 3次后弹"试试热门号"
+    if (json.data.net_result <= 0) {
+      setConsecutiveLosses(prev => {
+        const next = prev + 1;
+        if (next === 3) {
+          setTimeout(() => setShowLossTip(true), 2000);
+        }
+        return next;
+      });
+    } else {
+      setConsecutiveLosses(0);
+    }
+    
     // 彩蛋检测
     const hour = new Date().getHours();
     if (hour >= 1 && hour <= 5) setEasterEgg(msgs.egg_night[Math.floor(Math.random()*msgs.egg_night.length)]);
@@ -632,6 +649,11 @@ function LotterySimContent() {
     }
   };
 
+  // 未登录 → 展示预览页
+  if (!user) {
+    return <GuestPreview onLogin={() => setShowLogin(true)} />;
+  }
+
   return (
     <main className="pb-20 min-h-screen bg-bg">
       {/* 头部 + 彩种切换 (拆分组件) */}
@@ -646,6 +668,7 @@ function LotterySimContent() {
         user={user}
         balance={balance}
         jackpot={jackpot}
+        onSidePanel={() => setShowSidePanel(true)}
       />
 
       <div className="px-4 -mt-3 relative z-20">
@@ -1037,6 +1060,84 @@ function LotterySimContent() {
           </div>
         </div>
       )}
+
+      {/* ═══════= 侧边面板 (Drawer) ═══════= */}
+      {showSidePanel && (
+        <>
+          <div className="fixed inset-0 z-[800] bg-black/40" onClick={() => setShowSidePanel(false)} />
+          <div className="fixed top-0 right-0 z-[810] w-[300px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-200 overflow-y-auto">
+            <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <span className="text-[13px] font-semibold">数字碰 · 工具箱</span>
+              <button onClick={() => setShowSidePanel(false)} className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              {/* 冷热号分析 */}
+              <div className="bg-gray-50 rounded-[8px] p-3">
+                <a href={"/lottery?type=" + lotteryCode} className="text-[11px] font-semibold text-brand-teal-dark">📊 冷热号分析 →</a>
+                <p className="text-[9px] text-text-tertiary mt-1">查看各号码出现频率和冷热状态</p>
+              </div>
+
+              {/* 今日挑战 */}
+              {user && (
+                <DailyChallenges
+                  user={user}
+                  dailyTasks={dailyTasks as any}
+                  onSetDailyTasks={setDailyTasks}
+                  achievements={achievements}
+                  onSetAchievements={setAchievements}
+                  balance={balance}
+                  onSetBalance={setBalance}
+                  showTasks={showTasks}
+                  onSetShowTasks={setShowTasks}
+                  apiBase={API_BASE}
+                />
+              )}
+
+              {/* 个人统计 */}
+              <div className="bg-gray-50 rounded-[8px] p-3">
+                <div className="text-[11px] font-semibold text-text-primary mb-2">📈 个人统计</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: '参与局数', value: `${playerStats.totalBets}`, color: 'text-text-primary' },
+                    { label: '胜率', value: playerStats.totalBets > 0 ? `${Math.round(playerStats.totalWins / playerStats.totalBets * 100)}%` : '0%', color: playerStats.totalBets > 0 && playerStats.totalWins / playerStats.totalBets >= 0.5 ? 'text-green-600' : 'text-text-tertiary' },
+                    { label: '盈利', value: `${playerStats.totalProfit >= 0 ? '+' : ''}${playerStats.totalProfit.toLocaleString()}`, color: playerStats.totalProfit >= 0 ? 'text-brand-coral' : 'text-red-500' },
+                    { label: '最大奖金', value: `${playerStats.biggestWin.toLocaleString()}`, color: 'text-brand-gold-dark' },
+                  ].map(s => (
+                    <div key={s.label} className="p-2 rounded-[6px] bg-white border border-gray-100">
+                      <div className="text-[8px] text-text-tertiary">{s.label}</div>
+                      <div className={`text-[12px] font-bold mt-0.5 ${s.color}`}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ═══════= 连续未中提示 ═══════= */}
+      {showLossTip && (
+        <div className="fixed inset-0 z-[900] bg-black/40 flex items-center justify-center p-6" onClick={() => setShowLossTip(false)}>
+          <div className="bg-white rounded-[16px] p-5 w-[300px] shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="text-3xl mb-2">💡</div>
+              <div className="text-[13px] font-semibold mb-1">连续未中，换种策略？</div>
+              <p className="text-[11px] text-text-tertiary mb-4">试试机选或热门号码，概率更高哦</p>
+              <div className="flex gap-2">
+                <button onClick={() => { quickPick(); setShowLossTip(false); }}
+                  className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[11px] font-medium active:scale-95 transition-transform">
+                  🎲 机选一注
+                </button>
+                <button onClick={() => setShowLossTip(false)}
+                  className="flex-1 py-2 rounded-[8px] bg-gray-100 text-text-secondary text-[11px] font-medium active:scale-95 transition-transform">
+                  再想想
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
