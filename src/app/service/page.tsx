@@ -13,15 +13,15 @@ import Link from "next/link";
 import { TabBar } from "@/components/ui/tab-bar";
 
 // ─── 8格功能入口 ───
-const FUNC_GRID = [
-  { icon: "🤖", label: "AI趣预测", sub: "AI驱动·全民预测", color: "from-red-400 to-red-600" },
-  { icon: "🔥", label: "全民PK", sub: "发起话题赢奖励", color: "from-orange-400 to-orange-600" },
-  { icon: "⚽", label: "省超竞猜", sub: "12种玩法赢水晶石", color: "from-amber-400 to-amber-600" },
-  { icon: "💰", label: "我的资产", sub: "游戏豆·水晶石·余额", color: "from-green-400 to-green-600" },
-  { icon: "📅", label: "每日签到", sub: "签到得游戏豆", color: "from-purple-400 to-purple-600" },
-  { icon: "🔮", label: "今日运势", sub: "每日幸运指南", color: "from-pink-400 to-pink-600" },
-  { icon: "📈", label: "股票期指", sub: "AI量化分析", color: "from-blue-400 to-blue-600" },
-  { icon: "₿", label: "BTC试玩", sub: "模拟交易赚水晶石", color: "from-orange-500 to-orange-700" },
+const FUNC_GRID: { icon: string; label: string; sub: string; color: string; href: string }[] = [
+  { icon: "🤖", label: "AI趣预测", sub: "AI驱动·全民预测", color: "from-red-400 to-red-600", href: "/ai-predictions" },
+  { icon: "🔥", label: "全民PK", sub: "发起话题赢奖励", color: "from-orange-400 to-orange-600", href: "/pk-hall" },
+  { icon: "⚽", label: "省超竞猜", sub: "12种玩法赢水晶石", color: "from-amber-400 to-amber-600", href: "/pk-hall?category=sports" },
+  { icon: "💰", label: "我的资产", sub: "游戏豆·水晶石·余额", color: "from-green-400 to-green-600", href: "/jiadouzhan" },
+  { icon: "📅", label: "每日签到", sub: "签到得游戏豆", color: "from-purple-400 to-purple-600", href: "/tasks" },
+  { icon: "🔮", label: "今日运势", sub: "每日幸运指南", color: "from-pink-400 to-pink-600", href: "/daily-fortune" },
+  { icon: "📈", label: "股票期指", sub: "AI量化分析", color: "from-blue-400 to-blue-600", href: "/stock-analysis" },
+  { icon: "₿", label: "BTC试玩", sub: "模拟交易赚水晶石", color: "from-orange-500 to-orange-700", href: "/btc" },
 ];
 
 export default function ServicePage() {
