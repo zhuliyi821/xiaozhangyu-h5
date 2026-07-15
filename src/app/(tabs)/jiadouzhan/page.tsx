@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ExchangeModal from "./exchange-modal";
 import DailyTasks from "./daily-tasks";
+import NewcomerTasks from "./newcomer-tasks";
 import { shareToWeChat, buildShareText, getShareOrigin } from "@/lib/share-to-wechat";
 
 // ─── 接口 ───
@@ -376,6 +377,9 @@ export default function JiadouzhanPage() {
 
           {/* 六、快捷入口 */}
           <QuickLinks />
+
+          {/* 新手成长任务 — 注册奖励5步拆分 */}
+          <NewcomerTasks uid={user.uid} onBalanceRefresh={() => refreshBalance()} />
 
           {/* 七、日常任务 */}
           <DailyTasks uid={user.uid} onBalanceRefresh={() => refreshBalance()} />

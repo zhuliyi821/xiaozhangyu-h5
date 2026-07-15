@@ -91,8 +91,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [saveUser]);
 
   const register = useCallback(async (mobile: string, password: string) => {
-    await apiRegister(mobile, password);
+    const result = await apiRegister(mobile, password);
     await login(mobile, password);
+    // 初始化新手成长任务（步骤①自动完成+发放10000）
+    try {
+      await fetch("/api/newcomer/init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "init", uid: result.uid }),
+      });
+    } catch {}
   }, [login]);
 
   const loginByUsername = useCallback(async (username: string, password: string) => {
