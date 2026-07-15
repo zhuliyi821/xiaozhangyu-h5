@@ -6,6 +6,7 @@ import { TabBar } from "./tab-bar";
 const HIDE_TAB_BAR_PATHS = [
   "/pk-hall-solo",
   "/pk-hall/standalone",
+  "/store",
   "/service",
   "/btc",
   "/btc-predict",

@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * 🐙 服务号 — 品牌首页 + 新手任务 + 4Tab底栏
+ * 🐙 服务号 — 品牌首页 + 新手任务 + 5Tab底栏
  *
  * 首页嵌入新手任务进度（条件渲染），auto-claim 庆祝弹窗
- * 底栏4Tab：首页/AI助理/加豆站/服务
+ * 底栏5Tab：首页/AI预测/PK大厅/小章鱼/我的
  */
 
 import { useState, useCallback } from "react";
