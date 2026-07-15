@@ -45,7 +45,7 @@ export default function ServicePage() {
       </div>
 
       {/* ═══════ 品牌头 (渐变+章鱼+标题) ═══════ */}
-      <div className="bg-gradient-to-br from-teal-200 via-cyan-200 to-teal-300 px-4 pt-6 pb-12 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-brand-teal-light via-brand-teal to-brand-teal-dark px-4 pt-6 pb-12 relative overflow-hidden">
         <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/15" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10" />
         <div className="absolute top-6 right-8 w-20 h-20 rounded-full bg-white/20" />
@@ -53,8 +53,8 @@ export default function ServicePage() {
           <div className="w-16 h-16 rounded-2xl bg-white/30 backdrop-blur-sm flex items-center justify-center text-3xl shadow-sm mb-3">
             🐙
           </div>
-          <h1 className="text-2xl font-bold text-text-primary mb-1">小章鱼</h1>
-          <p className="text-[11px] text-text-secondary">AI趣预测 · 有奖PK · 赢水晶石</p>
+          <h1 className="text-2xl font-bold text-white mb-1">小章鱼</h1>
+          <p className="text-[11px] text-white/80">AI趣预测 · 有奖PK · 赢水晶石</p>
         </div>
       </div>
 
