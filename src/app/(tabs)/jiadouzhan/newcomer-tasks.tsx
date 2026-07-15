@@ -25,6 +25,7 @@ interface NewcomerStep {
 interface Props {
   uid: number;
   onBalanceRefresh?: () => void;
+  onClaimed?: (step: number, reward: number) => void;
 }
 
 const STEP_LINKS: Record<number, string> = {
@@ -42,7 +43,7 @@ const STEP_ICONS: Record<number, string> = {
   5: "📢",
 };
 
-export default function NewcomerTasks({ uid, onBalanceRefresh }: Props) {
+export default function NewcomerTasks({ uid, onBalanceRefresh, onClaimed }: Props) {
   const [steps, setSteps] = useState<NewcomerStep[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalReward, setTotalReward] = useState(150000);
@@ -77,6 +78,7 @@ export default function NewcomerTasks({ uid, onBalanceRefresh }: Props) {
       if (json.code === 0) {
         await fetchTasks();
         onBalanceRefresh?.();
+        onClaimed?.(step, json.reward || 0);
       }
     } catch {}
     setCompleting(null);

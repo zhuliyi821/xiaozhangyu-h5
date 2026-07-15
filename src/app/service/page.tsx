@@ -1,16 +1,18 @@
 "use client";
 
 /**
- * 🐙 服务号 — 小章鱼·AI趣预测 品牌首页
- * 100% 对齐图版：顶栏+品牌头+用户卡+功能入口+门店合作+底栏
+ * 🐙 服务号 — 品牌首页 + 新手任务 + 4Tab底栏
+ *
+ * 首页嵌入新手任务进度（条件渲染），auto-claim 庆祝弹窗
+ * 底栏4Tab：首页/AI助理/加豆站/服务
  */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { ChevronRight, X } from "lucide-react";
+import NewcomerTasks from "@/app/(tabs)/jiadouzhan/newcomer-tasks";
+import { ChevronRight, X, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { TabBar } from "@/components/ui/tab-bar";
 
 // ─── 8格功能入口 ───
 const FUNC_GRID: { icon: string; label: string; sub: string; color: string; href: string }[] = [
@@ -24,9 +26,37 @@ const FUNC_GRID: { icon: string; label: string; sub: string; color: string; href
   { icon: "₿", label: "BTC试玩", sub: "模拟交易赚水晶石", color: "from-orange-500 to-orange-700", href: "/btc" },
 ];
 
+// ─── 4Tab ───
+const BOTTOM_TABS = [
+  { icon: "🏠", label: "首页", href: "/service" },
+  { icon: "💬", label: "AI助理", href: "/ai" },
+  { icon: "💰", label: "加豆站", href: "/jiadouzhan" },
+  { icon: "🏪", label: "服务", href: "/service#products" },
+];
+
 export default function ServicePage() {
-  const { user } = useAuth();
+  const { user, refreshBalance } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [celebration, setCelebration] = useState<{ msg: string; nextLabel?: string; nextHref?: string } | null>(null);
+
+  const handleClaimed = useCallback((step: number, reward: number) => {
+    if (step < 5) {
+      const nextLabels: Record<number, { label: string; href: string }> = {
+        2: { label: "起一卦并分享", href: "/daily-fortune" },
+        3: { label: "玩一局游戏并分享", href: "/pk-hall" },
+        4: { label: "发起PK并分享", href: "/pk-hall" },
+        5: { label: "分享产品矩阵", href: "/service" },
+      };
+      const next = nextLabels[step + 1];
+      setCelebration({
+        msg: `🎉 恭喜获得 ${reward.toLocaleString()} 🎮！`,
+        nextLabel: next ? `下一步: ${next.label} +${(step + 1 === 2 ? 20000 : step + 1 === 3 ? 30000 : step + 1 === 4 ? 40000 : 50000).toLocaleString()} 🎮` : undefined,
+        nextHref: next?.href,
+      });
+    } else {
+      setCelebration({ msg: "🎉 全部完成！150,000 🎮 已到账" });
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-bg pb-24">
@@ -44,7 +74,7 @@ export default function ServicePage() {
         </button>
       </div>
 
-      {/* ═══════ 品牌头 (渐变+章鱼+标题) ═══════ */}
+      {/* ═══════ 品牌头 ═══════ */}
       <div className="bg-gradient-to-br from-brand-teal-light via-brand-teal to-brand-teal-dark px-4 pt-6 pb-12 relative overflow-hidden">
         <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/15" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10" />
@@ -58,7 +88,7 @@ export default function ServicePage() {
         </div>
       </div>
 
-      {/* ═══════ 用户卡片（悬浮在品牌头上） ═══════ */}
+      {/* ═══════ 用户卡片 ═══════ */}
       <div className="px-4 -mt-8 relative z-10">
         <div className="bg-white rounded-[12px] p-3.5 shadow-md border border-brand-teal/10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-pink-300 flex items-center justify-center text-white text-xs shrink-0">
@@ -82,8 +112,17 @@ export default function ServicePage() {
         </div>
       </div>
 
+      {/* ═══════ 新手任务（条件渲染） ═══════ */}
+      {user && (
+        <NewcomerTasks
+          uid={user.uid}
+          onBalanceRefresh={() => refreshBalance()}
+          onClaimed={handleClaimed}
+        />
+      )}
+
       {/* ═══════ 功能入口 ═══════ */}
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-3">
         <div className="flex items-center gap-2 mb-3">
           <span className="w-1 h-4 rounded-full bg-brand-teal" />
           <span className="text-[14px] font-semibold text-text-primary">功能入口</span>
@@ -123,8 +162,53 @@ export default function ServicePage() {
       {/* 登录弹窗 */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
 
-      {/* ═══════ 5Tab底栏（主 app 的 TabBar） ═══════ */}
-      <TabBar />
+      {/* ═══════ 庆祝弹窗 ═══════ */}
+      {celebration && (
+        <div className="fixed inset-0 z-[900] bg-black/60 flex items-center justify-center p-6"
+          onClick={() => setCelebration(null)}>
+          <div className="bg-white rounded-[16px] p-6 w-full max-w-[320px] text-center shadow-2xl animate-in scale-in-95 duration-200"
+            onClick={e => e.stopPropagation()}>
+            <div className="text-4xl mb-3">🎉</div>
+            <div className="text-sm font-semibold text-text-primary mb-2">{celebration.msg}</div>
+            {celebration.nextLabel && (
+              <div className="text-[11px] text-text-tertiary mb-4 flex items-center justify-center gap-1">
+                <Sparkles className="w-3 h-3 text-brand-gold" />
+                {celebration.nextLabel}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button onClick={() => setCelebration(null)}
+                className="flex-1 py-2 rounded-[8px] bg-gray-100 text-text-secondary text-[11px] font-medium active:scale-95 transition-transform">
+                回首页
+              </button>
+              {celebration.nextHref && (
+                <Link href={celebration.nextHref} onClick={() => setCelebration(null)}
+                  className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[11px] font-medium active:scale-95 transition-transform">
+                  去完成 →
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════ 4Tab底栏 ═══════ */}
+      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[64px] bg-white/90 backdrop-blur-[20px] saturate-180 border-t border-brand-teal/10 flex justify-around items-start pt-[6px] z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
+        {BOTTOM_TABS.map((tab, i) => {
+          const isActive = tab.href === "/service" ? typeof window !== "undefined" && window.location.pathname === tab.href : false;
+          return (
+            <Link key={i} href={tab.href}
+              className="flex flex-col items-center gap-[2px] px-3 py-[2px] rounded-xl active:scale-90 transition-transform relative">
+              <div className={`w-7 h-7 flex items-center justify-center text-xl transition-all duration-300 ${isActive ? "bg-gradient-to-br from-brand-teal to-brand-teal-dark rounded-xl text-white shadow-[0_2px_8px_rgba(69,204,213,0.3)]" : ""}`}>
+                <span className="text-[16px] leading-none">{tab.icon}</span>
+              </div>
+              <span className={`text-[10px] font-medium transition-colors ${isActive ? "text-brand-teal-dark font-semibold" : "text-gray-400"}`}>
+                {tab.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
     </main>
   );
 }
