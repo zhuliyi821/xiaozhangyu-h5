@@ -98,7 +98,7 @@ export default function BTCGamePage() {
       <BtcHeader price={quote.price} symbol="₿ BTC试玩" gameBeans={wallet.credit1 || 0} />
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div className="px-4 -mt-5 relative z-10 space-y-3">
+      <div className="px-4 pt-3 space-y-3">
         <AssetBar credit1={wallet.credit1 || 0} credit5={wallet.credit5 || 0} credit3={wallet.credit3 || 0} />
         <GameTabs active={tab} onChange={setTab} />
 
