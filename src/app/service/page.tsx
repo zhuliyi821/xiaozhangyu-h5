@@ -10,6 +10,7 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { TabBar } from "@/components/ui/tab-bar";
 import NewcomerTasks from "@/app/(tabs)/jiadouzhan/newcomer-tasks";
 import { ChevronRight, X, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -24,14 +25,6 @@ const FUNC_GRID: { icon: string; label: string; sub: string; color: string; href
   { icon: "🔮", label: "今日运势", sub: "每日幸运指南", color: "from-pink-400 to-pink-600", href: "/daily-fortune" },
   { icon: "📈", label: "股票期指", sub: "AI量化分析", color: "from-blue-400 to-blue-600", href: "/stock-analysis" },
   { icon: "₿", label: "BTC试玩", sub: "模拟交易赚水晶石", color: "from-orange-500 to-orange-700", href: "/btc" },
-];
-
-// ─── 4Tab ───
-const BOTTOM_TABS = [
-  { icon: "🏠", label: "首页", href: "/service" },
-  { icon: "💬", label: "AI助理", href: "/ai" },
-  { icon: "💰", label: "加豆站", href: "/jiadouzhan" },
-  { icon: "🏪", label: "服务", href: "/service#products" },
 ];
 
 export default function ServicePage() {
@@ -192,23 +185,8 @@ export default function ServicePage() {
         </div>
       )}
 
-      {/* ═══════ 4Tab底栏 ═══════ */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[64px] bg-white/90 backdrop-blur-[20px] saturate-180 border-t border-brand-teal/10 flex justify-around items-start pt-[6px] z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
-        {BOTTOM_TABS.map((tab, i) => {
-          const isActive = tab.href === "/service" ? typeof window !== "undefined" && window.location.pathname === tab.href : false;
-          return (
-            <Link key={i} href={tab.href}
-              className="flex flex-col items-center gap-[2px] px-3 py-[2px] rounded-xl active:scale-90 transition-transform relative">
-              <div className={`w-7 h-7 flex items-center justify-center text-xl transition-all duration-300 ${isActive ? "bg-gradient-to-br from-brand-teal to-brand-teal-dark rounded-xl text-white shadow-[0_2px_8px_rgba(69,204,213,0.3)]" : ""}`}>
-                <span className="text-[16px] leading-none">{tab.icon}</span>
-              </div>
-              <span className={`text-[10px] font-medium transition-colors ${isActive ? "text-brand-teal-dark font-semibold" : "text-gray-400"}`}>
-                {tab.label}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* ═══════ 5Tab底栏（首页/AI预测/PK大厅/小章鱼/我的） ═══════ */}
+      <TabBar />
     </main>
   );
 }
