@@ -6,6 +6,23 @@ import { TabBar } from "./tab-bar";
 const HIDE_TAB_BAR_PATHS = [
   "/pk-hall-solo",
   "/pk-hall/standalone",
+  "/service",
+  "/btc",
+  "/btc-predict",
+  "/lottery-sim",
+  "/daily-fortune",
+  "/stock-analysis",
+  "/divination",
+  "/exchange",
+  "/checkout",
+  "/draw",
+  "/calculator",
+  "/agent",
+  "/coupons",
+  "/messages",
+  "/orders",
+  "/settings",
+  "/admin",
 ];
 
 export default function ConditionalTabBar() {

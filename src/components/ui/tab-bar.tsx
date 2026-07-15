@@ -25,7 +25,9 @@ export function TabBar() {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[64px] bg-white/85 backdrop-blur-[20px] saturate-180 border-t border-brand-teal/10 flex justify-around items-start pt-[6px] z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
+        const isActive = tab.href === "/"
+          ? pathname === "/" || pathname === "/service"
+          : pathname === tab.href || pathname.startsWith(tab.href + "/");
         const Icon = tab.icon;
         return (
           <Link
