@@ -10,24 +10,8 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import { C } from "@/lib/brand-colors";
-import { Send, Bot, X, ChevronRight, CheckCircle, Zap, Layers } from "lucide-react";
+import { Send, Bot, X, ChevronRight, CheckCircle, Zap } from "lucide-react";
 import Link from "next/link";
-
-// ─── 12 大产品 ───
-const PRODUCTS = [
-  { icon: "🏪", name: "AI智慧门店", desc: "智能门店管理·7x24AI客服", color: "from-brand-teal to-brand-teal-dark", href: "/merchant" },
-  { icon: "🛒", name: "A2A智能SaaS商城", desc: "AI驱动·全渠道电商解决方案", color: "from-brand-coral to-brand-coral-dark", href: "/marketplace" },
-  { icon: "🤝", name: "AI异业联盟平台", desc: "跨界合作·流量共享·互利共赢", color: "from-purple-500 to-purple-700", href: "/merchant/cooperation" },
-  { icon: "🏭", name: "A2A智能产业平台", desc: "产业互联·供应链智能升级", color: "from-blue-500 to-blue-700", href: "/marketplace/cooperation" },
-  { icon: "☯", name: "AI周易八卦", desc: "AI推演·每日运势·命理分析", color: "from-amber-500 to-amber-700", href: "/divination" },
-  { icon: "📈", name: "AI股市分析", desc: "实时行情·技术面AI解读", color: "from-brand-gold to-brand-gold-dark", href: "/stock-analysis" },
-  { icon: "🎰", name: "AI彩票分析", desc: "冷热号追踪·智能推荐策略", color: "from-green-500 to-green-700", href: "/lottery-sim" },
-  { icon: "🦞", name: "AI小龙虾", desc: "门店AI员工·智能经营助手", color: "from-red-500 to-red-700", href: "/agent" },
-  { icon: "🐎", name: "AI爱马仕", desc: "赛马预测·赔率分析·策略推荐", color: "from-pink-500 to-pink-700", href: "/agent?persona=horse" },
-  { icon: "🎯", name: "数字碰游戏", desc: "实时PK·赢家瓜分奖池", color: "from-brand-teal to-cyan-700", href: "/lottery-sim?game=number-hit" },
-  { icon: "💰", name: "投资模拟", desc: "虚拟投资·策略验证·风控训练", color: "from-emerald-500 to-emerald-700", href: "/calculator" },
-  { icon: "🔗", name: "区块链开发", desc: "DApp开发·智能合约·Web3方案", color: "from-indigo-500 to-indigo-700", href: "/store-services" },
-];
 
 // ─── 功能入口 ───
 const QUICK_ACTIONS = [
@@ -139,27 +123,6 @@ export default function ServicePage() {
                 <span className="flex-1 text-[11px] text-text-primary">{t.label}</span>
                 <span className="text-[9px] text-brand-teal-dark font-medium">{t.reward}</span>
                 <ChevronRight className="w-3 h-3 text-text-tertiary" />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* ═══════ 产品矩阵 ═══════ */}
-        <div id="products" className="mb-3">
-          <div className="flex items-center gap-1.5 mb-2.5 px-1">
-            <Layers className="w-3.5 h-3.5 text-brand-teal" />
-            <span className="text-[12px] font-semibold text-text-primary">产品矩阵</span>
-            <span className="text-[8px] text-text-tertiary ml-auto">{PRODUCTS.length} 款产品</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {PRODUCTS.map((p, i) => (
-              <Link key={i} href={p.href}
-                className="bg-white rounded-[10px] border border-brand-teal/10 p-3 active:scale-[0.97] transition-transform shadow-sm">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${p.color} flex items-center justify-center text-sm mb-2 shadow-sm`}>
-                  <span className="text-white">{p.icon}</span>
-                </div>
-                <h3 className="text-[11px] font-semibold text-text-primary mb-0.5">{p.name}</h3>
-                <p className="text-[8px] text-text-tertiary leading-relaxed">{p.desc}</p>
               </Link>
             ))}
           </div>
