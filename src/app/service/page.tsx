@@ -1,12 +1,23 @@
 "use client";
 
 /**
- * 🏪 服务号 — 单页底栏入口
- * 仅4Tab导航：首页 / AI助理 / 加豆站 / 服务
+ * 🏪 服务号 — 功能入口页 + 4Tab底栏
+ * 首页：功能入口网格 / AI助理 / 加豆站 / 服务
  */
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Zap } from "lucide-react";
+
+// ─── 功能入口 ───
+const QUICK_ACTIONS = [
+  { icon: "💬", label: "AI对话", color: "bg-brand-teal/10 text-brand-teal-dark", href: "/ai" },
+  { icon: "📊", label: "经营看板", color: "bg-brand-coral/10 text-brand-coral-dark", href: "/merchant" },
+  { icon: "📋", label: "任务中心", color: "bg-brand-gold/10 text-brand-gold-dark", href: "/tasks" },
+  { icon: "🏆", label: "PK大厅", color: "bg-purple-50 text-purple-600", href: "/pk-hall" },
+  { icon: "🎫", label: "开奖查询", color: "bg-green-50 text-green-600", href: "/draw" },
+  { icon: "👤", label: "个人中心", color: "bg-blue-50 text-blue-600", href: "/profile" },
+];
 
 // ─── 底部 Tab ───
 const BOTTOM_TABS = [
@@ -21,18 +32,24 @@ export default function ServicePage() {
 
   return (
     <main className="min-h-screen bg-bg pb-20">
-      <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
-        <div className="text-4xl mb-4">🏪</div>
-        <h1 className="text-lg font-semibold text-text-primary mb-2">智能服务号</h1>
-        <p className="text-[12px] text-text-tertiary mb-6">请使用底部导航选择功能</p>
-        <div className="grid grid-cols-4 gap-3 w-full max-w-xs">
-          {BOTTOM_TABS.map((tab, i) => (
-            <Link key={i} href={tab.href}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-[10px] bg-white border border-brand-teal/10 active:scale-95 transition-transform shadow-sm">
-              <span className="text-xl">{tab.icon}</span>
-              <span className="text-[9px] font-medium text-text-secondary">{tab.label}</span>
-            </Link>
-          ))}
+      {/* ═══════ 功能入口页内容 ═══════ */}
+      <div className="px-4 pt-4">
+        <div className="bg-white rounded-[12px] shadow-sm border border-brand-teal/10 p-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-3">
+            <Zap className="w-3.5 h-3.5 text-brand-teal" />
+            <span className="text-[12px] font-semibold text-text-primary">快捷功能</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {QUICK_ACTIONS.map((a, i) => (
+              <Link key={i} href={a.href}
+                className="flex flex-col items-center gap-1 p-2.5 rounded-[10px] active:scale-95 transition-transform">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base ${a.color}`}>
+                  {a.icon}
+                </div>
+                <span className="text-[9px] font-medium text-text-secondary">{a.label}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
