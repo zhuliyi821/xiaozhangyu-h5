@@ -34,9 +34,9 @@ const DAILY_TASKS = [
 // ─── 底部 Tab ───
 const BOTTOM_TABS = [
   { icon: "🏠", label: "首页", href: "/service" },
-  { icon: "💬", label: "AI助手", href: "/ai" },
+  { icon: "💬", label: "AI助理", href: "/ai" },
+  { icon: "💰", label: "加豆站", href: "/jiadouzhan" },
   { icon: "🏪", label: "服务", href: "/service#products" },
-  { icon: "📋", label: "任务", href: "/tasks" },
 ];
 
 // ─── AI 默认会话 ───
