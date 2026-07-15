@@ -649,6 +649,18 @@ function LotterySimContent() {
     }
   };
 
+  // ─── 分享函数 ───
+  const shareResult = async (text: string) => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: '数字碰', text, url }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(text);
+      setSpriteMsg("已复制分享链接 🎉");
+      setTimeout(() => setSpriteMsg(""), 2000);
+    }
+  };
+
   // 未登录 → 展示预览页
   if (!user) {
     return <GuestPreview onLogin={() => setShowLogin(true)} />;
@@ -885,7 +897,19 @@ function LotterySimContent() {
                 <div className="text-4xl mb-2">{celebrate.label.includes('头彩') ? '🏆' : '🎉'}</div>
                 <div className="text-[13px] font-bold text-text mb-1">{celebrate.label}</div>
                 <div className="text-[28px] font-bold text-brand-coral">+{celebrate.amount.toLocaleString()}✨</div>
-                <div className="mt-2 text-[10px] text-text-tertiary">太棒了！继续保持！</div>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={() => {
+                    shareResult(`🎯 我刚在数字碰赢了 ${celebrate.amount.toLocaleString()} 🎮！快来试试手气！`);
+                    setCelebrate(prev => ({...prev, show: false}));
+                  }}
+                    className="flex-1 py-2 rounded-[8px] bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white text-[10px] font-medium active:scale-95 transition-transform flex items-center justify-center gap-1">
+                    👥 分享战绩
+                  </button>
+                  <button onClick={() => setCelebrate(prev => ({...prev, show: false}))}
+                    className="flex-1 py-2 rounded-[8px] bg-gray-100 text-text-secondary text-[10px] font-medium active:scale-95 transition-transform">
+                    再来一注
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1029,8 +1053,13 @@ function LotterySimContent() {
                   下一步 →
                 </button>
               ) : (
-                <button onClick={async () => {
-                  localStorage.setItem("szp_tutorial_done", "1");
+                <>
+                  <button onClick={() => { setShowTutorial(false); localStorage.setItem("szp_tutorial_done", "1"); }}
+                    className="flex-1 py-2.5 rounded-[8px] bg-bg text-text-tertiary text-xs font-medium border border-border-tertiary active:scale-95 transition-transform">
+                    跳过
+                  </button>
+                  <button onClick={async () => {
+                    localStorage.setItem("szp_tutorial_done", "1");
                   setShowTutorial(false);
                   // 机选1注作为免费体验
                   if (user) {
@@ -1046,8 +1075,9 @@ function LotterySimContent() {
                 }} className="flex-[2] py-2.5 rounded-[8px] bg-gradient-to-r from-brand-gold to-amber-500 text-white text-xs font-bold active:scale-95 transition-transform shadow-sm">
                   ✨ 免费体验一注
                 </button>
-              )}
-            </div>
+              </>
+            )}
+          </div>
           </div>
         </div>
       )}
