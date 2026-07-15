@@ -6,10 +6,11 @@
  */
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { API_BASE } from "@/config/api";
 import { C } from "@/lib/brand-colors";
-import { Send, Sparkles, Bot, MessageCircle, X, ChevronRight, CheckCircle, Target, Trophy, Zap, TrendingUp, Shield, ShoppingBag, Globe, Layers, Puzzle } from "lucide-react";
+import { Send, Bot, X, ChevronRight, CheckCircle, Zap, Layers } from "lucide-react";
 import Link from "next/link";
 
 // ─── 12 大产品 ───
@@ -51,7 +52,7 @@ const BOTTOM_TABS = [
   { icon: "🏠", label: "首页", href: "/service" },
   { icon: "💬", label: "AI助手", href: "/ai" },
   { icon: "🏪", label: "服务", href: "/service#products" },
-  { icon: "👤", label: "我的", href: "/profile" },
+  { icon: "📋", label: "任务", href: "/tasks" },
 ];
 
 // ─── AI 默认会话 ───
@@ -59,6 +60,7 @@ const WELCOME_MSG = "👋 你好！我是你的AI智能助手，可以帮你解�
 
 export default function ServicePage() {
   const { user } = useAuth();
+  const pathname = usePathname();
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMsg, setChatMsg] = useState("");
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([
@@ -96,46 +98,9 @@ export default function ServicePage() {
     }
   };
 
-  const quickQuestions = [
-    { label: "今日运势", icon: "🔮" },
-    { label: "股市分析", icon: "📈" },
-    { label: "门店建议", icon: "🏪" },
-    { label: "PK推荐", icon: "🎯" },
-  ];
-
   return (
     <main className="min-h-screen bg-bg pb-20">
-      {/* ═══════ Header ═══════ */}
-      <div className="bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white px-4 pt-5 pb-6">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-lg font-bold">🏪 智能服务号</h1>
-            <p className="text-[11px] text-white/70 mt-0.5">AI驱动 · 智慧经营 · 一站式服务平台</p>
-          </div>
-          <div onClick={() => setChatOpen(true)}
-            className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg cursor-pointer active:scale-90 transition-transform">
-            💬
-          </div>
-        </div>
-
-        {/* AI 快捷输入 */}
-        <div className="bg-white/15 backdrop-blur-sm rounded-[12px] p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-white/80" />
-            <span className="text-[11px] text-white/80">想问什么？AI助手在线</span>
-          </div>
-          <div className="flex gap-2">
-            {quickQuestions.map((q, i) => (
-              <button key={i} onClick={() => { setChatMsg(""); setChatOpen(true); }}
-                className="text-[10px] px-2.5 py-1 rounded-full bg-white/20 text-white/90 active:scale-95 transition-transform">
-                {q.icon} {q.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 -mt-3">
+      <div className="px-4 pt-4">
         {/* ═══════ 功能入口 ═══════ */}
         <div className="bg-white rounded-[12px] shadow-sm border border-brand-teal/10 p-3 mb-3">
           <div className="flex items-center gap-1.5 mb-2.5">
@@ -268,17 +233,20 @@ export default function ServicePage() {
 
       {/* ═══════ 底部导航栏 ═══════ */}
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[60px] bg-white/90 backdrop-blur-[20px] border-t border-brand-teal/10 flex justify-around items-center z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
-        {BOTTOM_TABS.map((tab, i) => (
-          <Link key={i} href={tab.href}
-            className="flex flex-col items-center gap-0.5 px-4 py-1 active:scale-90 transition-transform">
-            <span className={`text-xl ${tab.href === "/service" || (tab.href.startsWith("/service") && typeof window !== "undefined" && window.location.pathname === tab.href) ? "text-brand-teal" : "text-gray-400"}`}>
-              {tab.icon}
-            </span>
-            <span className={`text-[9px] font-medium ${tab.href === "/service" ? "text-brand-teal-dark font-semibold" : "text-gray-400"}`}>
-              {tab.label}
-            </span>
-          </Link>
-        ))}
+        {BOTTOM_TABS.map((tab, i) => {
+          const isActive = tab.href === "/service"
+            ? pathname === "/service" || pathname.startsWith("/service")
+            : pathname.startsWith(tab.href);
+          return (
+            <Link key={i} href={tab.href}
+              className="flex flex-col items-center gap-0.5 px-4 py-1 active:scale-90 transition-transform">
+              <span className={`text-xl ${isActive ? "text-brand-teal" : "text-gray-400"}`}>{tab.icon}</span>
+              <span className={`text-[9px] font-medium ${isActive ? "text-brand-teal-dark font-semibold" : "text-gray-400"}`}>
+                {tab.label}
+              </span>
+            </Link>
+          );
+        })}
       </nav>
     </main>
   );
