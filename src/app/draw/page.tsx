@@ -23,7 +23,7 @@ export default function DrawQueryPage() {
   const cfg = LOTTERY_CONFIG[activeKey] || LOTTERY_CONFIG.dlt;
 
   useEffect(() => {
-    getLatestDraws().then(setDraws).catch(() => {}).finally(() => setLoading(false));
+    getLatestDraws().then(setDraws).catch(() => console.warn("draws failed")).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
