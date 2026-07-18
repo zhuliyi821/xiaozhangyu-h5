@@ -8,6 +8,7 @@ import BetButton from "./_components/BetButton";
 import NumberPickerArea from "./_components/NumberPickerArea";
 import BetSlip from "./_components/BetSlip";
 import DrawResult from "./_components/DrawResult";
+import TicketComparison from "./_components/TicketComparison";
 import DailyChallenges from "./_components/DailyChallenges";
 import BetHistory from "./_components/BetHistory";
 import SlotMachine from "./_components/SlotMachine";
@@ -801,12 +802,21 @@ function LotterySimContent() {
               />
             )}
 
-            {/* Draw Result (倒计时+开奖+再来一注) — 摇奖完成后显示 */}
-            {drumPhase === "result" && (
-            <DrawResult
-              result={result}
-              rollDisplay={rollDisplay}
-              lastTickets={lastTickets}
+            {/* TicketComparison (摇奖结果对比) */}
+            {drumPhase === "result" && result && (
+            <TicketComparison
+              drawNumbers={result.draw || { front: [], back: [] }}
+              tickets={(result.tickets || []).map((t: any) => ({
+                front: t.ticket?.front || t.front || [],
+                back: t.ticket?.back || t.back || [],
+                matched_front: t.prize?.matched_front || t.matched_front || 0,
+                matched_back: t.prize?.matched_back || t.matched_back || 0,
+                prize: t.prize || null,
+              }))}
+              totalWin={result.total_win}
+              netResult={result.net_result}
+              totalBet={result.total_bet}
+              lotteryName={result.lottery_name}
               onRebet={rebet}
             />
             )}
