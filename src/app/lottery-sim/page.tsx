@@ -336,6 +336,20 @@ function LotterySimContent() {
       .catch(() => {});
   }, [user]);
 
+  // ─── 首次访问自动弹出引导 ───
+  useEffect(() => {
+    const done = localStorage.getItem("szp_tutorial_done");
+    if (!done) {
+      setShowTutorial(true);
+    }
+  }, []);
+
+  // Close tutorial & mark done
+  const closeTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem("szp_tutorial_done", "1");
+  };
+
   // Save draw_id to localStorage on betComplete
   useEffect(() => {
     if (drawId && (isDrawing || isResult)) {
@@ -1168,7 +1182,7 @@ function LotterySimContent() {
                   上一步
                 </button>
               ) : (
-                <button onClick={() => { setShowTutorial(false); localStorage.setItem("szp_tutorial_done", "1"); }}
+                <button onClick={closeTutorial}
                   className="flex-1 py-2.5 rounded-[8px] bg-bg text-text-tertiary text-xs font-medium border border-border-tertiary active:scale-95 transition-transform">
                   跳过
                 </button>
@@ -1180,14 +1194,13 @@ function LotterySimContent() {
                 </button>
               ) : (
                 <>
-                  <button onClick={() => { setShowTutorial(false); localStorage.setItem("szp_tutorial_done", "1"); }}
+                  <button onClick={closeTutorial}
                     className="flex-1 py-2.5 rounded-[8px] bg-bg text-text-tertiary text-xs font-medium border border-border-tertiary active:scale-95 transition-transform">
                     跳过
                   </button>
                   <button onClick={async () => {
-                    localStorage.setItem("szp_tutorial_done", "1");
-                  setShowTutorial(false);
-                  // 机选1注作为免费体验
+                    closeTutorial();
+                    // 机选1注作为免费体验
                   if (user) {
                     try {
                       const q = await fetch(API_BASE + "/api/lotto/quick-pick?code=" + lotteryCode).then(r => r.json());
