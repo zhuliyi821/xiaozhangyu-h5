@@ -41,7 +41,7 @@ export default function MerchantPurchasePage() {
         if (d.code === 0 && d.data?.length > 0) setVouchers(d.data);
         else { /* 无可用代金券 */ }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   const handlePayment = async () => {

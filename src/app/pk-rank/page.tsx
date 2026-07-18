@@ -31,13 +31,13 @@ export default function PKRankPage() {
   useEffect(() => {
     apiFetch<PKPlayer[]>("/api/pk/rank?limit=100")
       .then(d => setPlayers(d))
-      .catch(() => {})
+      .catch(() => console.warn("请求 失败"))
       .finally(() => setLoading(false));
 
     if (user?.uid) {
       apiFetch<PKPlayer>(`/api/pk/rank?uid=${user.uid}`)
         .then(d => setMyStat(d))
-        .catch(() => {});
+        .catch(() => console.warn("请求 失败"));
     }
   }, [user?.uid]);
 

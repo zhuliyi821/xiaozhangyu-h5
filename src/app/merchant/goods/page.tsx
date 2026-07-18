@@ -90,7 +90,7 @@ export default function MerchantGoodsPage() {
       });
       const d = await r.json();
       setMessage(d.code === 0 ? "✅ 已更新" : `❌ ${d.msg}`);
-      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); }).catch(() => {});
+      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); }).catch(() => console.warn("请求 失败"));
     } catch { setMessage("❌ 更新失败"); }
     setSavingId(null);
     setTimeout(() => setMessage(""), 2000);

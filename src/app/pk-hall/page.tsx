@@ -154,7 +154,7 @@ export default function PKHallPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid }),
-    }).then(r => r.json()).then(d => { if (d.code === 0) setWallet(d.data); }).catch(() => {});
+    }).then(r => r.json()).then(d => { if (d.code === 0) setWallet(d.data); }).catch(() => console.warn("请求 失败"));
   }, [uid]);
 
   // ═══ 千人千面智能推荐引擎 ═══
@@ -224,7 +224,7 @@ export default function PKHallPage() {
     fetch(`${API_BASE}/api/homepage/data`)
       .then(r => r.json())
       .then(j => { if (j.code === 0 && j.data?.charity_fund) setCharityFund(j.data.charity_fund); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, []);
 
   // ═══ 排行榜数据 ═══
@@ -232,7 +232,7 @@ export default function PKHallPage() {
     fetch(`${API_BASE}/api/leaderboard?limit=3`)
       .then(r => r.json())
       .then(j => { if (j.code === 0 && j.data) setRankData(j.data); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, []);
 
   // 60秒自动轮询刷新
@@ -246,7 +246,7 @@ export default function PKHallPage() {
           const j: APIResponse<PKTopic[]> = await r.json();
           if (j.code === 0 && j.data) { cachedData = j.data; setTopics(j.data); }
         })
-        .catch(() => {});
+        .catch(() => console.warn("请求 失败"));
     }, 60000);
     return () => clearInterval(timer);
   }, []);
@@ -275,7 +275,7 @@ export default function PKHallPage() {
           setPresets(mapped);
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, []);
 
   // 合并所有话题

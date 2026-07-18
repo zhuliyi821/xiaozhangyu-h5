@@ -41,7 +41,7 @@ export default function PKRoomPage() {
   useEffect(() => {
     if (!uid) return;
     fetch(`${API_BASE}/wallet_api.php?uid=${uid}&action=balance`)
-      .then(r => r.json()).then(d => { if (d.code === 0) setWallet(d.data); }).catch(() => {});
+      .then(r => r.json()).then(d => { if (d.code === 0) setWallet(d.data); }).catch(() => console.warn("请求 失败"));
   }, [uid]);
 
   const loadDetail = useCallback(() => {
@@ -117,7 +117,7 @@ export default function PKRoomPage() {
     fetch(`${API_BASE}/api/pk?action=comments&pk_id=${pkId}`)
       .then(r => r.json())
       .then((j: APIResponse<any[]>) => { if (j.code === 0) setComments(j.data || []); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [pkId]);
 
   useEffect(() => { loadDetail(); loadComments(); }, [loadDetail, loadComments]);
@@ -133,7 +133,7 @@ export default function PKRoomPage() {
     if (pkId && pkId > 0) fetch(`${API_BASE}/api/pk?action=spectate`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pk_id: pkId }),
-    }).catch(() => {});
+    }).catch(() => console.warn("请求 失败"));
   }, [pkId]);
 
   const handleOptionClick = (choice: string) => {

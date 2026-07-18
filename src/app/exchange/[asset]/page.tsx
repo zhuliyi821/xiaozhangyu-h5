@@ -65,7 +65,7 @@ export default function AssetDetailPage() {
         setBalance(val);
         setLabel(d[`${asset}_label`] || config?.label || asset);
       })
-      .catch(() => {})
+      .catch(() => console.warn("请求 失败"))
       .finally(() => setLoading(false));
   }, [user, asset]);
 

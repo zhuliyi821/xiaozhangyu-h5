@@ -22,7 +22,7 @@ export default function CrystalCard({ uid }: Props) {
     fetch(`/api/crystal/dashboard?uid=${uid}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setData(d.data); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [uid]);
 
   if (!data) {

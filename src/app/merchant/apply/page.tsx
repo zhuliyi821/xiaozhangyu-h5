@@ -72,7 +72,7 @@ export default function MerchantApplyPage() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   const handleSubmit = async () => {

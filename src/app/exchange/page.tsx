@@ -40,7 +40,7 @@ export default function ExchangePage() {
     if (!uid) { setLoading(false); return; }
     apiFetch<any>("/wallet_api.php", { params: { uid: String(uid), action: "balance" } })
       .then(d => { setData(d); })
-      .catch(() => {})
+      .catch(() => console.warn("/wallet_api.php 失败"))
       .finally(() => setLoading(false));
   };
 

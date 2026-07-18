@@ -40,7 +40,7 @@ export default function MediaSchedulesPage() {
     fetch(`${API_BASE}/api/store-media?action=schedules&store_id=${sid}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setSchedules(d.data || []); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   };
 
   const getSchedule = (platform: string) => schedules.find(s => s.platform === platform);

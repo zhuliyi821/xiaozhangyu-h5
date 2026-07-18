@@ -14,7 +14,7 @@ export default function MerchantOrdersPage() {
     fetch(`/api/v2/merchant/orders?member_id=${user.uid}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setOrders(d.data.list || []); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><div className="animate-spin w-6 h-6 border-2 border-[#F27152] border-t-transparent rounded-full" /></div>;

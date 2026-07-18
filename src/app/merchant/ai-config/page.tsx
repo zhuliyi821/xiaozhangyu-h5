@@ -36,7 +36,7 @@ export default function AiConfigPage() {
         // 如果能获取到log说明引擎在线
         console.log("Engine connected");
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   const toggleSubscribe = async (code: string) => {

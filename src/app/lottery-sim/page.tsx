@@ -183,7 +183,7 @@ function LotterySimContent() {
     fetch(API_BASE + "/api/lotto/jackpot?code=" + lotteryCode)
       .then(r => r.json())
       .then(j => { if (j.code === 0) setJackpot(j.data.grand_pool); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [lotteryCode]);
 
   const SPRITE_QUOTES: Record<string, string[]> = {
@@ -239,7 +239,7 @@ function LotterySimContent() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
     // 拉取冷热号（标准差模型 v2）
     fetch(API_BASE + "/api/lotto/trend?code=" + lotteryCode + "&limit=100")
       .then(r => r.json())
@@ -262,7 +262,7 @@ function LotterySimContent() {
           setRecommendations(j.data.recommendations || []);
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
     if (!aiPrediction) {
       setSelectedFront([]);
       setSelectedBack([]);
@@ -281,7 +281,7 @@ function LotterySimContent() {
     })
       .then(r => r.json())
       .then(j => { if (j.code === 0) setBalance(Math.floor(j.data.game_coins)); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   // ─── 每日挑战 + 成就 初始化 ───
@@ -379,7 +379,7 @@ function LotterySimContent() {
           if (t.digits) setSelectedFront(t.digits);
         }
       })
-    .catch(() => {});
+    .catch(() => console.warn("请求 失败"));
   setError("");
   trackQuickPick();
   };
@@ -465,14 +465,14 @@ function LotterySimContent() {
       setResult(json.data);
       setBalance(prev => prev - effectiveCost + totalWin);
       // 余额后校准
-      fetch(API_BASE + "/api/member/balance?uid=" + user.uid).then(r => r.json()).then(b => { if (b.code === 0) setBalance(b.data?.credit1 || 0); }).catch(() => {});
+      fetch(API_BASE + "/api/member/balance?uid=" + user.uid).then(r => r.json()).then(b => { if (b.code === 0) setBalance(b.data?.credit1 || 0); }).catch(() => console.warn("请求 失败"));
       setHistory(prev => [json.data, ...prev].slice(0, 50));
       trackBet(effectiveCost, totalWin);
       // 刷新奖池
       fetch(API_BASE + "/api/lotto/jackpot?code=" + lotteryCode)
         .then(r => r.json())
         .then(j => { if (j.code === 0) setJackpot(j.data.grand_pool); })
-        .catch(() => {});
+        .catch(() => console.warn("请求 失败"));
       // 保存号码用于"再来一注"
       setLastTickets(betTickets);
       setLastMultiple(betMultiple);
@@ -653,7 +653,7 @@ function LotterySimContent() {
   const shareResult = async (text: string) => {
     const url = window.location.href;
     if (navigator.share) {
-      navigator.share({ title: '数字碰', text, url }).catch(() => {});
+      navigator.share({ title: '数字碰', text, url }).catch(() => console.warn("请求 失败"));
     } else {
       navigator.clipboard?.writeText(text);
       setSpriteMsg("已复制分享链接 🎉");
@@ -990,7 +990,7 @@ function LotterySimContent() {
           const url = window.location.href;
           const text = `🎯 来数字碰试试手气吧！选号碰 · 一秒开奖\n${url}`;
           if (navigator.share) {
-            navigator.share({ title: '数字碰', text, url }).catch(() => {});
+            navigator.share({ title: '数字碰', text, url }).catch(() => console.warn("请求 失败"));
           } else {
             navigator.clipboard?.writeText(text);
             setSpriteMsg("链接已复制，分享给好友吧！🎉");

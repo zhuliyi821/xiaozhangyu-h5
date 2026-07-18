@@ -21,11 +21,11 @@ export default function MediaAnalyticsPage() {
         if (d.code === 0 && d.data.stores?.length > 0) {
           const sid = d.data.stores[0].id;
           fetch(`${API_BASE}/api/store-media?action=overview&store_id=${sid}`)
-            .then(r => r.json()).then(j => { if (j.code === 0) setStats(j.data); }).catch(() => {});
+            .then(r => r.json()).then(j => { if (j.code === 0) setStats(j.data); }).catch(() => console.warn("请求 失败"));
           fetch(`${API_BASE}/api/store-media?action=contents&store_id=${sid}&limit=50`)
-            .then(r => r.json()).then(j => { if (j.code === 0) setContents(j.data.list || []); }).catch(() => {});
+            .then(r => r.json()).then(j => { if (j.code === 0) setContents(j.data.list || []); }).catch(() => console.warn("请求 失败"));
         }
-      }).catch(() => {});
+      }).catch(() => console.warn("请求 失败"));
   }, [user]);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><div className="animate-spin w-6 h-6 border-2 border-[#F27152] border-t-transparent rounded-full" /></div>;

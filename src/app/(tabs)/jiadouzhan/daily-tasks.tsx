@@ -77,7 +77,7 @@ export default function DailyTasks({ uid, onBalanceRefresh }: Props) {
       const tasks = d?.tasks || [];
       setHasBets(tasks.some((t: any) => t.task_key === "first_bet" && t.user_progress >= t.target_count));
       setHasInvites(tasks.some((t: any) => t.task_key === "social_butterfly" && t.user_progress >= t.target_count));
-    }).catch(() => {});
+    }).catch(() => console.warn("请求 失败"));
   }, [fetchSignStatus, uid]);
 
   // 执行签到

@@ -28,7 +28,7 @@ export default function DrawQueryPage() {
 
   useEffect(() => {
     if (activeKey) {
-      getHistory(activeKey, 1, 20).then(r => setHistory(r.list || [])).catch(() => {});
+      getHistory(activeKey, 1, 20).then(r => setHistory(r.list || [])).catch(() => console.warn("请求 失败"));
     }
   }, [activeKey]);
 

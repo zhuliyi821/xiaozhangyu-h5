@@ -83,7 +83,7 @@ export default function PassPage() {
         setHasPremium(d.has_premium === 1);
         setClaimed(d.claimed_levels || []);
       })
-      .catch(() => {})
+      .catch(() => console.warn("请求 失败"))
       .finally(() => setLoading(false));
   }, [user?.uid]);
 

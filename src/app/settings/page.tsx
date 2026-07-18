@@ -23,7 +23,7 @@ export default function SettingsPage() {
     if (!user) { setLoading(false); return; }
     getProfile(user.uid)
       .then(p => { setProfile(p); setNickname(p.nickname); })
-      .catch(() => {})
+      .catch(() => console.warn("请求 失败"))
       .finally(() => setLoading(false));
   }, [user]);
 

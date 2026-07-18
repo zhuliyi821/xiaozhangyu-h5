@@ -68,7 +68,7 @@ export default function FortunePage() {
       await fetch(`${API_BASE}/api/v1/fortune/birth`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: user.uid, birth_date: birthDate, birth_hour: form.birth_hour, gender: form.gender || 1 }),
-      }).catch(() => {});
+      }).catch(() => console.warn("请求 失败"));
 
       // 2. 获取今日运势（含八字五行）→ /api/v1/fortune/today
       const todayRes = await fetch(`${API_BASE}/api/v1/fortune/today`, {

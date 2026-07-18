@@ -104,7 +104,7 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
       // 加载收藏列表
         const uid = getUid();
         if (uid) {
-          getFavorites(uid).then(d => setFavIds(new Set(d.list.map(f => f.product_id)))).catch(() => {});
+          getFavorites(uid).then(d => setFavIds(new Set(d.list.map(f => f.product_id)))).catch(() => console.warn("请求 失败"));
       }
       try {
         // 1. 获取门店信息

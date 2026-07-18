@@ -31,7 +31,7 @@ export default function MerchantRevenuePage() {
           setRecords(d.data.records || []);
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user, tab]);
 
   const handleWithdraw = async () => {

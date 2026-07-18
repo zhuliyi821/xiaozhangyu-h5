@@ -124,7 +124,7 @@ function UserLevelBadge({ uid }: { uid: number }) {
     fetch(`${API_BASE}/api/user/level?uid=${uid}`)
       .then(r => r.json())
       .then(j => { if (j.code === 0) setLevel(j.data); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [uid]);
 
   if (!level) return <div className="h-3 w-28 bg-white/10 rounded animate-pulse mt-1" />;
@@ -150,7 +150,7 @@ function StreakRow({ uid }: { uid: number }) {
   useEffect(() => {
     apiFetch<{ signed_today: boolean; current_streak: number }>(`/api/sign?uid=${uid}`)
       .then(d => { setSigned(d.signed_today); setStreak(d.current_streak); })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [uid]);
 
   const handleSign = async () => {

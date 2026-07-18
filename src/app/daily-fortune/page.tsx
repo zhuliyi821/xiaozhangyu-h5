@@ -176,7 +176,7 @@ export default function DailyFortunePage() {
           await fetch(`${API_BASE}/api/v1/fortune/birth`, {
             method: "POST", headers: authHeaders,
             body: JSON.stringify({ user_id: uid, birth_date: birthDate, birth_hour: parseInt(birthHour), gender: 1 }),
-          }).catch(() => {});
+          }).catch(() => console.warn("请求 失败"));
         }
 
         const [todayRes, detailRes] = await Promise.all([

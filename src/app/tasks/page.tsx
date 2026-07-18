@@ -258,7 +258,7 @@ export default function TasksPage() {
       const tasks = d?.tasks || [];
       setChallengeBets(tasks.some((t: any) => t.task_key === "first_bet" && t.user_progress >= t.target_count));
       setChallengeInvites(tasks.some((t: any) => t.task_key === "social_butterfly" && t.user_progress >= t.target_count));
-    }).catch(() => {});
+    }).catch(() => console.warn("请求 失败"));
   }, [user, fetchSign]);
 
   const handleSign = async () => {

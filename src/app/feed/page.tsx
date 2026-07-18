@@ -53,7 +53,7 @@ export default function FeedPage() {
     fetch(`${API_BASE}/api/feed?action=list${uidParam}`)
       .then(r => r.json())
       .then(j => { if (j.code === 0) setFeeds(j.data.list || []); })
-      .catch(() => {})
+      .catch(() => console.warn("请求 失败"))
       .finally(() => setLoading(false));
   }, [API_BASE, user]);
 

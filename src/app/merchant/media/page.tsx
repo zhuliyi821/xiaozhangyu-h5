@@ -50,7 +50,7 @@ export default function MediaPage() {
           loadData(id);
         }
       })
-      .catch(() => {});
+      .catch(() => console.warn("请求 失败"));
   }, [user]);
 
   // 自动轮询（待审核tab时每15秒刷新）
@@ -62,11 +62,11 @@ export default function MediaPage() {
 
   const loadData = (sid: number) => {
     fetch(`${API_BASE}/api/store-media?action=overview&store_id=${sid}`)
-      .then(r => r.json()).then(d => { if (d.code === 0) setOverview(d.data); }).catch(() => {});
+      .then(r => r.json()).then(d => { if (d.code === 0) setOverview(d.data); }).catch(() => console.warn("请求 失败"));
     const kw = searchKeyword ? `&keyword=${encodeURIComponent(searchKeyword)}` : "";
     const pf = filterPlatform ? `&platform=${filterPlatform}` : "";
     fetch(`${API_BASE}/api/store-media?action=contents&store_id=${sid}&status=${tab}${kw}${pf}`)
-      .then(r => r.json()).then(d => { if (d.code === 0) setContents(d.data.list || []); }).catch(() => {});
+      .then(r => r.json()).then(d => { if (d.code === 0) setContents(d.data.list || []); }).catch(() => console.warn("请求 失败"));
   };
 
   const generate = async () => {
