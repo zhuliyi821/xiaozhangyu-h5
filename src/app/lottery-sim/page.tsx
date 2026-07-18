@@ -13,6 +13,7 @@ import DailyChallenges from "./_components/DailyChallenges";
 import BetHistory from "./_components/BetHistory";
 import SlotMachine from "./_components/SlotMachine";
 import BettingOverlay from "./_components/BettingOverlay";
+import SidePanel from "./_components/SidePanel";
 import GuestPreview from "./_components/GuestPreview";
 
 import { useGameMachine } from "./_lib/useGameMachine";
@@ -1143,59 +1144,23 @@ function LotterySimContent() {
         </div>
       )}
 
-      {/* ═══════= 侧边面板 (Drawer) ═══════= */}
-      {showSidePanel && (
-        <>
-          <div className="fixed inset-0 z-[800] bg-black/40" onClick={() => setShowSidePanel(false)} />
-          <div className="fixed top-0 right-0 z-[810] w-[300px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-200 overflow-y-auto">
-            <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-gray-100">
-              <span className="text-[13px] font-semibold">数字碰 · 工具箱</span>
-              <button onClick={() => setShowSidePanel(false)} className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs">✕</button>
-            </div>
-            <div className="p-4 space-y-4">
-              {/* 冷热号分析 */}
-              <div className="bg-gray-50 rounded-[8px] p-3">
-                <a href={"/lottery?type=" + lotteryCode} className="text-[11px] font-semibold text-brand-teal-dark">📊 冷热号分析 →</a>
-                <p className="text-[9px] text-text-tertiary mt-1">查看各号码出现频率和冷热状态</p>
-              </div>
-
-              {/* 今日挑战 */}
-              {user && (
-                <DailyChallenges
-                  user={user}
-                  dailyTasks={dailyTasks as any}
-                  onSetDailyTasks={setDailyTasks}
-                  achievements={achievements}
-                  onSetAchievements={setAchievements}
-                  balance={balance}
-                  onSetBalance={setBalance}
-                  showTasks={showTasks}
-                  onSetShowTasks={setShowTasks}
-                  apiBase={API_BASE}
-                />
-              )}
-
-              {/* 个人统计 */}
-              <div className="bg-gray-50 rounded-[8px] p-3">
-                <div className="text-[11px] font-semibold text-text-primary mb-2">📈 个人统计</div>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: '参与局数', value: `${playerStats.totalBets}`, color: 'text-text-primary' },
-                    { label: '胜率', value: playerStats.totalBets > 0 ? `${Math.round(playerStats.totalWins / playerStats.totalBets * 100)}%` : '0%', color: playerStats.totalBets > 0 && playerStats.totalWins / playerStats.totalBets >= 0.5 ? 'text-green-600' : 'text-text-tertiary' },
-                    { label: '盈利', value: `${playerStats.totalProfit >= 0 ? '+' : ''}${playerStats.totalProfit.toLocaleString()}`, color: playerStats.totalProfit >= 0 ? 'text-brand-coral' : 'text-red-500' },
-                    { label: '最大奖金', value: `${playerStats.biggestWin.toLocaleString()}`, color: 'text-brand-gold-dark' },
-                  ].map(s => (
-                    <div key={s.label} className="p-2 rounded-[6px] bg-white border border-gray-100">
-                      <div className="text-[8px] text-text-tertiary">{s.label}</div>
-                      <div className={`text-[12px] font-bold mt-0.5 ${s.color}`}>{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {/* ═══════= 侧边面板 (SidePanel) ═══════= */}
+      <SidePanel
+        open={showSidePanel}
+        onClose={() => setShowSidePanel(false)}
+        playerStats={playerStats}
+        user={user}
+        dailyTasks={dailyTasks}
+        onSetDailyTasks={setDailyTasks}
+        achievements={achievements}
+        onSetAchievements={setAchievements}
+        balance={balance}
+        onSetBalance={setBalance}
+        apiBase={API_BASE}
+        history={history}
+        onHistoryView={trackHistoryView}
+        lotteryCode={lotteryCode}
+      />
 
       {/* ═══════= 连续未中提示 ═══════= */}
       {showLossTip && (
