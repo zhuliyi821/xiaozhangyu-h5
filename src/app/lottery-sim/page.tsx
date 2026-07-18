@@ -13,6 +13,7 @@ import BetHistory from "./_components/BetHistory";
 import SlotMachine from "./_components/SlotMachine";
 import GuestPreview from "./_components/GuestPreview";
 
+import { useGameMachine } from "./_lib/useGameMachine";
 import { API_BASE } from '@/config/api';
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
@@ -70,15 +71,32 @@ function LotterySimContent() {
   const [selectedFront, setSelectedFront] = useState<number[]>([]);
   const [selectedBack, setSelectedBack] = useState<number[]>([]);
   const [tickets, setTickets] = useState<Array<{ front: number[]; back: number[] }>>([]);
-  const [betting, setBetting] = useState(false);
+  const game = useGameMachine();
+  const isBetting = game.isBetting;
+  const isResult = game.isResult;
+  const isRolling = game.isRolling;
+  const isDrawing = game.isDrawing;
+  const isSelect = game.isSelect;
+  const drumPhase = game.phase === "select" ? "idle"
+    : game.phase === "betting" ? "betting"
+    : game.phase === "drawing" && game.drawSubPhase === "ready" ? "drum_ready"
+    : game.phase === "drawing" && game.drawSubPhase === "rolling" ? "rolling"
+    : game.phase === "drawing" && game.drawSubPhase === "complete" ? "result"
+    : game.phase === "result" ? "result" : "idle";
+  const drawId = game.drawId;
+  const revealed = game.drawState.revealed;
+  const revealedZones = game.drawState.revealedZones;
+  const rollNum = game.drawState.current;
+  const rollZone = game.drawState.currentZone;
+  const rollPos = game.drawState.currentPosition;
+  const isAuto = game.drawSubPhase === "rolling";
+  const expiresIn = game.expiresIn;
+  const drumResult = game.lastResult;
   const [result, setResult] = useState<BetResult | null>(null);
-  const [showDraw, setShowDraw] = useState(false);
   const [history, setHistory] = useState<BetResult[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState("");
   const [betMultiple, setBetMultiple] = useState(1);
   const [spriteMsg, setSpriteMsg] = useState("");
-  const [animPhase, setAnimPhase] = useState<"idle"|"flipping"|"reveal">("idle");
   const [rollDisplay, setRollDisplay] = useState(0);
   const [betCount, setBetCount] = useState(0);
   const [lastTickets, setLastTickets] = useState<Array<{ front: number[]; back: number[] }>>([]);
@@ -89,7 +107,6 @@ function LotterySimContent() {
   const [easterEgg, setEasterEgg] = useState("");
   const [showSurvey, setShowSurvey] = useState(false);
   const [jackpot, setJackpot] = useState(0);
-  const [countdown, setCountdown] = useState(0); // 参与后开奖倒计时秒数
   // 冷热号状态: scorching/hot/normal/cold/icy
   const [trendData, setTrendData] = useState<Record<number, 'scorching'|'hot'|'normal'|'cold'|'icy'>>({});
   const [trendDataBack, setTrendDataBack] = useState<Record<number, 'scorching'|'hot'|'normal'|'cold'|'icy'>>({});
@@ -103,18 +120,6 @@ function LotterySimContent() {
   // 庆祝效果
   const [celebrate, setCelebrate] = useState<{show:boolean; amount:number; label:string}>({show:false, amount:0, label:""});
 
-  // ─── 摇奖机状态 ───
-  const [drumPhase, setDrumPhase] = useState<"idle"|"betting"|"drum_ready"|"rolling"|"result">("idle");
-  const [drawId, setDrawId] = useState<string>("");
-  const [revealed, setRevealed] = useState<number[]>([]);
-  const [revealedZones, setRevealedZones] = useState<("front"|"back")[]>([]);
-  const [rollNum, setRollNum] = useState<number | null>(null);
-  const [rollZone, setRollZone] = useState<"front"|"back"|null>(null);
-  const [rollPos, setRollPos] = useState(0);
-  const [isRolling, setIsRolling] = useState(false);
-  const [isAuto, setIsAuto] = useState(false);
-  const [expiresIn, setExpiresIn] = useState(180);
-  const [drumResult, setDrumResult] = useState<Record<string, unknown> | null>(null);
   const drumTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoRollRef = useRef(false);
 
@@ -284,10 +289,7 @@ function LotterySimContent() {
       setSelectedBack([]);
     }
     setResult(null);
-    setShowDraw(false);
-    setDrumPhase("idle");
-    setDrawId("");
-    setRevealed([]);
+    game.resetPhase();
   }, [lotteryCode]);
 
   // Load real balance from wallet
@@ -309,19 +311,14 @@ function LotterySimContent() {
       if (drumTimerRef.current) { clearInterval(drumTimerRef.current); drumTimerRef.current = null; }
       return;
     }
-    setExpiresIn(180);
     drumTimerRef.current = setInterval(() => {
-      setExpiresIn(prev => {
-        if (prev <= 1) {
-          // Auto-roll when time expires
-          if (drumTimerRef.current) clearInterval(drumTimerRef.current);
-          autoRollRef.current = true;
-          setIsAuto(true);
-          handleDrumRoll();
-          return 0;
-        }
-        return prev - 1;
-      });
+      game.tickExpires();
+      if (expiresIn <= 1) {
+        if (drumTimerRef.current) clearInterval(drumTimerRef.current);
+        autoRollRef.current = true;
+        game.autoRollStart();
+        handleDrumRoll();
+      }
     }, 1000);
     return () => { if (drumTimerRef.current) clearInterval(drumTimerRef.current); };
   }, [drumPhase === "drum_ready" || drumPhase === "rolling"]);
@@ -452,12 +449,10 @@ function LotterySimContent() {
       config?.back_pick === 0 ? [{ front: selectedFront, back: [] }] : [{ front: selectedFront, back: selectedBack }];
     
     if (betTickets.length === 0) { setError("请至少添加一注"); return; }
-    
-    setBetting(true);
+
+    game.betStart();
     setError("");
     setResult(null);
-    setShowDraw(false);
-    setCountdown(0);
     
     try {
       // 计算实际参与金额（修复P0: 首次参与totalCost=0的bug）
@@ -491,17 +486,7 @@ function LotterySimContent() {
       
       // 切换到摇奖机模式
       const newDrawId = json.data?.draw_id || json.draw_id || "";
-      setDrawId(newDrawId);
-      setDrumPhase("drum_ready");
-      setRevealed([]);
-      setRevealedZones([]);
-      setRollNum(null);
-      setRollZone(null);
-      setRollPos(0);
-      setIsRolling(false);
-      setIsAuto(false);
-      setDrumResult(null);
-      setExpiresIn(180);
+      game.betComplete(newDrawId, 180);
       
       // 保存号码用于"再来一注"
       setLastTickets(betTickets);
@@ -516,7 +501,6 @@ function LotterySimContent() {
         .catch(() => console.warn("请求 失败"));
     } catch (e: any) {
       setError(e.message);
-      setBetting(false);
       bettingLockRef.current = false;
     } finally {
       // betting 在倒计时结束或catch中设置
@@ -526,8 +510,7 @@ function LotterySimContent() {
   // ─── 摇奖: 逐个出号 ───
   const handleDrumRoll = async () => {
     if (isRolling || !drawId) return;
-    setIsRolling(true);
-    if (drumPhase === "drum_ready") setDrumPhase("rolling");
+    if (drumPhase === "drum_ready") game.autoRollStart();
     try {
       const resp = await fetch(API_BASE + "/api/lotto/roll", {
         method: "POST",
@@ -539,24 +522,30 @@ function LotterySimContent() {
       if (!d) throw new Error(json.msg || "摇号失败");
 
       if (d.number !== undefined) {
-        setRevealed(prev => [...prev, d.number]);
-        setRevealedZones(prev => [...prev, d.zone]);
-        setRollNum(d.number);
-        setRollZone(d.zone);
-        setRollPos(prev => prev + 1);
+        game.rollResult(d.number, d.zone, d.status === "complete" || d.is_last);
       }
 
       if (d.status === "complete" || d.is_last) {
         // 所有号码已揭示 → 自动比对完成
-        setIsRolling(false);
-        setIsAuto(false);
         autoRollRef.current = false;
         if (drumTimerRef.current) clearInterval(drumTimerRef.current);
-        setDrumPhase("result");
 
         // 获取比对结果
         const resultData = json.data?.result || d.result || null;
-        setDrumResult(resultData);
+        const drawNumbers = d.draw || null;
+
+        // Dispatch complete to game machine
+        if (resultData) {
+          game.rollComplete(
+            {
+              tickets: resultData.tickets || [],
+              totalWin: resultData.total_win || 0,
+              netResult: (resultData.total_win || 0) - (resultData.total_bet || 0),
+              settled: resultData.settled || false,
+            },
+            drawNumbers || { front: d.draw?.front || [], back: d.draw?.back || [] }
+          );
+        }
 
         // 构造 BetResult 显示到 DrawResult
         if (resultData) {
@@ -591,7 +580,6 @@ function LotterySimContent() {
             balance_after: 0,
           };
           setResult(betResult);
-          setShowDraw(true);
           setBalance(prev => prev - cost + totalWin);
 
           // 余额校准
@@ -652,15 +640,13 @@ function LotterySimContent() {
           .catch(() => console.warn("请求 失败"));
       } else {
         // 还有更多号码要摇
-        setIsRolling(false);
         if (autoRollRef.current) {
           setTimeout(() => { handleDrumRoll(); }, 1500);
         }
       }
     } catch (e: any) {
       console.warn("摇号失败:", e?.message);
-      setIsRolling(false);
-      setIsAuto(false);
+      game.rollError(e?.message || "摇号异常");
       autoRollRef.current = false;
     }
   };
@@ -781,19 +767,14 @@ function LotterySimContent() {
 
             {/* BetButton (拆分组件) */}
             <BetButton
-              countdown={countdown}
-              betting={betting}
               canBet={canBet}
               user={user}
               tickets={tickets}
               totalCost={totalCost}
               config={config}
               betMultiple={betMultiple}
-              showDraw={showDraw}
-              setShowDraw={setShowDraw}
-              setBetting={setBetting}
-              bettingLockRef={bettingLockRef}
-              setCountdown={setCountdown}
+              betting={isBetting}
+              isBetDisabled={isDrawing || isResult}
               placeBet={placeBet}
             />
 
@@ -823,8 +804,6 @@ function LotterySimContent() {
             {/* Draw Result (倒计时+开奖+再来一注) — 摇奖完成后显示 */}
             {drumPhase === "result" && (
             <DrawResult
-              countdown={countdown}
-              showDraw={showDraw}
               result={result}
               rollDisplay={rollDisplay}
               lastTickets={lastTickets}
