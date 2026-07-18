@@ -12,6 +12,7 @@ import TicketComparison from "./_components/TicketComparison";
 import DailyChallenges from "./_components/DailyChallenges";
 import BetHistory from "./_components/BetHistory";
 import SlotMachine from "./_components/SlotMachine";
+import BettingOverlay from "./_components/BettingOverlay";
 import GuestPreview from "./_components/GuestPreview";
 
 import { useGameMachine } from "./_lib/useGameMachine";
@@ -830,6 +831,12 @@ function LotterySimContent() {
         )}
       </div>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+      <BettingOverlay
+        show={isBetting}
+        cost={totalCost || (config?.price || 100) * betMultiple}
+        tickets={tickets.length > 0 ? tickets.length : (selectedFront.length > 0 ? 1 : 0)}
+        onComplete={() => {}}
+      />
       {showSurvey && <SurveyModal onClose={() => setShowSurvey(false)} />}
 
       {/* 切换彩种确认弹窗 */}
