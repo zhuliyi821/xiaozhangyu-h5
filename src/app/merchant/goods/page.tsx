@@ -49,60 +49,61 @@ export default function MerchantGoodsPage() {
     (!searchTerm || g.title.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  // ── 加载商品(使用新API) ──
+  // ── 加载商品(新REST API) ──
   useEffect(() => {
     if (!user || !activeStoreId) return;
-    const url = `/api/store-services?action=merchant_my_goods&store_id=${activeStoreId}${filterStatus !== null ? `&status=${filterStatus}` : ""}`;
-    fetch(url).then(r => r.json()).then(d => { if (d.code === 0) setGoods(d.data || []); }).catch(() => {});
+    fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}${filterStatus !== null ? `&status=${filterStatus}` : ""}`)
+      .then(r => r.json())
+      .then(d => { if (d.code === 0) setGoods(d.data || []); })
+      .catch(() => {});
   }, [user, activeStoreId, filterStatus]);
 
-  // ── 添加商品 ──
+  // ── 添加商品(新REST API) ──
   const handleAdd = async () => {
     if (!user || !activeStoreId) return;
     if (!newForm.title || newForm.price <= 0) { setMessage("❌ 请填写商品名称和价格"); setTimeout(() => setMessage(""), 2000); return; }
     setSubmitting(true);
     try {
-      const r = await fetch("/api/store-services?action=merchant_add_goods", {
+      const r = await fetch("/api/v2/merchant/goods", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store_id: activeStoreId, member_id: user.uid, ...newForm }),
+        body: JSON.stringify({ store_id: activeStoreId, title: newForm.title, price: newForm.price, stock: newForm.stock, thumb: newForm.thumb, content: newForm.content, game_coin_ratio: newForm.game_coin_ratio, platform: newForm.platform }),
       });
       const d = await r.json();
       if (d.code === 0) {
         setMessage("✅ 商品发布成功");
         setShowAddModal(false);
         setNewForm({ title: "", price: 0, stock: 1, thumb: "", content: "", game_coin_ratio: 0, platform: "xiaozhangyu", images: [] });
-        // Reload
-        fetch(`/api/store-services?action=merchant_my_goods&store_id=${activeStoreId}`).then(r => r.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
+        fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
       } else { setMessage(`❌ ${d.msg || "发布失败"}`); }
     } catch { setMessage("❌ 网络错误"); }
     setSubmitting(false);
     setTimeout(() => setMessage(""), 2000);
   };
 
-  // ── 更新商品 ──
+  // ── 更新商品(新REST API) ──
   const updateGoods = async (goodsId: number, updates: Record<string, any>) => {
     setSavingId(goodsId);
     try {
-      const r = await fetch("/api/store-services?action=merchant_update_goods", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goods_id: goodsId, ...updates }),
+      const r = await fetch(`/api/v2/merchant/goods/${goodsId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
       });
       const d = await r.json();
       setMessage(d.code === 0 ? "✅ 已更新" : `❌ ${d.msg}`);
-      fetch(`/api/store-services?action=merchant_my_goods&store_id=${activeStoreId}`).then(r => r.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
+      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
     } catch { setMessage("❌ 更新失败"); }
     setSavingId(null);
     setTimeout(() => setMessage(""), 2000);
   };
 
-  // ── 删除商品 ──
+  // ── 删除商品(新REST API) ──
   const deleteGoods = async (goodsId: number) => {
     if (!confirm("确定删除此商品？")) return;
     try {
-      const r = await fetch(`/api/store-services?action=merchant_delete_goods&goods_id=${goodsId}`, { method: "GET" });
+      const r = await fetch(`/api/v2/merchant/goods/${goodsId}`, { method: "DELETE" });
       const d = await r.json();
       setMessage(d.code === 0 ? "✅ 已删除" : `❌ ${d.msg}`);
-      fetch(`/api/store-services?action=merchant_my_goods&store_id=${activeStoreId}`).then(r => r.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
+      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
     } catch { setMessage("❌ 删除失败"); }
     setTimeout(() => setMessage(""), 2000);
   };
