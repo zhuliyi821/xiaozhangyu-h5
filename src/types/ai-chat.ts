@@ -1,9 +1,15 @@
 export type TabId = 'zodiac' | 'lottery' | 'stock' | 'crypto';
 
 export interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
+  _tempId?: string;
+  status?: 'sending' | 'sent' | 'failed';
+  error?: string;
+  _type?: 'cost-confirm';      // 内联成本确认卡片
+  _cost?: number;               // 待扣豆数
+  _pendingContent?: string;     // 待发送消息
 }
 
 export interface TabConfig {

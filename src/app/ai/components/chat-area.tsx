@@ -7,6 +7,9 @@ interface Props {
   tab: TabId;
   onQuickQuestion: (q: string, cost: number) => void;
   onFeedback: (index: number, feedback: number) => void;
+  onRetry?: (msg: Message) => void;
+  onCostConfirm?: (cost: number, content: string) => void;
+  onCostCancel?: () => void;
 }
 
 const QUICK_QUESTIONS: Record<string, { q: string; cost: number; recommended?: boolean }[]> = {
@@ -28,7 +31,7 @@ const QUICK_QUESTIONS: Record<string, { q: string; cost: number; recommended?: b
   zodiac: [],
 };
 
-export default function ChatArea({ messages, loading, tab, onQuickQuestion, onFeedback }: Props) {
+export default function ChatArea({ messages, loading, tab, onQuickQuestion, onFeedback, onRetry, onCostConfirm, onCostCancel }: Props) {
   const qq = QUICK_QUESTIONS[tab] || [];
 
   return (
@@ -77,8 +80,17 @@ export default function ChatArea({ messages, loading, tab, onQuickQuestion, onFe
               msg.role === 'user'
                 ? 'bg-gradient-to-r from-brand-teal to-brand-teal-dark text-white rounded-br-md'
                 : 'bg-surface border border-border-tertiary shadow-sm rounded-bl-md'
-            }`}>
+            } ${msg.status === 'failed' ? 'opacity-70' : ''}`}>
               {msg.content}
+              {msg.role === 'user' && msg.status === 'sending' && <span className="ml-1.5 inline-block text-[9px] opacity-70">⟳</span>}
+              {msg.role === 'user' && msg.status === 'failed' && (
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-[9px] text-red-300">{msg.error || '发送失败'}</span>
+                  {onRetry && (
+                    <button onClick={() => onRetry(msg)} className="text-[9px] text-white/80 underline">重试</button>
+                  )}
+                </div>
+              )}
             </div>
             {msg.role === 'assistant' && i > 0 && !msg.content.startsWith('早安') && !msg.content.startsWith('午后') && !msg.content.startsWith('夜幕') && (
               <div className="flex gap-3 mt-1.5 ml-1">

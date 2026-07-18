@@ -268,52 +268,110 @@ export default function StoreH5Page({ params }: { params: Promise<{ storeId: str
         </div>
       </div>
 
-      {/* 装修模块 */}
-      {decoration && decoration.modules.filter(m => m.enabled !== false).length > 0 && (
-        <div className="px-4 mt-4 space-y-3">
-          {decoration.modules.filter(m => m.enabled !== false).sort((a,b) => (a.sort_order||0)-(b.sort_order||0)).map(mod => {
-            if (mod.type === 'banner' && mod.config?.images?.length > 0) {
-              return (
-                <div key={mod.id} className="rounded-[12px] overflow-hidden shadow-sm">
-                  <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
-                    {mod.config.images.map((img:string,i:number) => (
-                      <div key={i} className="snap-start shrink-0 w-full h-36 bg-gray-50">
-                        <img src={img} alt="" className="w-full h-full object-cover" />
+      {/* 装修模块 — 有已启用的模块时渲染，无时展示兜底 */}
+      {(() => {
+        const hasEnabled = decoration && decoration.modules.filter(m => m.enabled !== false).length > 0;
+        if (hasEnabled) {
+          return (
+            <div className="px-4 mt-4 space-y-3">
+              {decoration!.modules.filter(m => m.enabled !== false).sort((a,b) => (a.sort_order||0)-(b.sort_order||0)).map(mod => {
+                if (mod.type === 'banner' && mod.config?.images?.length > 0) {
+                  return (
+                    <div key={mod.id} className="rounded-[12px] overflow-hidden shadow-sm">
+                      <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
+                        {mod.config.images.map((img:string,i:number) => (
+                          <div key={i} className="snap-start shrink-0 w-full h-36 bg-gray-50">
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            if (mod.type === 'coupon' && mod.config?.coupons?.length > 0) {
-              return (
-                <div key={mod.id} className="bg-white rounded-[12px] p-3.5 shadow-sm border border-gray-50">
-                  <div className="text-[11px] font-semibold mb-2.5">{mod.config.title || "领优惠券"}</div>
-                  <div className="flex gap-2 overflow-x-auto scrollbar-none">
-                    {mod.config.coupons.map((c:any,i:number) => (
-                      <div key={i} className="shrink-0 w-28 p-2.5 rounded-[10px] text-center" style={{background:`${primary}10`}}>
-                        <div className="text-base font-bold" style={{color:primary}}>{c.discount || c.amount}</div>
-                        <div className="text-[9px] text-gray-500 mt-0.5">{c.label || "优惠券"}</div>
+                    </div>
+                  );
+                }
+                if (mod.type === 'coupon' && mod.config?.coupons?.length > 0) {
+                  return (
+                    <div key={mod.id} className="bg-white rounded-[12px] p-3.5 shadow-sm border border-gray-50">
+                      <div className="text-[11px] font-semibold mb-2.5">{mod.config.title || "领优惠券"}</div>
+                      <div className="flex gap-2 overflow-x-auto scrollbar-none">
+                        {mod.config.coupons.map((c:any,i:number) => (
+                          <div key={i} className="shrink-0 w-28 p-2.5 rounded-[10px] text-center" style={{background:`${primary}10`}}>
+                            <div className="text-base font-bold" style={{color:primary}}>{c.discount || c.amount}</div>
+                            <div className="text-[9px] text-gray-500 mt-0.5">{c.label || "优惠券"}</div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  );
+                }
+                if (mod.type === 'notice' && mod.config?.text) {
+                  return (
+                    <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-50 flex items-center gap-2.5">
+                      <span className="text-base shrink-0">📢</span>
+                      <div className="w-full overflow-hidden">
+                        <p className="text-[11px] text-gray-600 whitespace-nowrap animate-marquee">{mod.config.text}</p>
+                      </div>
+                    </div>
+                  );
+                }
+                if (mod.type === 'product-grid' && products.length > 0) {
+                  const cols = mod.config?.columns || 2;
+                  const maxItems = cols === 3 ? 6 : 4;
+                  return (
+                    <div key={mod.id} className="bg-white rounded-[12px] p-3.5 shadow-sm border border-gray-50">
+                      {mod.config?.title && <div className="text-[11px] font-semibold mb-2.5">{mod.config.title}</div>}
+                      <div className={`grid grid-cols-${cols} gap-2`} style={{display:'grid',gridTemplateColumns:`repeat(${cols},1fr)`}}>
+                        {products.slice(0, maxItems).map((p:any) => (
+                          <div key={p.id} className="bg-gray-50 rounded-[10px] overflow-hidden active:scale-[0.97] transition-transform">
+                            <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                              {p.thumb ? <img src={p.thumb.startsWith('http')?p.thumb:`${API_BASE}/${p.thumb}`} alt={p.title||p.name} className="w-full h-full object-cover" />
+                                : <span className="text-2xl opacity-20">📦</span>}
+                            </div>
+                            <div className="p-2">
+                              <div className="text-[10px] font-medium truncate">{p.title||p.name}</div>
+                              <div className="text-[11px] font-bold mt-0.5" style={{color:primary}}>¥{p.selling_price||p.price}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                if (mod.type === 'store-intro' && (mod.config?.description || store.intro)) {
+                  return (
+                    <div key={mod.id} className="bg-white rounded-[12px] p-3.5 shadow-sm border border-gray-50">
+                      <div className="text-[11px] font-semibold mb-2">门店介绍</div>
+                      <p className="text-[10px] text-gray-600 leading-relaxed whitespace-pre-line">{mod.config?.description || store.intro}</p>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          );
+        }
+        if (!loading) {
+          return (
+            <div className="mx-4 mt-4">
+              <div className="bg-white rounded-[12px] p-4 shadow-sm border border-gray-50/50 text-center">
+                <div className="text-2xl mb-2">🏪</div>
+                <p className="text-[11px] text-gray-400">商户正在完善门店装修，敬请期待</p>
+                <div className="flex items-center justify-center gap-3 mt-2">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-200" /> banner
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-gray-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-200" /> 商品
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-gray-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-200" /> 优惠券
                   </div>
                 </div>
-              );
-            }
-            if (mod.type === 'notice' && mod.config?.text) {
-              return (
-                <div key={mod.id} className="bg-white rounded-[12px] p-3 shadow-sm border border-gray-50 flex items-center gap-2.5">
-                  <span className="text-base shrink-0">📢</span>
-                  <div className="w-full overflow-hidden">
-                    <p className="text-[11px] text-gray-600 whitespace-nowrap animate-marquee">{mod.config.text}</p>
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-      )}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       {/* 门店商品 */}
       <div className="px-4 mt-5">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { useMerchantStores } from "../components/use-merchant-stores";
+import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
 
 
@@ -21,7 +21,7 @@ interface GoodsItem {
 
 export default function MerchantGoodsPage() {
   const { user, loading } = useAuth();
-  const { activeStoreId } = useMerchantStores();
+  const { activeStoreId } = useMerchant();
   const [showLogin, setShowLogin] = useState(false);
   const [goods, setGoods] = useState<GoodsItem[]>([]);
   const [filterStatus, setFilterStatus] = useState<number | null>(null);

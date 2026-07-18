@@ -34,9 +34,10 @@ export default function WeChatCallbackPage() {
   }
 
   const retry = useCallback(() => {
-    // 重新获取授权：跳回 auth_url，带上 ref
+    // 重新获取授权：跳回 auth_url，带上 ref 和 target
     const ref = getInviteRef();
-    fetch(`/api/wechat?action=auth_url${ref ? `&ref=${ref}` : ""}`)
+    const currentPath = window.location.pathname + window.location.search;
+    fetch(`/api/wechat?action=auth_url${ref ? `&ref=${ref}` : ""}&target=${encodeURIComponent(currentPath)}`)
       .then(r => r.json())
       .then(json => {
         if (json.code !== 0) throw new Error(json.msg);
@@ -105,9 +106,10 @@ export default function WeChatCallbackPage() {
         setStatus("登录成功！正在跳转...");
         setDone(true);
 
-        // 跳转首页
+        // 跳转到目标页面（从OAuth state中提取），默认首页
+        const redirectTo = data.redirect || "/";
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.href = redirectTo;
         }, 800);
       })
       .catch(() => {

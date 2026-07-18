@@ -97,7 +97,8 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
     setWechatLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/wechat?action=auth_url");
+      const target = window.location.pathname + window.location.search;
+      const res = await fetch(`/api/wechat?action=auth_url&scope=userinfo&target=${encodeURIComponent(target)}`);
       const json = await res.json();
       if (json.code !== 0) throw new Error(json.msg || "获取微信授权失败");
       // 存 state 到 sessionStorage 供回调页验证 CSRF

@@ -3,28 +3,24 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { useMerchantStores } from "../components/use-merchant-stores";
+import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
+import LocationPicker from "@/components/merchant/location-picker";
 
 
 export default function MerchantSettingsPage() {
   const { user, loading } = useAuth();
-  const { stores, activeStoreId } = useMerchantStores();
+  const { stores, activeStoreId } = useMerchant();
   const [showLogin, setShowLogin] = useState(false);
   const [operating, setOperating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [showEditInfo, setShowEditInfo] = useState(false);
-  const [showAddStaff, setShowAddStaff] = useState(false);
 
   // 可编辑信息
   const [info, setInfo] = useState({ store_name: "", address: "", phone: "", intro: "", latitude: "", longitude: "" });
   const [editInfo, setEditInfo] = useState({ store_name: "", address: "", phone: "", intro: "", latitude: "", longitude: "" });
   const [locating, setLocating] = useState(false);
-
-  // 新店员信息
-  const [newStaff, setNewStaff] = useState({ name: "", mobile: "", role: "clerk" });
-  const [staffSaving, setStaffSaving] = useState(false);
 
   // 当前门店
   const currentStore = stores.find(s => s.store_id === activeStoreId) || stores[0] || null;
@@ -62,23 +58,6 @@ export default function MerchantSettingsPage() {
       else { setMsg("❌ 保存失败"); }
     } catch { setMsg("❌ 网络错误"); }
     setSaving(false);
-    setTimeout(() => setMsg(""), 2000);
-  };
-
-  const addStaff = async () => {
-    if (!activeStoreId || !newStaff.name || !newStaff.mobile) { setMsg("❌ 请填写完整信息"); setTimeout(() => setMsg(""), 2000); return; }
-    setStaffSaving(true);
-    try {
-      const r = await fetch(`/api/v2/merchant/staff`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store_id: activeStoreId, ...newStaff }),
-      });
-      const d = await r.json();
-      if (d.code === 0) { setShowAddStaff(false); setNewStaff({ name: "", mobile: "", role: "clerk" }); setMsg("✅ 店员添加成功"); }
-      else { setMsg(`❌ ${d.msg || "添加失败"}`); }
-    } catch { setMsg("❌ 网络错误"); }
-    setStaffSaving(false);
     setTimeout(() => setMsg(""), 2000);
   };
 
@@ -158,6 +137,16 @@ export default function MerchantSettingsPage() {
                 {info.latitude ? `已定位 (${parseFloat(info.latitude).toFixed(4)}, ${parseFloat(info.longitude).toFixed(4)})` : "⚠️ 未设置"}
               </span>
             </div>
+            {info.latitude && (
+              <div className="mt-1">
+                <LocationPicker
+                  latitude={info.latitude}
+                  longitude={info.longitude}
+                  storeName={info.store_name}
+                  height={140}
+                />
+              </div>
+            )}
             <div className="flex justify-between text-[11px]">
               <span className="text-gray-400">联系电话</span>
               <span className="font-medium">{info.phone || "—"}</span>
@@ -166,33 +155,19 @@ export default function MerchantSettingsPage() {
         </div>
       </div>
 
-      {/* 店员管理 */}
+      {/* 店员管理 → 快捷跳转至员工管理 */}
       <div className="mx-4 mt-3">
-        <div className="bg-white rounded-[10px] p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
+        <div onClick={() => window.location.href = "/merchant/staff"}
+          className="bg-white rounded-[10px] p-4 shadow-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform">
+          <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-[8px] flex items-center justify-center" style={{backgroundColor: `${C.gold}15`}}>
               <span className="text-base">👥</span>
             </div>
             <div>
-              <div className="text-[13px] font-medium">店员管理</div>
-              <div className="text-[10px] text-gray-400">添加 · 编辑 · 权限管理</div>
+              <div className="text-[13px] font-medium">员工管理</div>
+              <div className="text-[10px] text-gray-400">添加 · 编辑 · 权限管理 →</div>
             </div>
           </div>
-          <div className="flex items-center justify-between py-2.5 border-t border-gray-50">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-medium">店</div>
-              <div>
-                <div className="text-[12px] font-medium">店主</div>
-                <div className="text-[9px] text-gray-400">全部权限</div>
-              </div>
-            </div>
-            <span className="text-[10px] text-gray-300">不可编辑</span>
-          </div>
-          <button onClick={() => setShowAddStaff(true)}
-            className="w-full mt-2 py-2.5 rounded-[8px] text-center text-[11px] font-medium active:scale-[0.97] transition-transform cursor-pointer"
-            style={{backgroundColor: `${C.coral}10`, color: C.coral}}>
-            + 添加店员
-          </button>
         </div>
       </div>
 
@@ -238,6 +213,15 @@ export default function MerchantSettingsPage() {
               <div>
                 <label className="text-[11px] text-gray-400 block mb-1">📍 门店定位</label>
                 <div className="flex flex-col gap-2">
+                  {/* 交互地图 */}
+                  <LocationPicker
+                    latitude={editInfo.latitude || "39.9042"}
+                    longitude={editInfo.longitude || "116.4074"}
+                    storeName={editInfo.store_name}
+                    onLocationChange={(lat, lng) => setEditInfo(p => ({ ...p, latitude: lat, longitude: lng }))}
+                    interactive
+                    height={220}
+                  />
                   {/* 第1行：定位按钮 */}
                   <div className="flex gap-2">
                     <button onClick={() => {
@@ -314,48 +298,6 @@ export default function MerchantSettingsPage() {
               <button onClick={saveInfo} disabled={saving}
                 className="flex-1 py-2.5 rounded-[8px] text-white text-[12px] font-medium active:scale-95 transition-transform"
                 style={{background: C.teal}}>{saving ? "保存中..." : "保存"}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 添加店员弹窗 */}
-      {showAddStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowAddStaff(false)}>
-          <div className="bg-white rounded-[12px] w-full max-w-[360px] p-5 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-[14px] font-semibold mb-4">添加店员</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[11px] text-gray-400 block mb-1">姓名</label>
-                <input value={newStaff.name} onChange={e => setNewStaff(p => ({ ...p, name: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#45CCD5]" placeholder="输入店员姓名" />
-              </div>
-              <div>
-                <label className="text-[11px] text-gray-400 block mb-1">手机号</label>
-                <input value={newStaff.mobile} onChange={e => setNewStaff(p => ({ ...p, mobile: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 text-[13px] outline-none focus:border-[#45CCD5]" placeholder="输入手机号" />
-              </div>
-              <div>
-                <label className="text-[11px] text-gray-400 block mb-1">角色</label>
-                <div className="flex gap-2">
-                  {[
-                    { key: "admin", label: "管理员" },
-                    { key: "clerk", label: "店员" },
-                  ].map(r => (
-                    <button key={r.key} onClick={() => setNewStaff(p => ({ ...p, role: r.key }))}
-                      className={`flex-1 py-2 rounded-[8px] text-[12px] font-medium transition-all ${newStaff.role === r.key ? "text-white" : "bg-gray-100 text-gray-400"}`}
-                      style={newStaff.role === r.key ? { background: C.coral } : {}}>
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2 mt-5">
-              <button onClick={() => setShowAddStaff(false)} className="flex-1 py-2.5 rounded-[8px] bg-gray-100 text-[12px] font-medium">取消</button>
-              <button onClick={addStaff} disabled={staffSaving}
-                className="flex-1 py-2.5 rounded-[8px] text-white text-[12px] font-medium active:scale-95 transition-transform"
-                style={{background: C.coral}}>{staffSaving ? "添加中..." : "添加"}</button>
             </div>
           </div>
         </div>

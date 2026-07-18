@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PKTopic, APIResponse, PKMode, CharityMode, PoolMode, POOL_MODE_LABELS, POOL_MODE_DESCS, PK_MODE_LABELS, PK_MODE_DESCS, DailySidelineStats, SidelineResult, AGENT_TOPICS_POOL, UserInterestProfile, type VoteConfirmData } from "./types";
+import { PKTopic, APIResponse, PKMode, CharityMode, PoolMode, POOL_MODE_LABELS, POOL_MODE_DESCS, PK_MODE_LABELS, PK_MODE_DESCS, DailySidelineStats, SidelineResult, UserInterestProfile, type VoteConfirmData } from "./types";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
 import { shareToWeChat, buildShareText } from "@/lib/share-to-wechat";
@@ -24,12 +24,8 @@ const CATEGORIES = [
   { key: "consumption", label: "🏪 消费对决" },
 ];
 
-// ─── 消费对决预设话题（硬编码） ───
-const CONSUMPTION_TOPICS: any[] = [
-  { id: -1, title: "沙县小吃 vs 兰州拉面 哪家好吃？", category: "consumption", options: ["沙县小吃", "兰州拉面"], option_a: "沙县小吃", option_b: "兰州拉面", vote_a: 1284, vote_b: 1023, vote_counts: [1284, 1023], total_votes: 2307, total_pool: 4560, pools: [2200, 2360], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "消费达人", creator_id: 0, time_label: "3天后截止", end_time: 0, time_remaining: 259200, comment_count: 56, spectator_count: 892, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [220, 230], created_at: "", time_ago: "1天前" },
-  { id: -2, title: "华为 vs iPhone 下一部手机买哪个？", category: "consumption", options: ["华为", "iPhone"], option_a: "华为", option_b: "iPhone", vote_a: 2456, vote_b: 1892, vote_counts: [2456, 1892], total_votes: 4348, total_pool: 8920, pools: [5000, 3920], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "数码控", creator_id: 0, time_label: "5天后截止", end_time: 0, time_remaining: 432000, comment_count: 128, spectator_count: 2341, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [500, 392], created_at: "", time_ago: "2天前" },
-  { id: -3, title: "社区火锅店 vs 商业区烤肉 周末去哪吃？", category: "consumption", options: ["老重庆火锅", "韩式烤肉"], option_a: "老重庆火锅", option_b: "韩式烤肉", vote_a: 892, vote_b: 1156, vote_counts: [892, 1156], total_votes: 2048, total_pool: 3200, pools: [1500, 1700], min_bet: 10, max_bet: 1000, status: 1, status_label: "进行中", mode: "NvN", creator_name: "美食侦探", creator_id: 0, time_label: "2天后截止", end_time: 0, time_remaining: 172800, comment_count: 34, spectator_count: 456, charity: "none", charity_ratio: 0, charity_project: "", pool_distribution: "winner_takes_all", platform_fee_ratio: 5, creator_fee_ratio: 0, challenger_limit: 100, challenger_pool_limit: 10000, estimated_rewards: [150, 170], created_at: "", time_ago: "昨天" },
-];
+// ─── 预设话题（从API获取） ───
+let presetCache: PKTopic[] = [];
 
 // ETag cache
 let lastETag = "";
@@ -74,6 +70,7 @@ export default function PKHallPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [topics, setTopics] = useState<PKTopic[]>([]);
+  const [charityFund, setCharityFund] = useState(284560);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeCat, setActiveCat] = useState("");
@@ -222,6 +219,14 @@ export default function PKHallPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // ═══ 公益资金池 ═══
+  useEffect(() => {
+    fetch(`${API_BASE}/api/homepage/data`)
+      .then(r => r.json())
+      .then(j => { if (j.code === 0 && j.data?.charity_fund) setCharityFund(j.data.charity_fund); })
+      .catch(() => {});
+  }, []);
+
   // ═══ 排行榜数据 ═══
   useEffect(() => {
     fetch(`${API_BASE}/api/leaderboard?limit=3`)
@@ -246,53 +251,37 @@ export default function PKHallPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 合并消费对决话题
+  // 加载预设话题 (API)
+  const [presets, setPresets] = useState<PKTopic[]>([]);
+  useEffect(() => {
+    if (presetCache.length > 0) { setPresets(presetCache); return; }
+    fetch(`${API_BASE}/api/pk/presets`)
+      .then(r => r.json())
+      .then(j => {
+        if (j.code === 0 && j.data?.list) {
+          const mapped: PKTopic[] = j.data.list.map((p: any) => ({
+            id: p.id, title: p.title, category: p.category || 'general',
+            option_a: p.option_a, option_b: p.option_b,
+            vote_a: p.vote_a || 0, vote_b: p.vote_b || 0,
+            total_pool: p.total_pool || 0, status: p.status || 1,
+            mode: p.mode || '1v1', min_bet: p.min_bet || 10,
+            end_time: p.end_time || 0, comment_count: p.comment_count || 0,
+            spectator_count: p.spectator_count || 0,
+            creator_name: p.creator_name || '小章鱼',
+            time_ago: p.time_ago || '今日',
+            description: p.description || '',
+          }));
+          presetCache = mapped;
+          setPresets(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // 合并所有话题
   const allTopics = useMemo(() => {
-    // Agent预设话题 → 转为PKTopic格式
-    const agentTopics: PKTopic[] = AGENT_TOPICS_POOL.map((p, i) => ({
-      id: -(1001 + i),                    // 负数ID避免冲突
-      title: p.title,
-      category: p.category,
-      options: p.options,
-      mode: "NvN" as PKMode,
-      charity: "none" as CharityMode,
-      charity_ratio: 0,
-      charity_project: "",
-      pool_distribution: "winner_takes_all" as PoolMode,
-      platform_fee_ratio: 5,
-      creator_fee_ratio: 0,
-      challenger_limit: 999,
-      challenger_pool_limit: 999999,
-      vote_counts: [Math.floor(Math.random() * 200 + 50), Math.floor(Math.random() * 150 + 30)],
-      pools: [0, 0],
-      total_pool: Math.floor(Math.random() * 100000 + 10000),
-      total_votes: 0,
-      comment_count: Math.floor(Math.random() * 30),
-      spectator_count: Math.floor(Math.random() * 500 + 100),
-      end_time: Math.floor(Date.now() / 1000) + p.end_time_days * 86400,
-      time_remaining: p.end_time_days * 86400,
-      time_label: `${p.end_time_days}天后截止`,
-      min_bet: p.min_bet,
-      max_bet: 10000,
-      status: 1,
-      status_label: "进行中",
-      winner: null,
-      creator_name: "🐙 小章鱼话题官",
-      creator_id: 0,
-      created_at: new Date().toISOString(),
-      time_ago: "刚刚",
-      estimated_rewards: [0, 0],
-      max_choices: 1,
-      // Agent字段
-      topic_source: "agent",
-      agent_source: p.agent_source,
-      settlement_type: p.settlement_type,
-      sideline_counts: [0, 0],
-      sideline_total: 0,
-      charity_from_sideline: 0,
-    }));
-    return [...agentTopics, ...topics, ...CONSUMPTION_TOPICS] as PKTopic[];
-  }, [topics]);
+    return [...presets, ...topics] as PKTopic[];
+  }, [presets, topics]);
 
   // 千人千面排序：Agent话题按匹配度排序 + 混排用户话题
   const rankedTopics = useMemo(() => {
@@ -339,7 +328,11 @@ export default function PKHallPage() {
   const catName: Record<string, string> = { sports: "竞技声浪", social: "社会动脉", event: "事件脉冲", general: "家庭战场", consumption: "消费对决" };
 
   // 围观用户名池
-  const spectatorNames = ["王姐", "贵州老铁", "张大哥", "李阿姨", "陈律师", "程序员阿杰", "退休老李", "宝妈小杨"];
+  // 话题相关围观者（基于话题ID生成唯一前缀）
+  const spectatorPrefix = useMemo(() => {
+    const prefixes = ["热心市民", "老铁", "吃瓜群众", "过来人", "追风少年", "悠闲大叔", "小确幸", "梦想家"];
+    return (id: number) => prefixes[Math.abs(id) % prefixes.length];
+  }, []);
 
   // 获取品类卡片底色
   const cardBg = (key: string) => {
@@ -527,7 +520,7 @@ export default function PKHallPage() {
             </div>
             {spectatorFeed.map((t, i) => (
               <div key={t.id} className="text-[10px] text-text-secondary mt-1">
-                <span className="font-medium text-brand-teal-dark">{spectatorNames[(t.id + i) % spectatorNames.length]}</span>
+                <span className="font-medium text-brand-teal-dark">{spectatorPrefix(t.id)}</span>
                 {i === 0 ? (
                   <> 投了「{t.title}」选「{t.options?.[0] || t.option_a || "A"}」{(t.min_bet || 10)}豆 <span className="text-text-tertiary">刚刚</span></>
                 ) : (
@@ -746,7 +739,7 @@ export default function PKHallPage() {
           <Link href="/charity-fund"
             className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center active:scale-[0.98] transition-transform shadow-sm">
             <div className="text-[10px] text-purple-600 font-medium">❤️ 公益资金池</div>
-            <div className="text-[8px] text-text-tertiary mt-0.5">284,560豆</div>
+            <div className="text-[8px] text-text-tertiary mt-0.5">{charityFund.toLocaleString()}豆</div>
           </Link>
           <Link href="/pk-rank"
             className="flex-1 bg-white rounded-[10px] border border-gray-100 p-2.5 text-center active:scale-[0.98] transition-transform shadow-sm">

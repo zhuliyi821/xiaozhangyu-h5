@@ -3,27 +3,75 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
+import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
 
 
 export default function StaffPage() {
   const { user, loading } = useAuth();
+  const { activeStoreId } = useMerchant();
   const [showLogin, setShowLogin] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [staff, setStaff] = useState<any[]>([
     { id: 1, name: "店主", role: "owner", phone: "-", status: "active", desc: "全部权限" },
   ]);
   const [newStaff, setNewStaff] = useState({ name: "", phone: "", role: "staff" });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
 
+  // 从后端加载店员列表
   useEffect(() => {
     if (!user) return;
     fetch(`/api/v2/merchant/staff?member_id=${user.uid}`)
       .then(r => r.json())
-      .then(d => { if (d.code === 0) setStaff(d.data || []); })
+      .then(d => { if (d.code === 0 && Array.isArray(d.data)) setStaff(d.data); })
       .catch(() => {});
   }, [user]);
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><div className="animate-spin w-6 h-6 border-2 border-[#F27152] border-t-transparent rounded-full" /></div>;
+  const handleAddStaff = async () => {
+    if (!newStaff.name || !newStaff.phone) {
+      setMsg("❌ 请填写完整信息");
+      setTimeout(() => setMsg(""), 2000);
+      return;
+    }
+    if (!activeStoreId) {
+      setMsg("❌ 请先选择门店");
+      setTimeout(() => setMsg(""), 2000);
+      return;
+    }
+    setSaving(true);
+    try {
+      const r = await fetch("/api/v2/merchant/staff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          store_id: activeStoreId,
+          member_id: user?.uid,
+          name: newStaff.name,
+          mobile: newStaff.phone,
+          role: newStaff.role,
+        }),
+      });
+      const d = await r.json();
+      if (d.code === 0) {
+        setMsg("✅ 店员添加成功");
+        setShowAdd(false);
+        setNewStaff({ name: "", phone: "", role: "staff" });
+        // 刷新列表
+        const r2 = await fetch(`/api/v2/merchant/staff?member_id=${user?.uid}`);
+        const d2 = await r2.json();
+        if (d2.code === 0 && Array.isArray(d2.data)) setStaff(d2.data);
+      } else {
+        setMsg(`❌ ${d.message || "添加失败"}`);
+      }
+    } catch {
+      setMsg("❌ 网络错误");
+    }
+    setSaving(false);
+    setTimeout(() => setMsg(""), 2000);
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center" style={{backgroundColor: C.pageBg}}><div className="animate-spin w-6 h-6 border-2 border-t-transparent rounded-full" style={{borderColor: C.coral, borderTopColor: "transparent"}} /></div>;
   if (!user) return <div className="h-screen flex items-center justify-center bg-[#F5F6FA]"><button onClick={() => setShowLogin(true)} className="px-6 py-2.5 rounded-[10px] text-white text-sm font-medium" style={{background:C.coral}}>登录后查看</button>{showLogin && <LoginModal onClose={() => setShowLogin(false)} />}</div>;
 
   return (
@@ -41,6 +89,13 @@ export default function StaffPage() {
         </div>
       </div>
 
+      {msg && (
+        <div className="mx-4 mt-3 p-2.5 rounded-[8px] text-[11px] text-center font-medium"
+          style={{backgroundColor: msg.startsWith("✅") ? "#D1FAE5" : "#FEE2E2", color: msg.startsWith("✅") ? "#065F46" : "#991B1B"}}>
+          {msg}
+        </div>
+      )}
+
       <div className="mx-4 mt-4 space-y-2">
         {staff.map(s => (
           <div key={s.id} className="bg-white rounded-[10px] p-3.5 shadow-sm flex items-center gap-3">
@@ -56,7 +111,7 @@ export default function StaffPage() {
               </div>
               <div className="text-[10px] text-gray-400 mt-0.5">{s.phone || s.desc || "-"}</div>
             </div>
-            <span className={`text-[10px] ${s.status === "active" ? "text-[#10B981]" : "text-gray-300"}`}>
+            <span className="text-[10px]" style={{color: s.status === "active" ? C.green : "#999"}}>
               {s.status === "active" ? "正常" : "已禁用"}
             </span>
           </div>
@@ -90,13 +145,10 @@ export default function StaffPage() {
                 <option value="admin">管理员</option>
                 <option value="staff">店员</option>
               </select>
-              <button onClick={() => {
-                if (!newStaff.name || !newStaff.phone) return;
-                setStaff(p => [...p, { id: Date.now(), name: newStaff.name, phone: newStaff.phone, role: newStaff.role, status: "active", desc: newStaff.role === "admin" ? "商品/订单/装修" : "仅订单查看" }]);
-                setShowAdd(false);
-                setNewStaff({ name: "", phone: "", role: "staff" });
-              }} className="w-full py-2.5 rounded-[8px] text-[12px] font-medium text-white active:scale-95 transition-transform" style={{background: C.coral}}>
-                确认添加
+              <button onClick={handleAddStaff} disabled={saving}
+                className="w-full py-2.5 rounded-[8px] text-[12px] font-medium text-white active:scale-95 transition-transform"
+                style={{background: saving ? "#999" : C.coral}}>
+                {saving ? "添加中..." : "确认添加"}
               </button>
             </div>
             <button onClick={() => { setShowAdd(false); setNewStaff({ name: "", phone: "", role: "staff" }); }}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import LoginModal from "@/components/ui/login-modal";
-import { useMerchantStores } from "./components/use-merchant-stores";
+import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
 
 
@@ -12,7 +12,7 @@ export default function MerchantPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [merchantStatus, setMerchantStatus] = useState<any>(null);
   const [stats, setStats] = useState({ goods: 0, orders: 0, revenue: 0, today_orders: 0 });
-  const { stores, activeStoreId, setActiveStoreId } = useMerchantStores();
+  const { stores, activeStoreId, setActiveStore } = useMerchant();
 
   // ── 加载商户全状态 ──
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function MerchantPage() {
           </div>
           {/* 门店切换 */}
           {stores.length > 1 && (
-            <select value={activeStoreId || ""} onChange={e => setActiveStoreId(Number(e.target.value))}
+            <select value={activeStoreId || ""} onChange={e => setActiveStore(Number(e.target.value))}
               className="text-[11px] px-2 py-1 rounded-[6px] border border-gray-200 bg-gray-50 outline-none">
               {stores.map(s => (
                 <option key={s.store_id} value={s.store_id}>{s.store_name}</option>
