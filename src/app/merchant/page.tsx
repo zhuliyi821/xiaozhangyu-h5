@@ -7,10 +7,36 @@ import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
 
 
+interface MerchantApply {
+  username?: string;
+}
+
+interface MerchantStatus {
+  paid?: boolean;
+  has_merchant?: boolean;
+  pending_pay?: boolean;
+  hasApply?: boolean;
+  merchant_apply?: MerchantApply;
+}
+
+interface StoreItem {
+  store_id: number;
+  store_name: string;
+  operating_state: number;
+  address: string;
+  thumb: string;
+  mobile: string;
+  phone: string;
+  intro: string;
+  latitude: string;
+  longitude: string;
+}
+
+
 export default function MerchantPage() {
   const { user, loading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  const [merchantStatus, setMerchantStatus] = useState<any>(null);
+  const [merchantStatus, setMerchantStatus] = useState<MerchantStatus | null>(null);
   const [stats, setStats] = useState({ goods: 0, orders: 0, revenue: 0, today_orders: 0 });
   const [networkError, setNetworkError] = useState<string | null>(null);
   const { stores, activeStoreId, setActiveStore } = useMerchant();
@@ -191,7 +217,7 @@ export default function MerchantPage() {
         <div className="mx-4 mt-6">
           <p className="text-[11px] text-gray-400 mb-2 px-0.5">🏪 我的门店</p>
           <div className="space-y-2">
-            {stores.map((s: any) => (
+            {stores.map((s) => (
               <div key={s.store_id} className="bg-white rounded-[10px] p-3.5 shadow-sm flex items-center gap-3">
                 <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-lg shrink-0" style={{backgroundColor:`${C.teal}15`}}>🏪</div>
                 <div className="flex-1 min-w-0">

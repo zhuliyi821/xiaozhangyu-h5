@@ -7,14 +7,25 @@ import { useMerchant } from "@/lib/merchant-context";
 import { C } from "@/lib/brand-colors";
 
 
+interface StaffMember {
+  id: number;
+  user_id: number;
+  name: string;
+  role: string;
+  mobile: string;
+  status: string;
+  joined_at: string;
+}
+
+
 export default function StaffPage() {
   const { user, loading } = useAuth();
   const { activeStoreId } = useMerchant();
   const [showLogin, setShowLogin] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [showEdit, setShowEdit] = useState<any>(null);  // staff object or null
-  const [showDelete, setShowDelete] = useState<any>(null); // staff object or null
-  const [staff, setStaff] = useState<any[]>([]);
+  const [showEdit, setShowEdit] = useState<StaffMember | null>(null);
+  const [showDelete, setShowDelete] = useState<StaffMember | null>(null);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
   const [newStaff, setNewStaff] = useState({ name: "", phone: "", role: "staff" });
   const [editStaff, setEditStaff] = useState({ name: "", phone: "", role: "staff" });
   const [saving, setSaving] = useState(false);
