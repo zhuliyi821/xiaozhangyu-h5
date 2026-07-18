@@ -14,6 +14,7 @@ import BetHistory from "./_components/BetHistory";
 import SlotMachine from "./_components/SlotMachine";
 import BettingOverlay from "./_components/BettingOverlay";
 import SidePanel from "./_components/SidePanel";
+import RecoveryBanner from "./_components/RecoveryBanner";
 import GuestPreview from "./_components/GuestPreview";
 
 import { useGameMachine } from "./_lib/useGameMachine";
@@ -294,6 +295,56 @@ function LotterySimContent() {
     setResult(null);
     game.resetPhase();
   }, [lotteryCode]);
+
+  // ─── 断线恢复: 检查 localStorage 未完成的摇奖 ───
+  const [hasRecovery, setHasRecovery] = useState(false);
+  useEffect(() => {
+    const savedDrawId = localStorage.getItem("szp_last_draw_id");
+    if (!savedDrawId || !user) return;
+    // Query server for current draw state
+    fetch(API_BASE + "/api/lotto/roll", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ draw_id: savedDrawId, action: "status" }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.code !== 0 || !d.data) return;
+        const data = d.data;
+        if (data.status === "complete" || data.status === "expired") return; // Already done
+        // Restore state from server
+        const frontPick = data.total_front || 6;
+        const backPick = data.total_back || 0;
+        const totalBalls = frontPick + backPick;
+        const revNums = data.revealed_numbers || [];
+        game.recoverState({
+          drawId: savedDrawId,
+          phase: "drawing",
+          drawSubPhase: revNums.length >= totalBalls ? "complete" : (revNums.length > 0 ? "rolling" : "ready"),
+          drawState: {
+            revealed: revNums,
+            revealedZones: revNums.map(() => "front" as const),
+            current: revNums.length > 0 ? revNums[revNums.length - 1] : null,
+            currentZone: "front",
+            currentPosition: revNums.length,
+            drawNumbers: data.draw || null,
+          },
+          expiresIn: 180,
+        });
+        setHasRecovery(true);
+      })
+      .catch(() => {});
+  }, [user]);
+
+  // Save draw_id to localStorage on betComplete
+  useEffect(() => {
+    if (drawId && (isDrawing || isResult)) {
+      localStorage.setItem("szp_last_draw_id", drawId);
+    }
+    if (isSelect) {
+      localStorage.removeItem("szp_last_draw_id");
+    }
+  }, [drawId, isDrawing, isResult, isSelect]);
 
   // Load real balance from wallet
   useEffect(() => {
@@ -838,6 +889,28 @@ function LotterySimContent() {
         tickets={tickets.length > 0 ? tickets.length : (selectedFront.length > 0 ? 1 : 0)}
         onComplete={() => {}}
       />
+      {/* 断线恢复横幅 */}
+      {isSelect && (
+        <RecoveryBanner
+          hasRecovery={hasRecovery}
+          isRolling={game.drawSubPhase === "rolling"}
+          revealedCount={game.drawState.revealed.length}
+          totalBalls={(config?.front_pick || 6) + (config?.back_pick || 0)}
+          drawPhase={game.drawSubPhase}
+          onResume={() => {
+            setHasRecovery(false);
+            // Trigger roll or status check
+            if (game.drawState.revealed.length > 0) {
+              handleDrumRoll();
+            }
+          }}
+          onDismiss={() => {
+            setHasRecovery(false);
+            localStorage.removeItem("szp_last_draw_id");
+            game.resetPhase();
+          }}
+        />
+      )}
       {showSurvey && <SurveyModal onClose={() => setShowSurvey(false)} />}
 
       {/* 切换彩种确认弹窗 */}
