@@ -1,0 +1,67 @@
+#!/bin/bash
+# ============================================================
+# pre-commit — 小章鱼项目提交前检查
+# 仅检查本次提交变更的文件
+# 安装: cp scripts/hooks/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit
+# ============================================================
+echo "🔍 代码审查 pre-commit hook..."
+
+BLOCK=0
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)
+
+# ── 函数: 判断文件是否在本次提交中 ──
+is_staged() {
+  echo "$STAGED_FILES" | grep -qx "$1"
+  return $?
+}
+
+# ── 检查: 静默 catch (仅 staged 的 tsx/ts 文件) ──
+for f in $(git diff --cached --name-only --diff-filter=ACM -- '*.tsx' '*.ts' 2>/dev/null); do
+  if [ ! -f "$f" ]; then continue; fi
+  # 只检查新增/修改的行中的静默 catch
+  SILENT=$(git diff --cached "$f" | grep '^+.*\.catch(()' | head -3)
+  if [ -n "$SILENT" ]; then
+    echo "🔴 ERROR: $f 新增了静默 catch"
+    echo "$SILENT"
+    BLOCK=1
+  fi
+done
+
+# ── 检查: useState<any> (仅新增行) ──
+for f in $(git diff --cached --name-only --diff-filter=ACM -- '*.tsx' '*.ts' 2>/dev/null); do
+  if [ ! -f "$f" ]; then continue; fi
+  ANY_STATE=$(git diff --cached "$f" | grep '^+.*useState<any' | head -3)
+  if [ -n "$ANY_STATE" ]; then
+    echo "🟡 BLOCK: $f 新增了 useState<any> 请使用具体类型"
+    echo "$ANY_STATE"
+    BLOCK=1
+  fi
+done
+
+# ── 检查: Python 语法 (仅 staged) ──
+for f in $(git diff --cached --name-only --diff-filter=ACM -- '*.py' 2>/dev/null); do
+  if [ -f "$f" ]; then
+    python3 -c "import ast; ast.parse(open('$f', encoding='utf-8').read())" 2>/dev/null || {
+      echo "🔴 ERROR: $f 语法错误"
+      BLOCK=1
+    }
+  fi
+done
+
+# ── 检查: 硬编码密码 (仅 staged) ──
+for f in $(git diff --cached --name-only --diff-filter=ACM -- '*.py' '*.php' 2>/dev/null); do
+  if [ -f "$f" ] && grep -qE 'password\s*=\s*["'"'"'][^"'"'"']{6,}' "$f" 2>/dev/null; then
+    if ! grep -qE '(settings\.|getenv|os\.getenv|\.env|ENV_)' "$f" 2>/dev/null; then
+      echo "🔴 ERROR: $f 发现可能硬编码的密码"
+      BLOCK=1
+    fi
+  fi
+done
+
+if [ "$BLOCK" -eq 1 ]; then
+  echo "❌ pre-commit 检查未通过，请修正后重试"
+  exit 1
+fi
+
+echo "✅ pre-commit 检查通过"
+exit 0
