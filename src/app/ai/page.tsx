@@ -99,7 +99,7 @@ export default function AIChatPage() {
         setBalance(j.data.balance);
         localStorage.setItem("ai_balance_cache", JSON.stringify({ balance: j.data.balance, cachedAt: Date.now() }));
       }
-    }).catch(() => {});
+    }).catch(() => console.warn("余额加载失败"));
   }, [user]);
 
   // ── Disclaimer: 仅首次展示 ──

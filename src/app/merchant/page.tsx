@@ -12,6 +12,7 @@ export default function MerchantPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [merchantStatus, setMerchantStatus] = useState<any>(null);
   const [stats, setStats] = useState({ goods: 0, orders: 0, revenue: 0, today_orders: 0 });
+  const [networkError, setNetworkError] = useState<string | null>(null);
   const { stores, activeStoreId, setActiveStore } = useMerchant();
 
   // ── 加载商户全状态 ──
@@ -20,16 +21,17 @@ export default function MerchantPage() {
     fetch(`/api/store-services?action=apply_status&member_id=${user.uid}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setMerchantStatus(d.data); })
-      .catch(() => {});
+      .catch(() => setNetworkError("商户状态加载失败"));
   }, [user]);
 
   // ── 加载实时数据 ──
   useEffect(() => {
     if (!activeStoreId) return;
+    setNetworkError(null);
     fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setStats(s => ({ ...s, goods: d.data.length })); })
-      .catch(() => {});
+      .catch(() => setNetworkError("商品数据加载失败"));
     if (!user) return;
     fetch(`/api/v2/merchant/revenue?member_id=${user.uid}&period=day`)
       .then(r => r.json())
@@ -41,7 +43,7 @@ export default function MerchantPage() {
           month: d.data.month || 0,
         }));
       })
-      .catch(() => {});
+      .catch(() => setNetworkError("营收数据加载失败"));
   }, [activeStoreId]);
 
   const isPaidMerchant = merchantStatus?.paid || merchantStatus?.has_merchant;
@@ -124,6 +126,13 @@ export default function MerchantPage() {
           )}
         </div>
       </div>
+
+      {/* 数据概览 */}
+      {networkError && (
+        <div className="mx-4 mt-3 p-2.5 rounded-[8px] text-[11px] text-center font-medium bg-red-50 text-red-600">
+          ⚠️ {networkError} · <button onClick={() => window.location.reload()} className="underline">点击重试</button>
+        </div>
+      )}
 
       {/* 数据概览 */}
       <div className="mx-4 mt-4 grid grid-cols-4 gap-2">

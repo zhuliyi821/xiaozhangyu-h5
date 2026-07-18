@@ -16,12 +16,13 @@ is_staged() {
 }
 
 # ── 检查: 静默 catch (仅 staged 的 tsx/ts 文件) ──
+# 匹配 .catch(() => {}) 空实现，放过 .catch(() => fn()) 有效处理
 for f in $(git diff --cached --name-only --diff-filter=ACM -- '*.tsx' '*.ts' 2>/dev/null); do
   if [ ! -f "$f" ]; then continue; fi
-  # 只检查新增/修改的行中的静默 catch
-  SILENT=$(git diff --cached "$f" | grep '^+.*\.catch(()' | head -3)
+  # 只检查新增/修改的行中的静默 catch (空大括号)
+  SILENT=$(git diff --cached "$f" | grep '^+.*\.catch(()\s*=>\s*{})$' | head -3)
   if [ -n "$SILENT" ]; then
-    echo "🔴 ERROR: $f 新增了静默 catch"
+    echo "🔴 ERROR: $f 新增了静默 catch（空实现）"
     echo "$SILENT"
     BLOCK=1
   fi

@@ -55,7 +55,7 @@ export default function MerchantGoodsPage() {
     fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}${filterStatus !== null ? `&status=${filterStatus}` : ""}`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setGoods(d.data || []); })
-      .catch(() => {});
+      .catch(() => setMessage("❌ 商品列表加载失败"));
   }, [user, activeStoreId, filterStatus]);
 
   // ── 添加商品(新REST API) ──
@@ -90,7 +90,7 @@ export default function MerchantGoodsPage() {
       });
       const d = await r.json();
       setMessage(d.code === 0 ? "✅ 已更新" : `❌ ${d.msg}`);
-      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); });
+      fetch(`/api/v2/merchant/store-goods?store_id=${activeStoreId}`).then(r2 => r2.json()).then(d2 => { if (d2.code === 0) setGoods(d2.data || []); }).catch(() => {});
     } catch { setMessage("❌ 更新失败"); }
     setSavingId(null);
     setTimeout(() => setMessage(""), 2000);

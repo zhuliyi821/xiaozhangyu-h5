@@ -380,7 +380,7 @@ function BTCBetPanel() {
     fetch(`/api/wallet-data?uid=${user.uid}&action=balance`)
       .then(r => r.json())
       .then(d => { if (d.code === 0) setBalance(d.data?.credit1 || 0); })
-      .catch(() => {});
+      .catch(() => setMsg("❌ 余额加载失败"));
   }, [user]);
   useEffect(() => { fetchBalance(); }, [fetchBalance]);
 
@@ -404,7 +404,7 @@ function BTCBetPanel() {
       .then(d => {
         if (d.code === 0 && d.data?.bets) setRecords(d.data.bets.slice(0, 20));
       })
-      .catch(() => {})
+      .catch(() => setMsg("❌ 记录加载失败"))
       .finally(() => setRecordsLoading(false));
   }, [user]);
   useEffect(() => { if (tab === "record") fetchRecords(); }, [tab, fetchRecords]);
