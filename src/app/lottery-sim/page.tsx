@@ -10,6 +10,7 @@ import BetSlip from "./_components/BetSlip";
 import DrawResult from "./_components/DrawResult";
 import DailyChallenges from "./_components/DailyChallenges";
 import BetHistory from "./_components/BetHistory";
+import SlotMachine from "./_components/SlotMachine";
 import GuestPreview from "./_components/GuestPreview";
 
 import { API_BASE } from '@/config/api';
@@ -101,6 +102,21 @@ function LotterySimContent() {
   const [showTasks, setShowTasks] = useState(false);
   // 庆祝效果
   const [celebrate, setCelebrate] = useState<{show:boolean; amount:number; label:string}>({show:false, amount:0, label:""});
+
+  // ─── 摇奖机状态 ───
+  const [drumPhase, setDrumPhase] = useState<"idle"|"betting"|"drum_ready"|"rolling"|"result">("idle");
+  const [drawId, setDrawId] = useState<string>("");
+  const [revealed, setRevealed] = useState<number[]>([]);
+  const [revealedZones, setRevealedZones] = useState<("front"|"back")[]>([]);
+  const [rollNum, setRollNum] = useState<number | null>(null);
+  const [rollZone, setRollZone] = useState<"front"|"back"|null>(null);
+  const [rollPos, setRollPos] = useState(0);
+  const [isRolling, setIsRolling] = useState(false);
+  const [isAuto, setIsAuto] = useState(false);
+  const [expiresIn, setExpiresIn] = useState(180);
+  const [drumResult, setDrumResult] = useState<Record<string, unknown> | null>(null);
+  const drumTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoRollRef = useRef(false);
 
   // ─── 个人统计 ───
   const defaultStats = { totalBets: 0, totalWins: 0, totalProfit: 0, biggestWin: 0, bestStreak: 0, worstStreak: 0, currentStreak: 0 };
@@ -269,6 +285,9 @@ function LotterySimContent() {
     }
     setResult(null);
     setShowDraw(false);
+    setDrumPhase("idle");
+    setDrawId("");
+    setRevealed([]);
   }, [lotteryCode]);
 
   // Load real balance from wallet
@@ -283,6 +302,29 @@ function LotterySimContent() {
       .then(j => { if (j.code === 0) setBalance(Math.floor(j.data.game_coins)); })
       .catch(() => console.warn("请求 失败"));
   }, [user]);
+
+  // ─── 摇奖机 3 分钟倒计时 ───
+  useEffect(() => {
+    if (drumPhase !== "drum_ready" && drumPhase !== "rolling") {
+      if (drumTimerRef.current) { clearInterval(drumTimerRef.current); drumTimerRef.current = null; }
+      return;
+    }
+    setExpiresIn(180);
+    drumTimerRef.current = setInterval(() => {
+      setExpiresIn(prev => {
+        if (prev <= 1) {
+          // Auto-roll when time expires
+          if (drumTimerRef.current) clearInterval(drumTimerRef.current);
+          autoRollRef.current = true;
+          setIsAuto(true);
+          handleDrumRoll();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (drumTimerRef.current) clearInterval(drumTimerRef.current); };
+  }, [drumPhase === "drum_ready" || drumPhase === "rolling"]);
 
   // ─── 每日挑战 + 成就 初始化 ───
   useEffect(() => {
@@ -429,6 +471,7 @@ function LotterySimContent() {
       }
       
       // 1) 扣游戏豆
+      // 1) 扣游戏豆
       const deductRes = await fetch(API_BASE + "/api/lotto-bet-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -437,7 +480,7 @@ function LotterySimContent() {
       const deductJson = await deductRes.json();
       if (deductJson.code !== 0) throw new Error(deductJson.msg || "参与失败");
       
-      // 2) Python开奖模拟
+      // 2) 创建摇奖待开奖(不再立即生成开奖号)
       const res = await fetch(API_BASE + "/api/lotto/bet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -446,185 +489,179 @@ function LotterySimContent() {
       const json = await res.json();
       if (json.code !== 0) throw new Error(json.msg);
       
-      // 3) 结算: 赢则加水晶石
-      const totalWin = json.data?.total_win || 0;
-      const winAmount = totalWin > effectiveCost ? totalWin - effectiveCost : 0;
-      if (totalWin > 0) {
-        await fetch(API_BASE + "/api/lotto-bet-sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid: user.uid, action: "settle",
-            return_amount: totalWin >= effectiveCost ? effectiveCost : totalWin,
-            win_amount: winAmount,
-            lottery: lotteryCode,
-          }),
-        });
-      }
+      // 切换到摇奖机模式
+      const newDrawId = json.data?.draw_id || json.draw_id || "";
+      setDrawId(newDrawId);
+      setDrumPhase("drum_ready");
+      setRevealed([]);
+      setRevealedZones([]);
+      setRollNum(null);
+      setRollZone(null);
+      setRollPos(0);
+      setIsRolling(false);
+      setIsAuto(false);
+      setDrumResult(null);
+      setExpiresIn(180);
       
-      setResult(json.data);
-      setBalance(prev => prev - effectiveCost + totalWin);
-      // 余额后校准
-      fetch(API_BASE + "/api/member/balance?uid=" + user.uid).then(r => r.json()).then(b => { if (b.code === 0) setBalance(b.data?.credit1 || 0); }).catch(() => console.warn("请求 失败"));
-      setHistory(prev => [json.data, ...prev].slice(0, 50));
-      trackBet(effectiveCost, totalWin);
+      // 保存号码用于"再来一注"
+      setLastTickets(betTickets);
+      setLastMultiple(betMultiple);
+      
+      // 统计
+      trackBet(effectiveCost, 0); // 尚未结算，先记一次参与
       // 刷新奖池
       fetch(API_BASE + "/api/lotto/jackpot?code=" + lotteryCode)
         .then(r => r.json())
         .then(j => { if (j.code === 0) setJackpot(j.data.grand_pool); })
         .catch(() => console.warn("请求 失败"));
-      // 保存号码用于"再来一注"
-      setLastTickets(betTickets);
-      setLastMultiple(betMultiple);
-      // 连胜/连败追踪
-      if (json.data.net_result > 0) {
-        setLosingStreak(0);
-      } else {
-        setLosingStreak(prev => prev + 1);
-      }
-      // ─── 个人统计追踪 ───
-      const netProfit = json.data.net_result || 0;
-      setPlayerStats(prev => {
-        const isWin = netProfit > 0;
-        const newStreak = isWin ? (prev.currentStreak > 0 ? prev.currentStreak + 1 : 1) : (prev.currentStreak < 0 ? prev.currentStreak - 1 : -1);
-        const newStats = {
-          totalBets: prev.totalBets + 1,
-          totalWins: prev.totalWins + (isWin ? 1 : 0),
-          totalProfit: prev.totalProfit + netProfit,
-          biggestWin: Math.max(prev.biggestWin, netProfit),
-          bestStreak: Math.max(prev.bestStreak, isWin ? newStreak : 0),
-          worstStreak: Math.min(prev.worstStreak, !isWin ? -newStreak : 0),
-          currentStreak: newStreak,
-        };
-        localStorage.setItem("szp_track", JSON.stringify(newStats));
-        return newStats;
-      });
-      setTickets([]);
-      setSelectedFront([]);
-      setSelectedBack([]);
-
-    // ─── 每日挑战追踪 ───
-    setDailyTasks(prev => {
-      const next = { ...prev };
-      // 参与次数++
-      next.betCount = (next.betCount || 0) + 1;
-      // 热号中奖
-      if (json.data.net_result > 0 && betTickets.some(t => t.front.some(n => trendData[n] === 'scorching' || trendData[n] === 'hot'))) {
-        next.hotWin = true;
-      }
-      // 单局净赚≥50
-      if (json.data.net_result >= 50) {
-        next.earn50 = true;
-      }
-      // 连续中奖追踪 (挑战任务)
-      if (json.data.net_result > 0) {
-        next.streak3 = (next.streak3 || 0) + 1;
-      } else {
-        next.streak3 = 0;
-      }
-      return next;
-    });
-
-    // ─── 成就系统追踪 ───
-    setAchievements(prev => {
-      const next = { ...prev };
-      const totalBets = (JSON.parse(localStorage.getItem("szp_track") || "{}") as any).totalBets || 0;
-      if (!next.first_bet && totalBets >= 1) next.first_bet = true;
-      if (!next.bet_100 && totalBets >= 100) next.bet_100 = true;
-      if (!next.bet_1000 && totalBets >= 1000) next.bet_1000 = true;
-      if (!next.jackpot && json.data.tickets.some((t: any) => t.prize.name?.includes("头彩"))) next.jackpot = true;
-      const hour = new Date().getHours();
-      if (!next.night_owl && hour >= 1 && hour <= 5) next.night_owl = true;
-      // 五连胜追踪
-      if (!next.streak_5) {
-        const streakKey = "szp_win_streak";
-        let streak = parseInt(localStorage.getItem(streakKey) || "0", 10);
-        if (json.data.net_result > 0) {
-          streak += 1;
-          if (streak >= 5) next.streak_5 = true;
-        } else {
-          streak = 0;
-        }
-        localStorage.setItem(streakKey, String(streak));
-      }
-      return next;
-    });
-
-    // 启动开奖倒计时（5秒动画）
-    setCountdown(5);
-    const cd = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(cd);
-          setShowDraw(true);
-          setBetting(false);
-          bettingLockRef.current = false;
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    // 数字精灵语录
-    const msgs = SPRITE_QUOTES;
-    if (json.data.net_result > 0) {
-      const tier = json.data.tickets.find((t:any) => t.prize.won)?.prize?.name || "";
-      if (tier.includes("头彩")) setSpriteMsg(msgs.head[Math.floor(Math.random()*msgs.head.length)]);
-      else if (tier.includes("大赏") || tier.includes("中赏")) setSpriteMsg(msgs.big[Math.floor(Math.random()*msgs.big.length)]);
-      else setSpriteMsg(msgs.small[Math.floor(Math.random()*msgs.small.length)]);
-    } else {
-      if (losingStreak >= 4) setSpriteMsg(msgs.badstreak[Math.floor(Math.random()*msgs.badstreak.length)]);
-      else setSpriteMsg(msgs.miss[Math.floor(Math.random()*msgs.miss.length)]);
-    }
-    
-    // 连续未中追踪 → 3次后弹"试试热门号"
-    if (json.data.net_result <= 0) {
-      setConsecutiveLosses(prev => {
-        const next = prev + 1;
-        if (next === 3) {
-          setTimeout(() => setShowLossTip(true), 2000);
-        }
-        return next;
-      });
-    } else {
-      setConsecutiveLosses(0);
-    }
-    
-    // 彩蛋检测
-    const hour = new Date().getHours();
-    if (hour >= 1 && hour <= 5) setEasterEgg(msgs.egg_night[Math.floor(Math.random()*msgs.egg_night.length)]);
-    else if (betTickets.some(t => {
-      const sorted = [...t.front].sort((a,b) => a-b);
-      return sorted.every((n,i) => i===0 || n === sorted[i-1]+1);
-    })) setEasterEgg(msgs.egg_pattern[Math.floor(Math.random()*msgs.egg_pattern.length)]);
-    
-    // 🎉 中奖庆祝特效
-    if (json.data.total_win >= 100) {
-      const tier = json.data.tickets.find((t:any) => t.prize.won)?.prize?.name || "";
-      const label = tier.includes("头彩") ? "🏆 头彩" : tier.includes("大赏") ? "🥇 大赏" : "🎉 大赢";
-      setCelebrate({show: true, amount: json.data.total_win, label});
-      vibrate(50);
-      setTimeout(() => setCelebrate(prev => ({...prev, show: false})), 3000);
-    }
-    
-    // 收银机滚动
-    let start = 0;
-    const target = json.data.total_win;
-    if (target > 0) {
-      const step = Math.max(1, Math.floor(target / 30));
-      const interval = setInterval(() => {
-        start += step;
-        if (start >= target) { start = target; clearInterval(interval); }
-        setRollDisplay(start);
-      }, 30);
-    }
-    
-  } catch (e: any) {
+    } catch (e: any) {
       setError(e.message);
       setBetting(false);
       bettingLockRef.current = false;
     } finally {
       // betting 在倒计时结束或catch中设置
+    }
+  };
+
+  // ─── 摇奖: 逐个出号 ───
+  const handleDrumRoll = async () => {
+    if (isRolling || !drawId) return;
+    setIsRolling(true);
+    if (drumPhase === "drum_ready") setDrumPhase("rolling");
+    try {
+      const resp = await fetch(API_BASE + "/api/lotto/roll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draw_id: drawId, uid: user?.uid }),
+      });
+      const json = await resp.json();
+      const d = json.data;
+      if (!d) throw new Error(json.msg || "摇号失败");
+
+      if (d.number !== undefined) {
+        setRevealed(prev => [...prev, d.number]);
+        setRevealedZones(prev => [...prev, d.zone]);
+        setRollNum(d.number);
+        setRollZone(d.zone);
+        setRollPos(prev => prev + 1);
+      }
+
+      if (d.status === "complete" || d.is_last) {
+        // 所有号码已揭示 → 自动比对完成
+        setIsRolling(false);
+        setIsAuto(false);
+        autoRollRef.current = false;
+        if (drumTimerRef.current) clearInterval(drumTimerRef.current);
+        setDrumPhase("result");
+
+        // 获取比对结果
+        const resultData = json.data?.result || d.result || null;
+        setDrumResult(resultData);
+
+        // 构造 BetResult 显示到 DrawResult
+        if (resultData) {
+          const totalWin = resultData.total_win || 0;
+          const cost = resultData.total_bet || totalWin || 0;
+
+          // 结算: 赢则加水晶石
+          if (totalWin > 0) {
+            try {
+              await fetch(API_BASE + "/api/lotto-bet-sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  uid: user?.uid, action: "settle",
+                  return_amount: totalWin >= cost ? cost : totalWin,
+                  win_amount: totalWin > cost ? totalWin - cost : 0,
+                  lottery: lotteryCode,
+                }),
+              });
+            } catch {}
+          }
+
+          const betResult: BetResult = {
+            bet_id: drawId,
+            lottery_name: config?.name || lotteryCode,
+            total_bet: cost,
+            total_win: totalWin,
+            net_result: totalWin - cost,
+            tickets: resultData.tickets || [],
+            draw: d.draw || { front: [], back: [] },
+            draw_id: drawId,
+            balance_after: 0,
+          };
+          setResult(betResult);
+          setShowDraw(true);
+          setBalance(prev => prev - cost + totalWin);
+
+          // 余额校准
+          if (user) {
+            fetch(API_BASE + "/api/member/balance?uid=" + user.uid)
+              .then(r => r.json())
+              .then(b => { if (b.code === 0) setBalance(b.data?.credit1 || 0); })
+              .catch(() => console.warn("请求 失败"));
+          }
+          setHistory(prev => [betResult, ...prev].slice(0, 50));
+          trackBet(cost, totalWin);
+
+          // 连胜/连败追踪
+          if (totalWin > cost) {
+            setLosingStreak(0);
+          } else {
+            setLosingStreak(prev => prev + 1);
+          }
+
+          // 每日挑战
+          setDailyTasks(prev => {
+            const next = { ...prev, betCount: (prev.betCount || 0) + 1 };
+            if (totalWin > 0) {
+              if (resultData.tickets?.some((t: any) => t.prize && t.prize.tier >= 3)) next.hotWin = true;
+              if (totalWin - cost >= 50) next.earn50 = true;
+            }
+            localStorage.setItem("szp_daily_tasks", JSON.stringify(next));
+            return next;
+          });
+
+          // 🎉 中奖庆祝特效
+          if (totalWin >= 100) {
+            const tier = resultData.tickets?.find((t: any) => t.prize?.won)?.prize?.name || "";
+            const label = tier.includes("头彩") ? "🏆 头彩" : tier.includes("大赏") ? "🥇 大赏" : "🎉 大赢";
+            setCelebrate({ show: true, amount: totalWin, label });
+            try { navigator.vibrate(50); } catch {}
+            setTimeout(() => setCelebrate(prev => ({ ...prev, show: false })), 3000);
+          }
+
+          // 彩蛋检测
+          if (betResult.tickets.some((t: any) => {
+            const sorted = [...(t.ticket?.front || t.front || [])].sort((a: number, b: number) => a - b);
+            return sorted.every((n: number, i: number) => i === 0 || n === sorted[i - 1] + 1);
+          })) {
+            const msgs = SPRITE_QUOTES;
+            setEasterEgg(msgs.egg_pattern?.[Math.floor(Math.random() * msgs.egg_pattern?.length)] || "");
+          }
+        }
+
+        setTickets([]);
+        setSelectedFront([]);
+        setSelectedBack([]);
+
+        // 刷新奖池
+        fetch(API_BASE + "/api/lotto/jackpot?code=" + lotteryCode)
+          .then(r => r.json())
+          .then(j => { if (j.code === 0) setJackpot(j.data.grand_pool); })
+          .catch(() => console.warn("请求 失败"));
+      } else {
+        // 还有更多号码要摇
+        setIsRolling(false);
+        if (autoRollRef.current) {
+          setTimeout(() => { handleDrumRoll(); }, 1500);
+        }
+      }
+    } catch (e: any) {
+      console.warn("摇号失败:", e?.message);
+      setIsRolling(false);
+      setIsAuto(false);
+      autoRollRef.current = false;
     }
   };
 
@@ -766,7 +803,25 @@ function LotterySimContent() {
               </div>
             )}
 
-            {/* Draw Result (倒计时+开奖+再来一注) */}
+            {/* Slot Machine (摇奖机) */}
+            {drumPhase !== "idle" && (
+              <SlotMachine
+                totalFront={config?.front_pick || 0}
+                totalBack={config?.back_pick || 0}
+                revealedNumbers={revealed}
+                isComplete={drumPhase === "result"}
+                isRolling={isRolling}
+                isAuto={isAuto}
+                currentNumber={rollNum}
+                currentZone={rollZone as any}
+                currentPosition={rollPos}
+                onRoll={handleDrumRoll}
+                expiresIn={expiresIn}
+              />
+            )}
+
+            {/* Draw Result (倒计时+开奖+再来一注) — 摇奖完成后显示 */}
+            {drumPhase === "result" && (
             <DrawResult
               countdown={countdown}
               showDraw={showDraw}
@@ -775,6 +830,7 @@ function LotterySimContent() {
               lastTickets={lastTickets}
               onRebet={rebet}
             />
+            )}
 
             {/* History */}
             <BetHistory
